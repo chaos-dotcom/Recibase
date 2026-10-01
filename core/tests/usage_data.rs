@@ -689,3 +689,26 @@ fn the_built_in_fetcher_reads_an_http_url_and_follows_one_redirect() {
     assert!(fetch_csv_text(&format!("http://127.0.0.1:{}/missing", port)).is_err());
     let _ = server.join();
 }
+
+#[test]
+fn usage_data_can_be_shared_by_the_server_without_an_outer_mutex() {
+    // The Scala keeps the cache in an `AtomicCell`; here the `Mutex` is inside
+    // `UsageData`, so the server only needs an `Arc`.
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<UsageData>();
+
+    let (_calls, fetcher) = counting_fetcher(ONE_ROW);
+    let usage = std::sync::Arc::new(UsageData::with_fetcher(
+        Some("file:///tmp/never-read.csv".to_string()),
+        fetcher,
+    ));
+    let handles: Vec<std::thread::JoinHandle<usize>> = (0..4)
+        .map(|_| {
+            let usage = usage.clone();
+            std::thread::spawn(move || usage.meal_count().len())
+        })
+        .collect();
+    for handle in handles {
+        assert_eq!(handle.join().unwrap(), 1);
+    }
+}
