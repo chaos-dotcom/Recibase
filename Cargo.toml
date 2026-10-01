@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = ["core", "submit", "server"]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+
+[profile.release]
+debug = false
