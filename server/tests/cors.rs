@@ -24,6 +24,7 @@ fn request(method: &str, target: &str, headers: &[(&str, &str)]) -> Request {
     Request {
         method: method.to_string(),
         target: target.to_string(),
+        version: "HTTP/1.1".to_string(),
         path,
         query,
         headers: headers
@@ -35,7 +36,7 @@ fn request(method: &str, target: &str, headers: &[(&str, &str)]) -> Request {
 }
 
 fn wire(response: &Response) -> String {
-    String::from_utf8(response.to_bytes(true, DATE)).expect("UTF-8 response")
+    String::from_utf8(response.to_bytes("close", DATE)).expect("UTF-8 response")
 }
 
 const ORIGIN: &str = "https://c.reciba.se";

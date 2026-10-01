@@ -118,7 +118,15 @@ python3 verify_port.py --reference capture-scala --out capture-rust \
 python3 measure2.py --only both --repeat 3
 ```
 
-## 5. Caveats, stated plainly
+## 5. Application footprint (RAM, CPU, size)
+
+Measured separately for the two implementations: RSS, CPU per request,
+throughput, start-up and distribution size. See **`REPORT-APP.md`**. Headlines:
+idle RSS 307.8 MB → 6.0 MB, peak RSS under load ~1.36 GB → ~15 MB, 4,000-request
+burst 3.92 CPU-s → 0.84 CPU-s, start-up 1.25 s → 0.024 s, deployable size
+412 MiB (app + JDK) → 2.28 MiB.
+
+## 6. Caveats, stated plainly
 
 * The comparison is a test-suite comparison, not a runtime benchmark of the
   service. No throughput or latency of the running servers was measured.

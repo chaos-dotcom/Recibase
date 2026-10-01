@@ -1,0 +1,93 @@
+[
+ {
+  "name": "ka_health",
+  "path": "/health",
+  "headers": {
+   "Connection": "keep-alive"
+  }
+ },
+ {
+  "name": "ka_recipes",
+  "path": "/recipes/",
+  "headers": {
+   "Connection": "keep-alive"
+  }
+ },
+ {
+  "name": "ka_recipe",
+  "path": "/recipes/vegetable-primavera",
+  "headers": {
+   "Connection": "keep-alive"
+  }
+ },
+ {
+  "name": "ka_meals",
+  "path": "/meals/",
+  "headers": {
+   "Connection": "keep-alive"
+  }
+ },
+ {
+  "name": "ka_root",
+  "path": "/",
+  "headers": {
+   "Connection": "keep-alive"
+  }
+ },
+ {
+  "name": "ka_nope",
+  "path": "/nope",
+  "headers": {
+   "Connection": "keep-alive"
+  }
+ },
+ {
+  "name": "ka_missing_recipe",
+  "path": "/recipes/i-do-not-exist",
+  "headers": {
+   "Connection": "keep-alive"
+  }
+ },
+ {
+  "name": "ka_10_keepalive",
+  "path": "/health",
+  "headers": {
+   "Connection": "Keep-Alive"
+  },
+  "version": "HTTP/1.0"
+ },
+ {
+  "name": "ka_10_none",
+  "path": "/health",
+  "version": "HTTP/1.0"
+ },
+ {
+  "name": "ka_11_none",
+  "path": "/health"
+ },
+ {
+  "name": "ka_10_close",
+  "path": "/health",
+  "headers": {
+   "Connection": "close"
+  },
+  "version": "HTTP/1.0"
+ },
+ {
+  "name": "ka_11_close",
+  "path": "/health",
+  "headers": {
+   "Connection": "close"
+  }
+ },
+ {
+  "name": "ka_options_preflight",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Connection": "keep-alive",
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET"
+  }
+ }
+]

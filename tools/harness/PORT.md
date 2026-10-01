@@ -26,8 +26,9 @@ Two byte-exact captures of the *running Scala server* are the ground truth:
 | `capture-scala-cors/` | 7 | requests carrying `Origin`: the CORS preflight and the `Access-Control-Allow-Origin` header |
 | `capture-scala-cors2/` | 20 | the preflight matrix: per-path, per-method, requested-header echoing, `OPTIONS` without an origin, `HEAD`/`PUT`, the CORS header on 404 and 503 |
 | `capture-scala-cors3/` | 6 | header-list normalisation and non-preflight requests that carry the preflight headers |
+| `capture-scala-keepalive/` | 13 | kept-alive connections: the `Connection` header, HTTP/1.0 vs 1.1, and a preflight on a kept-alive connection |
 
-All 274 responses are byte-identical; only the volatile `Date` header differs.
+All 287 responses are byte-identical; only the volatile `Date` header differs.
 
 ```
 B=recibase-rs/target/release/recibase-server
@@ -75,7 +76,13 @@ stores the raw bytes; `diff_captures.py` compares two capture directories.
    `Access-Control-Allow-Origin: *` written after `Content-Length`; a request
    that matches no route is answered by `orNotFound` outside the middleware and
    gets nothing.
-4. **Dates.** circe encodes `java.time.LocalDate` as `YYYY-MM-DD`.
+4. **Connection handling.** Ember answers `Connection: keep-alive` when the
+   client asks for it (any HTTP version) or sends an HTTP/1.1 request with no
+   `Connection` header, and `Connection: close` for an explicit `close` or an
+   HTTP/1.0 request without `keep-alive`. The captures only used
+   `Connection: close` at first, which hid this; ApacheBench exposed it, and the
+   rule is now captured in `capture-scala-keepalive/`.
+5. **Dates.** circe encodes `java.time.LocalDate` as `YYYY-MM-DD`.
 5. **Text.** `StringUtils.stripAccents` is NFD + remove U+0300..U+036F;
    `Permalink.fromRawString`, `unpluralise`, the temperature formatting
    (`Math.round`, gas marks) and the generated Scala source text are copied

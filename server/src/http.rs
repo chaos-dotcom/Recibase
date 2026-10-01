@@ -14,6 +14,8 @@ use std::net::TcpStream;
 pub struct Request {
     pub method: String,
     pub target: String,
+    /// The HTTP version from the request line, e.g. `HTTP/1.1`.
+    pub version: String,
     pub path: String,
     pub query: String,
     pub headers: Vec<(String, String)>,
@@ -36,6 +38,21 @@ impl Request {
             }
             _ => String::new(),
         }
+    }
+
+    /// http4s/Ember's connection handling: a client that asks for
+    /// `keep-alive` gets it, an HTTP/1.1 request without a `Connection` header
+    /// keeps the connection, and anything else (an explicit `close`, or
+    /// HTTP/1.0 without `keep-alive`) closes it.
+    pub fn keeps_alive(&self) -> bool {
+        let connection = self.header("Connection").unwrap_or_default().to_ascii_lowercase();
+        if connection.split(',').any(|token| token.trim() == "close") {
+            return false;
+        }
+        if connection.split(',').any(|token| token.trim() == "keep-alive") {
+            return true;
+        }
+        self.version.eq_ignore_ascii_case("HTTP/1.1")
     }
 
     pub fn query_param(&self, name: &str) -> Option<String> {
@@ -171,16 +188,15 @@ impl Response {
         }
     }
 
-    /// The exact bytes on the wire.
-    pub fn to_bytes(&self, close: bool, date: &str) -> Vec<u8> {
+    /// The exact bytes on the wire. `connection` is the value of the
+    /// `Connection` header ("close" or "keep-alive").
+    pub fn to_bytes(&self, connection: &str, date: &str) -> Vec<u8> {
         let mut out = Vec::with_capacity(self.body.len() + 128);
         out.extend_from_slice(
             format!("HTTP/1.1 {} {}\r\n", self.status, Response::reason(self.status)).as_bytes(),
         );
         out.extend_from_slice(format!("Date: {}\r\n", date).as_bytes());
-        if close {
-            out.extend_from_slice(b"Connection: close\r\n");
-        }
+        out.extend_from_slice(format!("Connection: {}\r\n", connection).as_bytes());
         if let Some(content_type) = self.content_type {
             out.extend_from_slice(format!("Content-Type: {}\r\n", content_type).as_bytes());
         }
@@ -196,8 +212,8 @@ impl Response {
         out
     }
 
-    pub fn write_to(&self, stream: &mut TcpStream, close: bool, date: &str) -> std::io::Result<()> {
-        stream.write_all(&self.to_bytes(close, date))?;
+    pub fn write_to(&self, stream: &mut TcpStream, connection: &str, date: &str) -> std::io::Result<()> {
+        stream.write_all(&self.to_bytes(connection, date))?;
         stream.flush()
     }
 }
@@ -219,6 +235,7 @@ pub fn read_request(stream: &TcpStream) -> std::io::Result<Option<Request>> {
     let mut parts = line.trim_end().split(' ');
     let method = parts.next().unwrap_or_default().to_string();
     let target = parts.next().unwrap_or_default().to_string();
+    let version = parts.next().unwrap_or("HTTP/1.0").to_string();
     let (path, query) = match target.split_once('?') {
         Some((p, q)) => (p.to_string(), q.to_string()),
         None => (target.clone(), String::new()),
@@ -246,7 +263,7 @@ pub fn read_request(stream: &TcpStream) -> std::io::Result<Option<Request>> {
         reader.read_exact(&mut body)?;
     }
 
-    Ok(Some(Request { method, target, path, query, headers, body }))
+    Ok(Some(Request { method, target, version, path, query, headers, body }))
 }
 
 /// `EEE, dd MMM yyyy HH:mm:ss GMT`, the format java.time emits for HTTP dates.

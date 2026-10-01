@@ -48,13 +48,22 @@ pub fn recipes_json(has_ingredient: Option<&str>) -> Value {
     Value::Array(list_recipes(has_ingredient).iter().map(|e| e.to_json()).collect())
 }
 
+/// `RecipeController.routing`: permalink -> recipe, built once at start-up as
+/// the Scala's `private val routing` is.
+fn routing() -> &'static HashMap<String, &'static RecipeDef> {
+    static ROUTING: std::sync::LazyLock<HashMap<String, &'static RecipeDef>> =
+        std::sync::LazyLock::new(|| {
+            recibase_core::recipes::recipes()
+                .iter()
+                .map(|recipe| (recipe.permalink(), recipe))
+                .collect()
+        });
+    &ROUTING
+}
+
 /// `RecipeController.getRecipe`.
 pub fn recipe_json(permalink: &str, usage: &Usage) -> Option<Value> {
-    let route: HashMap<String, &RecipeDef> = recibase_core::recipes::recipes()
-        .iter()
-        .map(|r| (r.permalink(), r))
-        .collect();
-    route.get(permalink).map(|recipe| {
+    routing().get(permalink).map(|recipe| {
         let notes = usage.meal_notes();
         let dated = notes.get(&recipe.name).cloned().unwrap_or_default();
         recipe.to_json_with_usage(&dated)

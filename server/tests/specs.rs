@@ -19,6 +19,7 @@ fn request(method: &str, target: &str) -> Request {
     Request {
         method: method.to_string(),
         target: target.to_string(),
+        version: "HTTP/1.1".to_string(),
         path,
         query,
         headers: Vec::new(),

@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Date: Thu, 01 Oct 2026 21:20:42 GMT
+Connection: close
+Content-Type: application/json
+Content-Length: 1416
+
+{"name":"Red Pepper & Apple Soup","permalink":"red-pepper-soup","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/RedPepperSoup.scala","source":null,"description":null,"tagline":null,"notes":[],"dated_notes":[],"tags":["Soup","Scales","Vegan-ish","Low Effort"],"inherited_tags":["Pescatarian","Vegetarian-ish","Vegetarian"],"image":null,"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Butter","quantity":"Knob","prep":null,"notes":null},{"name":"Onion","quantity":"1","prep":null,"notes":null},{"name":"Red Pepper","quantity":"1","prep":null,"notes":null},{"name":"Apple","quantity":"1","prep":null,"notes":null},{"name":"Carrot","quantity":"1","prep":null,"notes":null},{"name":"Water","quantity":"600ml","prep":null,"notes":null},{"name":"Stock Cube","quantity":null,"prep":null,"notes":null},{"name":"Mixed Herbs","quantity":null,"prep":null,"notes":null},{"name":"Extra vegetables","quantity":null,"prep":null,"notes":"Optional"}]}],"method":["Chop up everything and place everything but the onions in a bowl.","Boil the water and add the stock cube and stir it in.","Melt the butter then add the onions and soften then under a low heat for a minute or so.","Add all the vegetables then the water and herbs.","Turn up the heat and boil for a minute then turn down the heat and simmer it for 30 minutes. Wait until cool and blend."]}

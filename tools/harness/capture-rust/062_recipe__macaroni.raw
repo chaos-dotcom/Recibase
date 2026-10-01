@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Date: Thu, 01 Oct 2026 21:20:42 GMT
+Connection: close
+Content-Type: application/json
+Content-Length: 1300
+
+{"name":"Macaroni","permalink":"macaroni","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/Macaroni.scala","source":null,"description":null,"tagline":null,"notes":["We largely vibe the ingredients for this recipe."],"dated_notes":[],"tags":["Scales","Vegetarian","Cold Weather","Stodge"],"inherited_tags":["Pescatarian","Vegetarian-ish"],"image":null,"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Butter","quantity":"25g","prep":null,"notes":null},{"name":"Plain Flour","quantity":"2 tbsp","prep":null,"notes":null},{"name":"Milk","quantity":"1/2 pint (or more)","prep":null,"notes":null},{"name":"Medium Cheddar Cheese","quantity":null,"prep":null,"notes":null},{"name":"Macaroni Pasta","quantity":"275g","prep":null,"notes":null}]}],"method":["Grate the cheese.","Melt the butter then stir in the flour a tablespoon at a time until you have a paste.","Cook the flour paste for a few minutes, stirring constantly.","Add milk a dribble at a time until it's fairly runny again.","Add in the grated cheese and bring up to the simmer then turn the heat right down.","In a second pan, boil slightly salted water then add and cook the macaroni.","Check texture then drain thoroughly and add to the sauce and mix. Serve."]}

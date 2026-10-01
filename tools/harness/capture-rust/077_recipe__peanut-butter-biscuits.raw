@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Date: Thu, 01 Oct 2026 21:20:42 GMT
+Connection: close
+Content-Type: application/json
+Content-Length: 1068
+
+{"name":"Peanut Butter Biscuits","permalink":"peanut-butter-biscuits","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/PeanutButterBiscuits.scala","source":"Alex's Mum","description":null,"tagline":null,"notes":[],"dated_notes":[],"tags":["Baking"],"inherited_tags":[],"image":{"src":"https://i.reciba.se/peanut-butter-biscuits.jpg","width":1080,"height":1080},"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Crunchy peanut butter","quantity":"250g","prep":null,"notes":null},{"name":"Light Brown soft sugar","quantity":"200g","prep":null,"notes":null},{"name":"Egg","quantity":"1 medium","prep":null,"notes":null}]}],"method":["Preheat oven 180°C (355°F, gas mark 4).","Line 2 baking trays with parchment.","Beat all the ingredients together in a bowl until well combined.","Scoop out tablespoons and roll them into balls.","Arrange on baking trays, well spaced out","Flatten with a fork.","Bake for 12 minutes. Leave to cool for 5 minutes.","Transfer to a rack to cool completely."]}

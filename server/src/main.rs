@@ -23,14 +23,12 @@ fn serve(mut stream: std::net::TcpStream, context: &recibase_server::Context) ->
         let Some(request) = recibase_server::http::read_request(&stream)? else {
             return Ok(());
         };
-        let close = match request.header("connection") {
-            Some(value) => value.eq_ignore_ascii_case("close"),
-            None => false,
-        };
+        let keeps_alive = request.keeps_alive();
         let response = recibase_server::route(&request, context);
         let date = recibase_server::http::http_date(chrono::Utc::now());
-        response.write_to(&mut stream, close, &date)?;
-        if close {
+        let connection = if keeps_alive { "keep-alive" } else { "close" };
+        response.write_to(&mut stream, connection, &date)?;
+        if !keeps_alive {
             return Ok(());
         }
     }

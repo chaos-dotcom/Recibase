@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Date: Thu, 01 Oct 2026 21:20:42 GMT
+Connection: close
+Content-Type: application/json
+Content-Length: 1391
+
+{"name":"New York Bagels","permalink":"new-york-bagels","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/NewYorkBagel.scala","source":"https://www.thevegspace.co.uk/recipe-four-fabulously-filling-bagel-toppings/","description":"A vegetarian take on the classic pastrami bagel","tagline":null,"notes":[],"dated_notes":[],"tags":["Lunch"],"inherited_tags":[],"image":null,"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Bagels","quantity":"4","prep":null,"notes":null},{"name":"Squeaky Bean Deli Pastrami","quantity":"180g","prep":null,"notes":"2 packets"},{"name":"Cooked Beetroot","quantity":"180g","prep":null,"notes":"ideally pre-grated sweet & smoky"},{"name":"Pickles","quantity":null,"prep":null,"notes":null},{"name":"Cheese","quantity":null,"prep":null,"notes":"ideally something fancy like Comté"},{"name":"Mayonnaise","quantity":null,"prep":null,"notes":"optional"}]}],"method":["Halve and lightly toast the bagels.","Slice the beetroot, pickles and cheese.","Layer the bottom half of each bagel with mayo, pastrami, pickles, beetroot and then cheese. Make sure the cheese covers everything so it doesn't burn.","Grill the bottom halves of the bagels until the cheese is bubbly.","Optionally spread the top half of each bagel with mayo.","Combine the top and bottom halves of the bagels and serve."]}
