@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+Date: <normalised>
+Connection: close
+Content-Type: application/json
+Content-Length: 210
+Access-Control-Allow-Origin: *
+
+{"health":"/health","recipes_list":"/recipes/?hasIngredient={ingredient_name}","service_info":"/manifest","recipe":"/recipes/{recipe_permalink}","docs":"/","meals_list":"/meals/","meal_names_text":"/meals/raw"}

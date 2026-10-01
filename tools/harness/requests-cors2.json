@@ -1,0 +1,167 @@
+[
+ {
+  "name": "opt_recipes",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET",
+   "Access-Control-Request-Headers": "authorization"
+  }
+ },
+ {
+  "name": "opt_recipe",
+  "path": "/recipes/vegetable-primavera",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET",
+   "Access-Control-Request-Headers": "authorization"
+  }
+ },
+ {
+  "name": "opt_health",
+  "path": "/health",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET",
+   "Access-Control-Request-Headers": "authorization"
+  }
+ },
+ {
+  "name": "opt_meals",
+  "path": "/meals/",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET",
+   "Access-Control-Request-Headers": "authorization"
+  }
+ },
+ {
+  "name": "opt_nope",
+  "path": "/nope",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET",
+   "Access-Control-Request-Headers": "authorization"
+  }
+ },
+ {
+  "name": "opt_submissions",
+  "path": "/recipe-submissions",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "POST",
+   "Access-Control-Request-Headers": "authorization,content-type"
+  }
+ },
+ {
+  "name": "opt_recipes_post",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "POST",
+   "Access-Control-Request-Headers": "content-type"
+  }
+ },
+ {
+  "name": "opt_recipes_nohdrs",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "opt_no_origin",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Access-Control-Request-Method": "GET"
+  }
+ },
+ {
+  "name": "get_missing_origin",
+  "path": "/recipes/i-do-not-exist",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "get_nope_origin",
+  "path": "/nope",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "get_nope_no_origin",
+  "path": "/nope",
+  "headers": {}
+ },
+ {
+  "name": "head_health_origin",
+  "path": "/health",
+  "method": "HEAD",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "head_recipes_origin",
+  "path": "/recipes/",
+  "method": "HEAD",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "put_recipes_origin",
+  "path": "/recipes/",
+  "method": "PUT",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "post_sub_origin",
+  "path": "/recipe-submissions",
+  "method": "POST",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Content-Type": "application/json"
+  },
+  "body": "{}"
+ },
+ {
+  "name": "get_manifest_origin",
+  "path": "/manifest",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "get_meals_raw_origin",
+  "path": "/meals/raw",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "get_recipes_thyme_origin",
+  "path": "/recipes/?hasIngredient=Thyme",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "get_root_no_origin",
+  "path": "/",
+  "headers": {}
+ }
+]

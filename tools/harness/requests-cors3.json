@@ -1,0 +1,55 @@
+[
+ {
+  "name": "opt_origin_acrm_nohdrs",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET"
+  }
+ },
+ {
+  "name": "opt_origin_acrm_emptyhdrs",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET",
+   "Access-Control-Request-Headers": ""
+  }
+ },
+ {
+  "name": "opt_origin_acrm_weird",
+  "path": "/health",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "PATCH",
+   "Access-Control-Request-Headers": "X-Foo, content-type"
+  }
+ },
+ {
+  "name": "get_recipes_origin_acrm",
+  "path": "/recipes/",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET"
+  }
+ },
+ {
+  "name": "get_recipes_origin_acrh",
+  "path": "/recipes/",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Headers": "content-type"
+  }
+ },
+ {
+  "name": "opt_only_acrm",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Access-Control-Request-Method": "GET"
+  }
+ }
+]

@@ -1,0 +1,9 @@
+HTTP/1.1 200 OK
+Date: Thu, 01 Oct 2026 21:04:42 GMT
+Connection: close
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: PATCH, HEAD, QUERY, PUT, GET, POST, DELETE
+Access-Control-Allow-Headers: 
+Vary: Access-Control-Request-Method, Access-Control-Request-Headers
+Content-Length: 0
+

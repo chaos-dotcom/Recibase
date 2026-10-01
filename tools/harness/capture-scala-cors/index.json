@@ -1,0 +1,51 @@
+[
+ {
+  "i": 0,
+  "name": "cors_get_recipes_origin",
+  "path": "/recipes/",
+  "status": "HTTP/1.1 200 OK",
+  "bytes": 6289
+ },
+ {
+  "i": 1,
+  "name": "cors_get_recipe_origin",
+  "path": "/recipes/vegetable-primavera",
+  "status": "HTTP/1.1 200 OK",
+  "bytes": 2024
+ },
+ {
+  "i": 2,
+  "name": "cors_get_health_origin",
+  "path": "/health",
+  "status": "HTTP/1.1 200 OK",
+  "bytes": 169
+ },
+ {
+  "i": 3,
+  "name": "cors_options_preflight",
+  "path": "/recipes/",
+  "status": "HTTP/1.1 200 OK",
+  "bytes": 314
+ },
+ {
+  "i": 4,
+  "name": "cors_get_meals_origin",
+  "path": "/meals/",
+  "status": "HTTP/1.1 200 OK",
+  "bytes": 48914
+ },
+ {
+  "i": 5,
+  "name": "cors_get_root_origin",
+  "path": "/",
+  "status": "HTTP/1.1 200 OK",
+  "bytes": 370
+ },
+ {
+  "i": 6,
+  "name": "cors_get_missing_origin",
+  "path": "/nope",
+  "status": "HTTP/1.1 404 Not Found",
+  "bytes": 151
+ }
+]

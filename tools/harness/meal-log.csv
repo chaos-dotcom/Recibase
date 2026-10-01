@@ -1,0 +1,51 @@
+Date,Meal,Notes,Feature
+"Thursday, 6 January 22",Apple & Sausage Filo Casserole,Add more cheese,TRUE
+"Wednesday, 19 January 22",Aubergine & Halloumi Lasagne,Try paprika on top before grilling,
+"Tuesday, 1 February 22",Aubergine curry,Used less chilli,
+"Monday, 14 February 22",Avocado & coconut soup,,FALSE
+"Sunday, 27 February 22",Baked Rigatoni with Aubergine,Doubled the sauce,
+"Saturday, 12 March 22",Baked Salmon with Olives and Spaghetti,Add more cheese,TRUE
+"Friday, 25 March 22",Baked potatoes,Try paprika on top before grilling,FALSE
+"Thursday, 7 April 22",Banana Curry,Used less chilli,
+"Wednesday, 20 April 22",Basa Pathia,,
+"Tuesday, 3 May 22",Bean & Broccoli Pasta,Doubled the sauce,FALSE
+"Monday, 16 May 22",Beef Stroganoff,Add more cheese,TRUE
+"Sunday, 29 May 22",Blue Cheese Gnocchi,Try paprika on top before grilling,
+"Saturday, 11 June 22",Broccoli & Cauliflower Bake,Used less chilli,FALSE
+"Friday, 24 June 22",Broccoli & Salmon Quiche,,
+"Thursday, 7 July 22",Broccoli & Stilton soup,Doubled the sauce,
+"Wednesday, 20 July 22",Butternut & Blue Cheese Risotto,Add more cheese,TRUE
+"Tuesday, 2 August 22",Butternut Chilli,Try paprika on top before grilling,
+"Monday, 15 August 22",Butternut Squash Pad Thai,Used less chilli,
+"Sunday, 28 August 22",Butternut squash risotto,,FALSE
+"Saturday, 10 September 22",Carbonara,Doubled the sauce,
+"Friday, 23 September 22",Carrot & Coriander Burgers,Add more cheese,TRUE
+"Thursday, 6 October 22",Cashew Curry,Try paprika on top before grilling,FALSE
+"Wednesday, 19 October 22",Cheese & olive tarts,Used less chilli,
+"Tuesday, 1 November 22",Cheese Scones,,
+"Monday, 14 November 22",Cheesy Cod and Spinach Gratin,Doubled the sauce,FALSE
+"Sunday, 27 November 22",Chicken Curry (WIP),Add more cheese,TRUE
+"Saturday, 10 December 22",Chilli con Carne,Try paprika on top before grilling,
+"Friday, 23 December 22",Chinese Fusion with Hoisin,Used less chilli,FALSE
+"Thursday, 5 January 23",Chipotle Burgers,,
+"Wednesday, 18 January 23",Chipotle Mac 'n' Cheese,Doubled the sauce,
+"Tuesday, 31 January 23",Christmas Naanwidge,Add more cheese,TRUE
+"Monday, 13 February 23",Chunky Vegetable Crumble,Try paprika on top before grilling,
+"Sunday, 26 February 23",Coconut & egg curry,Used less chilli,
+"Saturday, 11 March 23",Coconut Lime Dahl,,FALSE
+"Friday, 24 March 23",Cod in tomato sauce,Doubled the sauce,
+"Thursday, 6 April 23",Cod with Lentils,Add more cheese,TRUE
+"Wednesday, 19 April 23",Courgette & Broccoli Pasta,Try paprika on top before grilling,FALSE
+"Tuesday, 2 May 23",Courgette and spinach pasties,Used less chilli,
+"Monday, 15 May 23",Creamy cauliflower cheese with walnuts,,
+"Sunday, 28 May 23",Dahl,Doubled the sauce,FALSE
+"Sunday, 1 March 26",Apple & Sausage Filo Casserole,,TRUE
+"Sunday, 8 March 26",Aubergine & Halloumi Lasagne,,TRUE
+"Sunday, 15 March 26",Aubergine curry,,TRUE
+"Sunday, 22 March 26",Avocado & coconut soup,,TRUE
+"Sunday, 29 March 26",Baked Rigatoni with Aubergine,,TRUE
+"Sunday, 5 April 26",Baked Salmon with Olives and Spaghetti,,TRUE
+"Sunday, 12 April 26",Baked potatoes,,TRUE
+"Sunday, 19 April 26",Banana Curry,,TRUE
+"Monday, 3 March 25",,should be dropped,TRUE
+not a date,Some Meal,,TRUE

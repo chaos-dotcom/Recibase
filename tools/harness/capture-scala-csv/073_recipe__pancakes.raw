@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Date: Thu, 01 Oct 2026 20:40:42 GMT
+Connection: close
+Content-Type: application/json
+Content-Length: 1001
+
+{"name":"Pancakes","permalink":"pancakes","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/Pancakes.scala","source":"Eth","description":"Incredibly simple crepe style pancakes","tagline":null,"notes":[],"dated_notes":[],"tags":["Vegetarian","Scales","Pudding","Low Effort","Quick"],"inherited_tags":["Vegetarian-ish","Pescatarian"],"image":null,"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Flour","quantity":"200g","prep":null,"notes":null},{"name":"Milk","quantity":"400ml","prep":null,"notes":null},{"name":"Butter","quantity":null,"prep":null,"notes":null}]}],"method":["Whisk together ingredients.","Heat a large frying pan over a high flame.","Throw in a small piece of butter. It should immediately start bubbling.","Pour a small amount of the mixture into the pan. Just enough to go to cover the bottom.","Flip once the underside is lightly browned and brown the remaining side.","Serve with sweet toppings."]}

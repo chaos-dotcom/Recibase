@@ -1,0 +1,7 @@
+HTTP/1.1 503 Service Unavailable
+Date: <normalised>
+Connection: close
+Content-Type: application/json
+Content-Length: 44
+
+{"error":"recipe submission not configured"}

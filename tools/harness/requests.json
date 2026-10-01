@@ -1,0 +1,465 @@
+[
+ {
+  "name": "root",
+  "path": "/"
+ },
+ {
+  "name": "health",
+  "path": "/health"
+ },
+ {
+  "name": "manifest",
+  "path": "/manifest"
+ },
+ {
+  "name": "recipes_list",
+  "path": "/recipes/"
+ },
+ {
+  "name": "recipes_list_thyme",
+  "path": "/recipes/?hasIngredient=Thyme"
+ },
+ {
+  "name": "recipes_list_no_slash",
+  "path": "/recipes"
+ },
+ {
+  "name": "recipes_list_neg_thyme",
+  "path": "/recipes/?hasIngredient=!Thyme"
+ },
+ {
+  "name": "recipes_list_empty",
+  "path": "/recipes/?hasIngredient="
+ },
+ {
+  "name": "recipe_vegetable_primavera",
+  "path": "/recipes/vegetable-primavera"
+ },
+ {
+  "name": "recipe_missing",
+  "path": "/recipes/i-do-not-exist"
+ },
+ {
+  "name": "recipe_trailing_slash",
+  "path": "/recipes/vegetable-primavera/"
+ },
+ {
+  "name": "meals",
+  "path": "/meals/"
+ },
+ {
+  "name": "meals_raw",
+  "path": "/meals/raw"
+ },
+ {
+  "name": "meals_no_slash",
+  "path": "/meals"
+ },
+ {
+  "name": "submissions_get",
+  "path": "/recipe-submissions"
+ },
+ {
+  "name": "submissions_post_unconfigured",
+  "path": "/recipe-submissions",
+  "method": "POST",
+  "body": "{}",
+  "headers": {
+   "Content-Type": "application/json"
+  }
+ },
+ {
+  "name": "unknown_path",
+  "path": "/nope"
+ },
+ {
+  "name": "unknown_nested",
+  "path": "/recipes/a/b"
+ },
+ {
+  "name": "health_post",
+  "path": "/health",
+  "method": "POST",
+  "body": "x"
+ },
+ {
+  "name": "recipe__baked-rigatoni-aubergine",
+  "path": "/recipes/baked-rigatoni-aubergine"
+ },
+ {
+  "name": "recipe__salmon-olive-spaghetti",
+  "path": "/recipes/salmon-olive-spaghetti"
+ },
+ {
+  "name": "recipe__baobab-ice-cream",
+  "path": "/recipes/baobab-ice-cream"
+ },
+ {
+  "name": "recipe__basa-pathia",
+  "path": "/recipes/basa-pathia"
+ },
+ {
+  "name": "recipe__beef-stroganoff",
+  "path": "/recipes/beef-stroganoff"
+ },
+ {
+  "name": "recipe__beef-wraps",
+  "path": "/recipes/beef-wraps"
+ },
+ {
+  "name": "recipe__beetroot-ice-cream",
+  "path": "/recipes/beetroot-ice-cream"
+ },
+ {
+  "name": "recipe__birthday-cake",
+  "path": "/recipes/birthday-cake"
+ },
+ {
+  "name": "recipe__birthday-cake-classic",
+  "path": "/recipes/birthday-cake-classic"
+ },
+ {
+  "name": "recipe__blue-cheese-gnocchi",
+  "path": "/recipes/blue-cheese-gnocchi"
+ },
+ {
+  "name": "recipe__broccoli-salmon-quiche",
+  "path": "/recipes/broccoli-salmon-quiche"
+ },
+ {
+  "name": "recipe__broccoli-stilton-soup",
+  "path": "/recipes/broccoli-stilton-soup"
+ },
+ {
+  "name": "recipe__brownies",
+  "path": "/recipes/brownies"
+ },
+ {
+  "name": "recipe__butternut-chilli",
+  "path": "/recipes/butternut-chilli"
+ },
+ {
+  "name": "recipe__butternut-squash-pad-thai",
+  "path": "/recipes/butternut-squash-pad-thai"
+ },
+ {
+  "name": "recipe__cheese-scones",
+  "path": "/recipes/cheese-scones"
+ },
+ {
+  "name": "recipe__cheesy-cod",
+  "path": "/recipes/cheesy-cod"
+ },
+ {
+  "name": "recipe__chicken-curry",
+  "path": "/recipes/chicken-curry"
+ },
+ {
+  "name": "recipe__chilli-con-carne",
+  "path": "/recipes/chilli-con-carne"
+ },
+ {
+  "name": "recipe__chinese-fusion",
+  "path": "/recipes/chinese-fusion"
+ },
+ {
+  "name": "recipe__chipotle-burgers",
+  "path": "/recipes/chipotle-burgers"
+ },
+ {
+  "name": "recipe__chipotle-mac-n-cheese",
+  "path": "/recipes/chipotle-mac-n-cheese"
+ },
+ {
+  "name": "recipe__christmas-naanwidge",
+  "path": "/recipes/christmas-naanwidge"
+ },
+ {
+  "name": "recipe__vegetable-crumble",
+  "path": "/recipes/vegetable-crumble"
+ },
+ {
+  "name": "recipe__coconut-lime-dahl",
+  "path": "/recipes/coconut-lime-dahl"
+ },
+ {
+  "name": "recipe__cod-lentils",
+  "path": "/recipes/cod-lentils"
+ },
+ {
+  "name": "recipe__courgette-broccoli-pasta",
+  "path": "/recipes/courgette-broccoli-pasta"
+ },
+ {
+  "name": "recipe__courgette-spinach-pasties",
+  "path": "/recipes/courgette-spinach-pasties"
+ },
+ {
+  "name": "recipe__cranberry-relish",
+  "path": "/recipes/cranberry-relish"
+ },
+ {
+  "name": "recipe__creamy-cauliflower-cheese",
+  "path": "/recipes/creamy-cauliflower-cheese"
+ },
+ {
+  "name": "recipe__coffee-cake",
+  "path": "/recipes/coffee-cake"
+ },
+ {
+  "name": "recipe__dahl",
+  "path": "/recipes/dahl"
+ },
+ {
+  "name": "recipe__dukaten-cookies",
+  "path": "/recipes/dukaten-cookies"
+ },
+ {
+  "name": "recipe__egg-tapas",
+  "path": "/recipes/egg-tapas"
+ },
+ {
+  "name": "recipe__goan-king-prawn-balchao",
+  "path": "/recipes/goan-king-prawn-balchao"
+ },
+ {
+  "name": "recipe__greek-wraps",
+  "path": "/recipes/greek-wraps"
+ },
+ {
+  "name": "recipe__halloumi-wraps",
+  "path": "/recipes/halloumi-wraps"
+ },
+ {
+  "name": "recipe__duck-wraps",
+  "path": "/recipes/duck-wraps"
+ },
+ {
+  "name": "recipe__indian-patties",
+  "path": "/recipes/indian-patties"
+ },
+ {
+  "name": "recipe__kashtouri",
+  "path": "/recipes/kashtouri"
+ },
+ {
+  "name": "recipe__lamb-aubergine-daube",
+  "path": "/recipes/lamb-aubergine-daube"
+ },
+ {
+  "name": "recipe__lemon-feta-pasta",
+  "path": "/recipes/lemon-feta-pasta"
+ },
+ {
+  "name": "recipe__lentil-spinach-stew",
+  "path": "/recipes/lentil-spinach-stew"
+ },
+ {
+  "name": "recipe__macaroni",
+  "path": "/recipes/macaroni"
+ },
+ {
+  "name": "recipe__marmalade-ice-cream",
+  "path": "/recipes/marmalade-ice-cream"
+ },
+ {
+  "name": "recipe__mascarpone-ice-cream",
+  "path": "/recipes/mascarpone-ice-cream"
+ },
+ {
+  "name": "recipe__mead",
+  "path": "/recipes/mead"
+ },
+ {
+  "name": "recipe__melty-mushroom-wellingtons",
+  "path": "/recipes/melty-mushroom-wellingtons"
+ },
+ {
+  "name": "recipe__mexican-polenta-pie",
+  "path": "/recipes/mexican-polenta-pie"
+ },
+ {
+  "name": "recipe__mushroom-quiche",
+  "path": "/recipes/mushroom-quiche"
+ },
+ {
+  "name": "recipe__mushroom-risotto",
+  "path": "/recipes/mushroom-risotto"
+ },
+ {
+  "name": "recipe__mushroom-stroganoff",
+  "path": "/recipes/mushroom-stroganoff"
+ },
+ {
+  "name": "recipe__new-york-bagels",
+  "path": "/recipes/new-york-bagels"
+ },
+ {
+  "name": "recipe__nut-roast",
+  "path": "/recipes/nut-roast"
+ },
+ {
+  "name": "recipe__pancakes",
+  "path": "/recipes/pancakes"
+ },
+ {
+  "name": "recipe__paneer-jalfrezi",
+  "path": "/recipes/paneer-jalfrezi"
+ },
+ {
+  "name": "recipe__parsnip-and-ginger-soup",
+  "path": "/recipes/parsnip-and-ginger-soup"
+ },
+ {
+  "name": "recipe__parsnip-and-lentil-lasagne",
+  "path": "/recipes/parsnip-and-lentil-lasagne"
+ },
+ {
+  "name": "recipe__peanut-butter-biscuits",
+  "path": "/recipes/peanut-butter-biscuits"
+ },
+ {
+  "name": "recipe__pistachio-ice-cream",
+  "path": "/recipes/pistachio-ice-cream"
+ },
+ {
+  "name": "recipe__pomegranate-lime-ice-cream",
+  "path": "/recipes/pomegranate-lime-ice-cream"
+ },
+ {
+  "name": "recipe__pomegranate-persian-halloumi",
+  "path": "/recipes/pomegranate-persian-halloumi"
+ },
+ {
+  "name": "recipe__quesadillas",
+  "path": "/recipes/quesadillas"
+ },
+ {
+  "name": "recipe__red-pepper-soup",
+  "path": "/recipes/red-pepper-soup"
+ },
+ {
+  "name": "recipe__rhubarb-crumble",
+  "path": "/recipes/rhubarb-crumble"
+ },
+ {
+  "name": "recipe__roast-beetroot-dahl",
+  "path": "/recipes/roast-beetroot-dahl"
+ },
+ {
+  "name": "recipe__beetroot-risotto",
+  "path": "/recipes/beetroot-risotto"
+ },
+ {
+  "name": "recipe__roasted-artichoke-pasta",
+  "path": "/recipes/roasted-artichoke-pasta"
+ },
+ {
+  "name": "recipe__roasted-vegetable-lasagne",
+  "path": "/recipes/roasted-vegetable-lasagne"
+ },
+ {
+  "name": "recipe__roasted-vegetable-moroccan-tagine",
+  "path": "/recipes/roasted-vegetable-moroccan-tagine"
+ },
+ {
+  "name": "recipe__roasted-vegetable-tart",
+  "path": "/recipes/roasted-vegetable-tart"
+ },
+ {
+  "name": "recipe__russian-mushroom-julienne",
+  "path": "/recipes/russian-mushroom-julienne"
+ },
+ {
+  "name": "recipe__saag-paneer",
+  "path": "/recipes/saag-paneer"
+ },
+ {
+  "name": "recipe__scotch-pancakes",
+  "path": "/recipes/scotch-pancakes"
+ },
+ {
+  "name": "recipe__scrambled-eggs",
+  "path": "/recipes/scrambled-eggs"
+ },
+ {
+  "name": "recipe__seafood-lasagne",
+  "path": "/recipes/seafood-lasagne"
+ },
+ {
+  "name": "recipe__shawarma-wraps",
+  "path": "/recipes/shawarma-wraps"
+ },
+ {
+  "name": "recipe__vegetarian-mexican",
+  "path": "/recipes/vegetarian-mexican"
+ },
+ {
+  "name": "recipe__smoky-sweet-potato-chickpea-stew",
+  "path": "/recipes/smoky-sweet-potato-chickpea-stew"
+ },
+ {
+  "name": "recipe__smoky-fish-curry",
+  "path": "/recipes/smoky-fish-curry"
+ },
+ {
+  "name": "recipe__spanakopita",
+  "path": "/recipes/spanakopita"
+ },
+ {
+  "name": "recipe__spiced-apple-winter-soup",
+  "path": "/recipes/spiced-apple-winter-soup"
+ },
+ {
+  "name": "recipe__spicy-smoked-paprika-chorizo",
+  "path": "/recipes/spicy-smoked-paprika-chorizo"
+ },
+ {
+  "name": "recipe__squash-gnocchi-gratin",
+  "path": "/recipes/squash-gnocchi-gratin"
+ },
+ {
+  "name": "recipe__strawberry-basil-ice-cream",
+  "path": "/recipes/strawberry-basil-ice-cream"
+ },
+ {
+  "name": "recipe__sweet-chilli-feta-pasta",
+  "path": "/recipes/sweet-chilli-feta-pasta"
+ },
+ {
+  "name": "recipe__tangy-vegetable-pad-thai",
+  "path": "/recipes/tangy-vegetable-pad-thai"
+ },
+ {
+  "name": "recipe__toad-in-the-hole",
+  "path": "/recipes/toad-in-the-hole"
+ },
+ {
+  "name": "recipe__tofu-katsu-curry",
+  "path": "/recipes/tofu-katsu-curry"
+ },
+ {
+  "name": "recipe__truffle-burgers",
+  "path": "/recipes/truffle-burgers"
+ },
+ {
+  "name": "recipe__turmeric-ginger-ice-cream",
+  "path": "/recipes/turmeric-ginger-ice-cream"
+ },
+ {
+  "name": "recipe__vegan-brownies",
+  "path": "/recipes/vegan-brownies"
+ },
+ {
+  "name": "recipe__vegetable-primavera",
+  "path": "/recipes/vegetable-primavera"
+ },
+ {
+  "name": "recipe__veggie-shepherds-pie",
+  "path": "/recipes/veggie-shepherds-pie"
+ },
+ {
+  "name": "recipe__wasabi-ice-cream",
+  "path": "/recipes/wasabi-ice-cream"
+ }
+]

@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+Date: Thu, 01 Oct 2026 21:04:30 GMT
+Connection: close
+Content-Type: application/json
+Content-Length: 20
+Access-Control-Allow-Origin: *
+
+{"version":"latest"}

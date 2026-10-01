@@ -1,0 +1,54 @@
+[
+ {
+  "name": "cors_get_recipes_origin",
+  "path": "/recipes/",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "cors_get_recipe_origin",
+  "path": "/recipes/vegetable-primavera",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "cors_get_health_origin",
+  "path": "/health",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "cors_options_preflight",
+  "path": "/recipes/",
+  "method": "OPTIONS",
+  "headers": {
+   "Origin": "https://c.reciba.se",
+   "Access-Control-Request-Method": "GET",
+   "Access-Control-Request-Headers": "authorization"
+  }
+ },
+ {
+  "name": "cors_get_meals_origin",
+  "path": "/meals/",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "cors_get_root_origin",
+  "path": "/",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ },
+ {
+  "name": "cors_get_missing_origin",
+  "path": "/nope",
+  "headers": {
+   "Origin": "https://c.reciba.se"
+  }
+ }
+]
