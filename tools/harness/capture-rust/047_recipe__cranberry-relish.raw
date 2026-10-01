@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Date: Thu, 01 Oct 2026 21:20:42 GMT
-Connection: close
-Content-Type: application/json
-Content-Length: 1304
-
-{"name":"Cranberry & Cinnamon Relish","permalink":"cranberry-relish","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/CranberryRelish.scala","source":"Kit's Mum","description":null,"tagline":null,"notes":["This is best made in advance, to give the flavours time to mix"],"dated_notes":[],"tags":["Christmas","Not a Meal"],"inherited_tags":[],"image":null,"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Red onions","quantity":"2","prep":"thinly sliced","notes":null},{"name":"Brown sugar","quantity":"3 tbsp","prep":null,"notes":null},{"name":"Cranberries","quantity":"450g","prep":null,"notes":null},{"name":"Redcurrant jelly","quantity":"2 tbsp","prep":null,"notes":null},{"name":"Cinnamon stick","quantity":"1","prep":null,"notes":null},{"name":"Vegetable oil","quantity":"tbsp","prep":null,"notes":null}]}],"method":["Gently cook the onions in the oil and sugar for about 20 minutes, stirring frequently, until soft and caramelised.","Add the remaining ingredients along with 150ml boiling water.","Simmer gently for about 10 minutes until the cranberries are softened but not completely broken down.","Add additional sugar if needed, but don't overdo it. The relish should have a tart flavour.","Serve warm or cold."]}

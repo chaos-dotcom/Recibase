@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Date: <normalised>
-Connection: close
-Content-Type: application/json
-Content-Length: 1397
-
-{"name":"Parsnip & Ginger Soup","permalink":"parsnip-and-ginger-soup","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/ParsnipGingerSoup.scala","source":null,"description":null,"tagline":null,"notes":[],"dated_notes":[],"tags":["Soup","Vegan-ish","Low Effort"],"inherited_tags":["Pescatarian","Vegetarian-ish","Vegetarian"],"image":null,"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Parnsips","quantity":"450g","prep":"Diced","notes":null},{"name":"Onion","quantity":"1","prep":"Diced","notes":null},{"name":"Potato","quantity":"1","prep":null,"notes":"Optional, subtitute for flour"},{"name":"Orange","quantity":"1","prep":"Grate the rind and juice","notes":null},{"name":"Fresh Ginger","quantity":"2.5cm","prep":"Grated","notes":null},{"name":"Stock cube","quantity":null,"prep":null,"notes":null},{"name":"Butter","quantity":null,"prep":null,"notes":null},{"name":"Single Cream","quantity":"250ml","prep":null,"notes":"Optional"}]}],"method":["Melt the butter in a large pan then stir in the parsnips, onion, flour, ginger and orange rind.","Dissolve the stock in 500ml - 1L of water then mix in and bring to the boil.","Simmer for 20 minutes or so, until the parsnips are soft.","Blend the mixture to your desired consistency.","Stir in the orange juice and reheat, without boiling.","Add cream, if desired."]}

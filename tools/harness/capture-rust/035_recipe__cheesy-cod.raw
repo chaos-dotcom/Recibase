@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Date: Thu, 01 Oct 2026 21:20:42 GMT
-Connection: close
-Content-Type: application/json
-Content-Length: 1411
-
-{"name":"Cheesy Cod and Spinach Gratin","permalink":"cheesy-cod","edit":"https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes/CheesyCodSpinachGratin.scala","source":null,"description":null,"tagline":null,"notes":[],"dated_notes":[],"tags":["Pescatarian","Low Effort","Quick"],"inherited_tags":[],"image":{"src":"https://i.reciba.se/cod-spinach-gratin.jpg","width":1080,"height":1080},"ingredients_blocks":[{"name":null,"ingredients":[{"name":"Cod","quantity":"2 110g fillets","prep":null,"notes":null},{"name":"Stock cube","quantity":"1","prep":null,"notes":null},{"name":"Spinach","quantity":"80g","prep":"torn or chopped","notes":null},{"name":"Panko breadcrumbs","quantity":"30g","prep":null,"notes":null},{"name":"Cheddar","quantity":"40g","prep":"grated","notes":null},{"name":"Soft cheese","quantity":"50g","prep":null,"notes":null},{"name":"Water","quantity":"150ml","prep":"boiling","notes":null},{"name":"Crispy Potato Slices","quantity":null,"prep":null,"notes":"optional"}]}],"method":["Heat the oven to 200°C (390°F, gas mark 6).","Dissolve the stock cube and soft cheese in the boiling water.","Place the spinach in an ovenproof dish and pour over the cheesy stock.","Place the cod fillets on top of the spinach.","Sprinkle the cheddar and breadcrumbs over the cod.","Put in the oven for 15-20 mins or until the fish is cooked through."]}

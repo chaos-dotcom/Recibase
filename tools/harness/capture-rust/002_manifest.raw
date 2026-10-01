@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Date: Thu, 01 Oct 2026 21:20:42 GMT
-Connection: close
-Content-Type: application/json
-Content-Length: 20
-
-{"version":"latest"}

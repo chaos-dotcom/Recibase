@@ -1,0 +1,167 @@
+[
+ {
+  "label": "scala-published-amd64",
+  "image": "ghcr.io/the-silverwood-institute/recibase:latest",
+  "note": "emulated amd64",
+  "image_size": "667MB",
+  "startup_seconds": 4.873396873474121,
+  "idle_mem_mb": 460.7,
+  "loads": {
+   "/recipes/vegetable-primavera": {
+    "requests": 20000,
+    "rps": 2787.27,
+    "p50_ms": 1,
+    "p99_ms": 183,
+    "failed": 0,
+    "cpu_seconds": 16.625913,
+    "cores_busy": 2.2918460733059374,
+    "cpu_ms_per_request": 0.83129565,
+    "peak_mem_mb": 1074.176
+   },
+   "/meals/": {
+    "requests": 10000,
+    "rps": 2182.79,
+    "p50_ms": 5,
+    "p99_ms": 132,
+    "failed": 0,
+    "cpu_seconds": 20.419502,
+    "cores_busy": 4.396081076863101,
+    "cpu_ms_per_request": 2.0419502,
+    "peak_mem_mb": 2873.344
+   }
+  },
+  "after_load_mem_mb": 2871.296
+ },
+ {
+  "label": "scala-local-arm64",
+  "image": "recibase:latest",
+  "note": "native arm64",
+  "image_size": "692MB",
+  "startup_seconds": 1.2114601135253906,
+  "idle_mem_mb": 384.5,
+  "loads": {
+   "/recipes/vegetable-primavera": {
+    "requests": 20000,
+    "rps": 22348.87,
+    "p50_ms": 1,
+    "p99_ms": 8,
+    "failed": 0,
+    "cpu_seconds": 9.102146,
+    "cores_busy": 9.37921761408805,
+    "cpu_ms_per_request": 0.45510729999999994,
+    "peak_mem_mb": 903.7
+   },
+   "/meals/": {
+    "requests": 10000,
+    "rps": 7826.01,
+    "p50_ms": 3,
+    "p99_ms": 17,
+    "failed": 0,
+    "cpu_seconds": 9.286994,
+    "cores_busy": 6.896496816867246,
+    "cpu_ms_per_request": 0.9286994000000001,
+    "peak_mem_mb": 2579.456
+   }
+  },
+  "after_load_mem_mb": 2578.432
+ },
+ {
+  "label": "rust-glibc-slim",
+  "image": "recibase-rust-gnu:slim",
+  "note": "native arm64",
+  "image_size": "139MB",
+  "startup_seconds": 0.05105400085449219,
+  "idle_mem_mb": 0.921875,
+  "loads": {
+   "/recipes/vegetable-primavera": {
+    "requests": 20000,
+    "rps": 117457.05,
+    "p50_ms": 0,
+    "p99_ms": 1,
+    "failed": 0,
+    "cpu_seconds": 0.565215,
+    "cores_busy": 2.2310173850228026,
+    "cpu_ms_per_request": 0.02826075,
+    "peak_mem_mb": 3.84
+   },
+   "/meals/": {
+    "requests": 10000,
+    "rps": 23134.71,
+    "p50_ms": 1,
+    "p99_ms": 5,
+    "failed": 0,
+    "cpu_seconds": 5.936657,
+    "cores_busy": 11.650258550832264,
+    "cpu_ms_per_request": 0.5936657,
+    "peak_mem_mb": 6.07
+   }
+  },
+  "after_load_mem_mb": 5.73
+ },
+ {
+  "label": "rust-musl-slim",
+  "image": "recibase-rust:slim",
+  "note": "native arm64",
+  "image_size": "139MB",
+  "startup_seconds": 0.05098295211791992,
+  "idle_mem_mb": 0.55859375,
+  "loads": {
+   "/recipes/vegetable-primavera": {
+    "requests": 20000,
+    "rps": 5998.99,
+    "p50_ms": 4,
+    "p99_ms": 26,
+    "failed": 0,
+    "cpu_seconds": 50.82227,
+    "cores_busy": 14.886564408104798,
+    "cpu_ms_per_request": 2.5411135000000002,
+    "peak_mem_mb": 4.707
+   },
+   "/meals/": {
+    "requests": 10000,
+    "rps": 109.75,
+    "p50_ms": 290,
+    "p99_ms": 534,
+    "failed": 0,
+    "cpu_seconds": 1431.127997,
+    "cores_busy": 15.689294699642646,
+    "cpu_ms_per_request": 143.1127997,
+    "peak_mem_mb": 18.79
+   }
+  },
+  "after_load_mem_mb": 1.332
+ },
+ {
+  "label": "rust-musl-scratch",
+  "image": "recibase-rust-musl:minimal",
+  "note": "native arm64, no shell",
+  "image_size": "3.05MB",
+  "startup_seconds": 0.05077195167541504,
+  "idle_mem_mb": 0.51171875,
+  "loads": {
+   "/recipes/vegetable-primavera": {
+    "requests": 20000,
+    "rps": 5953.89,
+    "p50_ms": 4,
+    "p99_ms": 28,
+    "failed": 0,
+    "cpu_seconds": null,
+    "cores_busy": null,
+    "cpu_ms_per_request": null,
+    "peak_mem_mb": 4.492
+   },
+   "/meals/": {
+    "requests": 10000,
+    "rps": 107.42,
+    "p50_ms": 297,
+    "p99_ms": 527,
+    "failed": 0,
+    "cpu_seconds": null,
+    "cores_busy": null,
+    "cpu_ms_per_request": null,
+    "peak_mem_mb": 18.5
+   }
+  },
+  "after_load_mem_mb": 1.191
+ }
+]
