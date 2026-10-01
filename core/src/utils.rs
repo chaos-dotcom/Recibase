@@ -53,8 +53,13 @@ pub mod int_utils {
         }
     }
 
+    /// `IntUtils.nearestMultipleOf`: `of * Math.round(in / of)`.
+    ///
+    /// `Math.round(float)` is `floor(x + 0.5)`, not Rust's round-half-away
+    /// from zero, so the two differ on a negative half (no recipe reaches
+    /// those temperatures, but the formula is copied exactly).
     fn nearest_multiple_of(input: f32, of: i32) -> i32 {
-        of * (input / of as f32).round() as i32
+        of * (input / of as f32 + 0.5).floor() as i32
     }
 
     fn formatted_temperature_string(c: i32, f: i32, gas_mark: Option<&str>) -> String {
