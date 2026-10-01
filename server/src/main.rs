@@ -11,6 +11,10 @@ fn main() {
     eprintln!("Recibase listening on 0.0.0.0:{}", port);
     for stream in listener.incoming() {
         let Ok(stream) = stream else { continue };
+        // Nagle's algorithm plus delayed ACKs would hold back the second
+        // segment of a multi-segment response; every real HTTP stack (http4s on
+        // Netty/Ember included) turns it off.
+        let _ = stream.set_nodelay(true);
         let context = std::sync::Arc::clone(&context);
         std::thread::spawn(move || {
             let _ = serve(stream, &context);

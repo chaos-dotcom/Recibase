@@ -1,0 +1,5 @@
+target/
+tools/harness/capture-*/
+tools/harness/capture-*
+.git/
+*.log
