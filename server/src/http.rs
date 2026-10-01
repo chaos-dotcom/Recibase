@@ -91,29 +91,62 @@ fn percent_decode(input: &str) -> String {
 #[derive(Debug, Clone)]
 pub struct Response {
     pub status: u16,
-    pub content_type: &'static str,
+    /// `None` for a CORS preflight, which http4s answers without a body type.
+    pub content_type: Option<&'static str>,
     pub body: Vec<u8>,
+    /// Headers written before `Content-Length` (the CORS preflight ones).
+    pub headers_before_length: Vec<(&'static str, String)>,
+    /// Headers written after `Content-Length` (`Access-Control-Allow-Origin`).
+    pub headers_after_length: Vec<(&'static str, &'static str)>,
 }
 
 impl Response {
     pub fn json(value: &serde_json::Value) -> Response {
-        Response {
-            status: 200,
-            content_type: "application/json",
-            body: serde_json::to_vec(value).expect("JSON serialisation cannot fail"),
-        }
+        Response::status(
+            200,
+            "application/json",
+            serde_json::to_vec(value).expect("JSON serialisation cannot fail"),
+        )
     }
 
     pub fn plain(body: &str) -> Response {
-        Response {
-            status: 200,
-            content_type: "text/plain; charset=UTF-8",
-            body: body.as_bytes().to_vec(),
-        }
+        Response::status(200, "text/plain; charset=UTF-8", body.as_bytes().to_vec())
     }
 
     pub fn status(status: u16, content_type: &'static str, body: Vec<u8>) -> Response {
-        Response { status, content_type, body }
+        Response {
+            status,
+            content_type: Some(content_type),
+            body,
+            headers_before_length: Vec::new(),
+            headers_after_length: Vec::new(),
+        }
+    }
+
+    /// http4s' CORS preflight answer: an empty 200 with the allow headers and
+    /// no content type.
+    pub fn preflight(requested_headers: &str) -> Response {
+        Response {
+            status: 200,
+            content_type: None,
+            body: Vec::new(),
+            headers_before_length: vec![
+                ("Access-Control-Allow-Origin", "*".to_string()),
+                (
+                    "Access-Control-Allow-Methods",
+                    "PATCH, HEAD, QUERY, PUT, GET, POST, DELETE".to_string(),
+                ),
+                (
+                    "Access-Control-Allow-Headers",
+                    requested_headers.to_string(),
+                ),
+                (
+                    "Vary",
+                    "Access-Control-Request-Method, Access-Control-Request-Headers".to_string(),
+                ),
+            ],
+            headers_after_length: Vec::new(),
+        }
     }
 
     /// http4s' default "route not found" response.
@@ -138,7 +171,8 @@ impl Response {
         }
     }
 
-    pub fn write_to(&self, stream: &mut TcpStream, close: bool, date: &str) -> std::io::Result<()> {
+    /// The exact bytes on the wire.
+    pub fn to_bytes(&self, close: bool, date: &str) -> Vec<u8> {
         let mut out = Vec::with_capacity(self.body.len() + 128);
         out.extend_from_slice(
             format!("HTTP/1.1 {} {}\r\n", self.status, Response::reason(self.status)).as_bytes(),
@@ -147,10 +181,23 @@ impl Response {
         if close {
             out.extend_from_slice(b"Connection: close\r\n");
         }
-        out.extend_from_slice(format!("Content-Type: {}\r\n", self.content_type).as_bytes());
-        out.extend_from_slice(format!("Content-Length: {}\r\n\r\n", self.body.len()).as_bytes());
+        if let Some(content_type) = self.content_type {
+            out.extend_from_slice(format!("Content-Type: {}\r\n", content_type).as_bytes());
+        }
+        for (name, value) in &self.headers_before_length {
+            out.extend_from_slice(format!("{}: {}\r\n", name, value).as_bytes());
+        }
+        out.extend_from_slice(format!("Content-Length: {}\r\n", self.body.len()).as_bytes());
+        for (name, value) in &self.headers_after_length {
+            out.extend_from_slice(format!("{}: {}\r\n", name, value).as_bytes());
+        }
+        out.extend_from_slice(b"\r\n");
         out.extend_from_slice(&self.body);
-        stream.write_all(&out)?;
+        out
+    }
+
+    pub fn write_to(&self, stream: &mut TcpStream, close: bool, date: &str) -> std::io::Result<()> {
+        stream.write_all(&self.to_bytes(close, date))?;
         stream.flush()
     }
 }
