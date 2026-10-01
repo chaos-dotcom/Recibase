@@ -383,9 +383,7 @@ fn inherited_tags(tags: &[Tag]) -> Vec<Tag> {
 // --------------------------------------------------------------------------
 
 #[test]
-fn improve_is_the_scala_hash_mix() {
-    // `Hashing.improve` at work: the mask of the improved hash decides the trie
-    // slot, and these are the improved values the Scala probe's dumps imply.
+fn string_and_case_object_hashes_match_scala() {
     assert_eq!(java_string_hash("New"), 78208);
     assert_eq!(java_string_hash("Vegetarian"), 93893310);
     assert_eq!(case_object_hash("se.reciba.api.model.Tag$Vegan$"), 82533797);
