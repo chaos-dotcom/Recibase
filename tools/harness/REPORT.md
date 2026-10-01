@@ -101,6 +101,12 @@ spends most of its cold time in the same place (Zinc compiling 124 + 10 sources)
 while the warm path still pays JVM and sbt-server startup on every run, which
 Rust does not have at all.
 
+A second round on the final code state, taken while ~6 unrelated cores were busy
+with another job, gave 14.75 s (Scala cold), 8.56 s (Rust cold) and 7.78 s (Rust
+cold release), with warm runs at 3.68 s / 0.38 s / 0.32 s. Both sides inflate
+together under load, so the shape of the comparison is unchanged; the table above
+is the number to quote for an idle machine.
+
 ## 4. Reproducing all of this
 
 ```
