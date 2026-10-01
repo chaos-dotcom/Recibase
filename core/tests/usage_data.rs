@@ -657,8 +657,24 @@ fn the_built_in_fetcher_reads_an_http_url_and_follows_one_redirect() {
         while served < 3 && std::time::Instant::now() < deadline {
             match listener.accept() {
                 Ok((mut stream, _)) => {
+                    // The listener is non-blocking, so the accepted socket can
+                    // be too: wait for the request instead of reading zero bytes
+                    // and answering 404.
+                    let _ = stream.set_nonblocking(false);
                     let mut buffer = [0u8; 2048];
-                    let read = stream.read(&mut buffer).unwrap_or(0);
+                    let mut read = 0;
+                    while read < buffer.len() {
+                        match stream.read(&mut buffer[read..]) {
+                            Ok(0) => break,
+                            Ok(n) => {
+                                read += n;
+                                if buffer[..read].windows(4).any(|w| w == b"\r\n\r\n") {
+                                    break;
+                                }
+                            }
+                            Err(_) => break,
+                        }
+                    }
                     let request = String::from_utf8_lossy(&buffer[..read]).to_string();
                     let response = if request.starts_with("GET /redirect") {
                         "HTTP/1.0 302 Found\r\nLocation: /meal-log.csv\r\nContent-Length: 0\r\n\r\n"

@@ -1,6 +1,6 @@
 //! `se.reciba.api.model.Meal`, `MealStub`, `Source` and dated notes.
 
-use crate::json::{arr, obj, opt_date, opt_str};
+use crate::json::{arr, obj, opt_date};
 use crate::recipe::RecipeDef;
 use crate::tag::Tag;
 use chrono::NaiveDate;

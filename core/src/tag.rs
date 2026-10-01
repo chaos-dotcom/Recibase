@@ -152,6 +152,12 @@ impl Tag {
     }
 
     /// `allParentTags` - the transitive parents, excluding self.
+    ///
+    /// Scala builds the result as `parent.allParentTags + parent`, so the
+    /// outermost ancestor comes first: for `Vegan` that is
+    /// `Pescatarian, VegetarianIsh, Vegetarian, VeganIsh`. The order is
+    /// observable: `Set.flatMap` keeps insertion order for a result of four or
+    /// fewer elements.
     pub fn all_parent_tags(self) -> Vec<Tag> {
         let mut out = Vec::new();
         let mut cur = self.parent();
@@ -159,6 +165,7 @@ impl Tag {
             out.push(p);
             cur = p.parent();
         }
+        out.reverse();
         out
     }
 

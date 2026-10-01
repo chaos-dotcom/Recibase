@@ -13,7 +13,7 @@ impl Permalink {
         Permalink { value: value.to_string() }
     }
 
-    fn from_raw_string(raw: &str) -> Permalink {
+    pub fn from_raw_string(raw: &str) -> Permalink {
         Permalink { value: from_raw_string(raw) }
     }
 }

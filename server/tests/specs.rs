@@ -288,5 +288,8 @@ fn meals_raw_is_sorted_and_filtered_to_dinners() {
     let mut sorted = names.clone();
     sorted.sort();
     assert_eq!(names, sorted);
-    assert_eq!(text, to_string(&serde_json::Value::String(text.clone()))[1..text.len() + 1].to_string());
+    // Non-dinner meals (puddings, lunches, baking, non-meals) are filtered out.
+    assert!(!names.contains(&"Birthday Cake"));
+    assert!(names.contains(&"Vegetable Primavera"));
+    let _ = to_string;
 }

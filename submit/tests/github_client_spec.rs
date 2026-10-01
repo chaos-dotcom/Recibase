@@ -122,9 +122,19 @@ fn serve(mut stream: TcpStream, calls: &Arc<Mutex<Vec<GithubCall>>>, rules: &Arc
     });
 
     let mut request_line = String::new();
-    if reader.read_line(&mut request_line).is_err() {
-        let _ = respond(&mut stream, 400, "{}");
-        return;
+    loop {
+        match reader.read_line(&mut request_line) {
+            Ok(0) => return,
+            Ok(_) => break,
+            Err(ref error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(2));
+                continue;
+            }
+            Err(_) => {
+                let _ = respond(&mut stream, 400, "{}");
+                return;
+            }
+        }
     }
     let mut parts = request_line.split_whitespace();
     let method = parts.next().unwrap_or_default().to_string();
@@ -134,8 +144,16 @@ fn serve(mut stream: TcpStream, calls: &Arc<Mutex<Vec<GithubCall>>>, rules: &Arc
     let mut authorization = None;
     loop {
         let mut line = String::new();
-        if reader.read_line(&mut line).unwrap_or(0) == 0 {
-            break;
+        match reader.read_line(&mut line) {
+            Ok(0) => break,
+            Ok(_) => {}
+            // The listener is non-blocking, so the accepted socket may be too:
+            // wait for the bytes instead of treating WouldBlock as EOF.
+            Err(ref error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(2));
+                continue;
+            }
+            Err(_) => break,
         }
         let header = line.trim_end_matches(['\r', '\n']);
         if header.is_empty() {
