@@ -9,3 +9,5 @@ recibase-submit = { path = "../submit" }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 chrono = "0.4"
+
+ureq = { version = "3", default-features = false, features = ["json"] }
