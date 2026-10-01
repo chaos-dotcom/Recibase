@@ -349,24 +349,31 @@ fn scala_recipes() -> BTreeMap<String, Vec<Tag>> {
 
 /// `Recipe.inheritedTags` = `tags.flatMap(_.allParentTags)`.
 ///
-/// Scala's `allParentTags` is `parent.allParentTags + parent`, so the ancestors
-/// come out with the **outermost first**; `Tag::all_parent_tags` (tag.rs, owned
-/// by W1 and frozen) walks the chain upwards and so returns them innermost
-/// first. The reversal below restores the Scala order. When tag.rs is fixed
-/// (`all_parent_tags` returning the outermost ancestor first) this helper must
-/// be replaced by a direct `tag.all_parent_tags()` call; nothing else changes.
+/// Scala's `allParentTags` is `parent.allParentTags + parent`, so its `Set`
+/// iterates the ancestors with the **outermost first**; `Tag::all_parent_tags`
+/// (tag.rs, owned by W1 and frozen) walks the chain upwards and today returns
+/// them innermost first, which is the reverse. The helper below detects the
+/// order tag.rs gives and restores the Scala `Set` order, so this test keeps
+/// passing once tag.rs returns the Scala order (see the note in
+/// `scala_hash::scala_set_flat_map`; the fix is one `.reverse()` in tag.rs).
 ///
-/// Evidence for the order: `/recipes/baked-rigatoni-aubergine` has tags
+/// Evidence for the Scala order: `/recipes/baked-rigatoni-aubergine` has tags
 /// {Vegetarian, Slow, Scales} (a Set3, insertion order) and the capture's
 /// `inherited_tags` is `["Pescatarian","Vegetarian-ish"]`, i.e. the outermost
-/// ancestor first. It is *not* a sorted or hash order: in recipes whose tags
-/// set is a HashSet (5+ tags) the Scala `flatMap` builds a HashSet and the
-/// result is in trie order instead, e.g. `/recipes/broccoli-stilton-soup`
+/// ancestor first. It is *not* sorted or hash order: in a recipe whose tags set
+/// is a HashSet (5+ tags) the Scala `flatMap` builds a HashSet and the result
+/// is in trie order instead, e.g. `/recipes/broccoli-stilton-soup`
 /// `inherited_tags` is `["Vegetarian-ish","Pescatarian"]`.
 fn inherited_tags(tags: &[Tag]) -> Vec<Tag> {
     scala_set_flat_map(tags, |tag| {
+        let mut outermost = *tag;
+        while let Some(parent) = outermost.parent() {
+            outermost = parent;
+        }
         let mut parents = tag.all_parent_tags();
-        parents.reverse();
+        if parents.first() != Some(&outermost) {
+            parents.reverse();
+        }
         parents
     })
 }
