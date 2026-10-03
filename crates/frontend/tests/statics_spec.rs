@@ -223,3 +223,72 @@ fn the_root_joins_the_filename() {
     assert_eq!(root.file_name().and_then(|name| name.to_str()), Some("static"));
     assert_eq!(Path::new(env!("CARGO_MANIFEST_DIR")).join("static"), root);
 }
+
+/// A file whose timestamp has a sub-second part must still answer `304` to an
+/// `If-Modified-Since` that matches its `Last-Modified`.
+///
+/// HTTP dates have no fractions, so Werkzeug drops the microseconds from the
+/// file's timestamp before comparing. Without that, a file modified at
+/// 21:52:31.75 looks newer than an `If-Modified-Since` of 21:52:31 and the
+/// answer is a `200`. This is pinned here rather than left to the real
+/// `styles.css`, whose own timestamp happens to be a whole second.
+#[test]
+fn a_fractional_timestamp_still_matches_if_modified_since() {
+    fn served(files: &StaticFiles, request: &recibase_frontend::http::Request) -> recibase_frontend::http::Response {
+        match files.serve(request, "styles.css") {
+            Outcome::Served(response) => response,
+            Outcome::NotFound => panic!("styles.css is not being served"),
+        }
+    }
+
+    let dir = std::env::temp_dir().join("recibase-statics-fractional");
+    std::fs::create_dir_all(&dir).expect("temp static dir");
+    let file = dir.join("styles.css");
+    std::fs::copy(styles(), &file).expect("copy styles.css");
+    // 2026-10-01 21:52:31 UTC, with 750 ms on top.
+    let when = std::time::UNIX_EPOCH + std::time::Duration::from_millis(1790891551750);
+    let handle = std::fs::File::options().write(true).open(&file).expect("open");
+    handle
+        .set_times(std::fs::FileTimes::new().set_modified(when))
+        .expect("set mtime");
+    drop(handle);
+
+    unsafe { std::env::set_var("STATIC_DIR", &dir) };
+    let files = StaticFiles::from_env();
+
+    let fresh = served(&files, &get("/static/styles.css"));
+    assert_eq!(fresh.status, 200);
+    assert_eq!(
+        header_or(&fresh, "Last-Modified"),
+        "Thu, 01 Oct 2026 21:52:31 GMT",
+    );
+    assert!(
+        header_or(&fresh, "ETag").contains("1790891551.75"),
+        "the ETag keeps the fraction: {}",
+        header_or(&fresh, "ETag"),
+    );
+
+    // The date does not, so this matches.
+    let request = with_header(
+        get("/static/styles.css"),
+        "If-Modified-Since",
+        "Thu, 01 Oct 2026 21:52:31 GMT",
+    );
+    assert_eq!(
+        served(&files, &request).status,
+        304,
+        "the sub-second part must not count",
+    );
+
+    // One second earlier is a real change.
+    let request = with_header(
+        get("/static/styles.css"),
+        "If-Modified-Since",
+        "Thu, 01 Oct 2026 21:52:30 GMT",
+    );
+    let response = served(&files, &request);
+    assert_eq!(response.status, 200);
+    assert!(!response.body.is_empty());
+
+    unsafe { std::env::set_var("STATIC_DIR", static_dir()) };
+}

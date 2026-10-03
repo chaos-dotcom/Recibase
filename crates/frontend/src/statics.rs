@@ -347,9 +347,15 @@ fn is_resource_modified(request: &Request, etag_quoted: &str, modified: f64) -> 
 
     if let Some(value) = request.header("If-Modified-Since")
         && let Some(timestamp) = parse_http_date(value)
-            && modified <= timestamp as f64 {
-                unmodified = true;
-            }
+        && modified.floor() <= timestamp as f64
+    {
+        // HTTP dates carry no sub-second part, and Werkzeug drops the
+        // microseconds from the file's timestamp before comparing
+        // (`last_modified.replace(microsecond=0)`). Without the floor a file
+        // modified at 12:00:00.88 looks newer than an `If-Modified-Since` of
+        // 12:00:00, and the answer is a 200 where Werkzeug sends a 304.
+        unmodified = true;
+    }
 
     if !etag.is_empty() {
         if let Some(value) = request.header("If-None-Match") {
