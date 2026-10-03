@@ -225,7 +225,7 @@ fn contribute_submits_recipe() {
     assert_eq!(response.status, 200);
     let body = body_of(&response);
     assert!(
-        body.contains("https://github.com/The-Silverwood-Institute/Recibase/pull/12"),
+        body.contains("https://github.com/chaos-dotcom/Recibase/pull/12"),
         "{body}"
     );
     assert!(!body.contains("name=\"passcode\""), "{body}");

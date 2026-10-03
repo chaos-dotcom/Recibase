@@ -216,7 +216,7 @@ fn default_routes() -> HashMap<(String, String), Answer> {
     );
     routes.insert(
         ("POST".to_string(), "/recipe-submissions".to_string()),
-        Answer::json(r#"{"url": "https://github.com/The-Silverwood-Institute/Recibase/pull/12"}"#),
+        Answer::json(r#"{"url": "https://github.com/chaos-dotcom/Recibase/pull/12"}"#),
     );
     routes
 }

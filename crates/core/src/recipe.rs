@@ -7,7 +7,20 @@ use crate::utils::string_utils::unpluralise;
 use chrono::NaiveDate;
 use serde_json::Value;
 
-pub const RECIPE_DIR: &str = "https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes";
+pub const RECIPE_DIR: &str =
+    "https://github.com/chaos-dotcom/Recibase/tree/master/crates/core/src/recipes";
+
+/// `BeefStroganoff` -> `beef_stroganoff`, matching `tools/gen_recipes.py`.
+pub fn snake_case(name: &str) -> String {
+    let mut out = String::new();
+    for (i, c) in name.chars().enumerate() {
+        if i > 0 && c.is_ascii_uppercase() {
+            out.push('_');
+        }
+        out.extend(c.to_lowercase());
+    }
+    out
+}
 
 /// Marker for recipes that are ours (Casa Chaos) rather than part of the
 /// upstream parity corpus of Kit's and Alex's recipes. It lives in a recipe
@@ -165,7 +178,7 @@ impl RecipeDef {
     }
 
     pub fn edit(&self) -> String {
-        format!("{}/{}.scala", RECIPE_DIR, self.object_name)
+        format!("{}/{}.rs", RECIPE_DIR, snake_case(&self.object_name))
     }
 
     /// `hasIngredient`, including the `!` negation prefix.

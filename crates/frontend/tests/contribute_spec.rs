@@ -283,10 +283,10 @@ fn contribute_shows_json_error() {
 fn contribute_rejects_unexpected_pull_request_url() {
     let reply = json!({"url": "javascript:alert(1)"});
     assert_eq!(pull_request_url(&reply), None);
-    let accepted = json!({"url": "https://github.com/The-Silverwood-Institute/Recibase/pull/12"});
+    let accepted = json!({"url": "https://github.com/chaos-dotcom/Recibase/pull/12"});
     assert_eq!(
         pull_request_url(&accepted).as_deref(),
-        Some("https://github.com/The-Silverwood-Institute/Recibase/pull/12")
+        Some("https://github.com/chaos-dotcom/Recibase/pull/12")
     );
 
     let form = Form::from_pairs(
@@ -579,7 +579,7 @@ fn contribute_page_redisplays_and_escapes() {
     assert!(!page.contains("Pull request opened"));
 
     // A successful reply replaces the form with the link.
-    let url = "https://github.com/The-Silverwood-Institute/Recibase/pull/12";
+    let url = "https://github.com/chaos-dotcom/Recibase/pull/12";
     let accepted = json!({ "url": url });
     let opened = render_page(&environment, page_state(None), None, pull_request_url(&accepted).as_deref());
     assert!(opened.contains("Pull request opened"));

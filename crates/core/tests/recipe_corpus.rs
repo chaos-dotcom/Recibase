@@ -85,18 +85,26 @@ fn captured_bodies() -> BTreeMap<String, String> {
 /// The recipe module file for an `object_name`: `BeefStroganoff` ->
 /// `crates/core/src/recipes/beef_stroganoff.rs`.
 fn recipe_source(object_name: &str) -> String {
-    let mut stem = String::new();
-    for (i, c) in object_name.chars().enumerate() {
-        if i > 0 && c.is_ascii_uppercase() {
-            stem.push('_');
-        }
-        stem.extend(c.to_lowercase());
-    }
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("src")
         .join("recipes")
-        .join(format!("{stem}.rs"));
+        .join(format!("{}.rs", core::recipe::snake_case(object_name)));
     fs::read_to_string(&path).unwrap_or_else(|e| panic!("read {}: {e}", path.display()))
+}
+
+/// `edit` points at the recipe's source in the deployment's own repository, not
+/// the Scala the capture came from, so it is compared by presence, not value.
+fn without_edit(body: &str) -> String {
+    const KEY: &str = "\"edit\":\"";
+    let Some(start) = body.find(KEY) else {
+        return body.to_string();
+    };
+    let value_start = start + KEY.len();
+    let Some(length) = body[value_start..].find('"') else {
+        return body.to_string();
+    };
+    let end = value_start + length;
+    format!("{}<edit>{}", &body[..value_start], &body[end..])
 }
 
 /// Our own recipes (chaos-tagged) are not part of Kit's and Alex's upstream
@@ -125,7 +133,8 @@ fn every_recipe_equals_its_capture_byte_for_byte() {
             .unwrap_or_else(|| panic!("no capture whose edit ends with /{name}.scala"));
         let actual = core::json::to_string(&recipe.to_json_with_usage(&[]));
         assert_eq!(
-            actual, *expected,
+            without_edit(&actual),
+            without_edit(expected),
             "{name}: the JSON body differs from the Scala capture"
         );
         checked += 1;

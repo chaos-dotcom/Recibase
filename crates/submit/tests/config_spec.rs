@@ -97,7 +97,7 @@ fn the_repository_and_the_branch_must_match_the_patterns() {
     assert_eq!(empty.github.repository, DEFAULT_REPOSITORY);
     assert_eq!(empty.github.base_branch, DEFAULT_BRANCH);
 
-    for repository in ["owner/repo", "A._-b/C9", "The-Silverwood-Institute/Recibase"] {
+    for repository in ["owner/repo", "A._-b/C9", "chaos-dotcom/Recibase"] {
         assert!(
             from(Some("p"), Some("t"), Some(repository), Some("release-1.0"), Some("s"), Some("h")).is_some(),
             "{}",

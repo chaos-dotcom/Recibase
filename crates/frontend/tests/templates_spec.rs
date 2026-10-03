@@ -134,7 +134,7 @@ fn the_footer_carries_both_versions() {
     let home = working_templates("abcdef1234567890")
         .render("home.html", TemplateValue::from_serialize(json!({})))
         .expect("home.html renders");
-    assert!(home.contains("Frontend/commit/abcdef1234567890"), "{home}");
+    assert!(home.contains("Recibase/commit/abcdef1234567890"), "{home}");
     assert!(home.contains(">abcdef<"), "{home}");
     assert!(home.contains("Recibase/commit/deadbeef"), "{home}");
     assert!(home.contains(">deadbe<"), "{home}");

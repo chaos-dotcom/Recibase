@@ -237,7 +237,7 @@ fn respond(stream: &mut TcpStream, status: u16, body: &str) -> std::io::Result<(
 fn settings() -> GithubSettings {
     GithubSettings {
         token: "test-token".to_string(),
-        repository: "The-Silverwood-Institute/Recibase".to_string(),
+        repository: "chaos-dotcom/Recibase".to_string(),
         base_branch: "master".to_string(),
     }
 }
@@ -265,7 +265,7 @@ fn creates_a_branch_commits_the_file_and_opens_a_pull_request() {
         "POST",
         |path| path.ends_with("/pulls"),
         201,
-        r#"{"html_url":"https://github.com/The-Silverwood-Institute/Recibase/pull/4"}"#,
+        r#"{"html_url":"https://github.com/chaos-dotcom/Recibase/pull/4"}"#,
     );
 
     let client = GithubClient::new(&settings(), Some(&github.base()));
@@ -277,7 +277,7 @@ fn creates_a_branch_commits_the_file_and_opens_a_pull_request() {
     );
     assert_eq!(
         result,
-        Ok("https://github.com/The-Silverwood-Institute/Recibase/pull/4".to_string())
+        Ok("https://github.com/chaos-dotcom/Recibase/pull/4".to_string())
     );
 
     let recorded = github.recorded();
@@ -288,10 +288,10 @@ fn creates_a_branch_commits_the_file_and_opens_a_pull_request() {
     assert_eq!(
         calls,
         vec![
-            "GET /repos/The-Silverwood-Institute/Recibase/git/ref/heads/master".to_string(),
-            "POST /repos/The-Silverwood-Institute/Recibase/git/refs".to_string(),
-            "PUT /repos/The-Silverwood-Institute/Recibase/contents/src/main/scala/se/reciba/api/recibase/recipes/PhoneTestSoup.scala".to_string(),
-            "POST /repos/The-Silverwood-Institute/Recibase/pulls".to_string(),
+            "GET /repos/chaos-dotcom/Recibase/git/ref/heads/master".to_string(),
+            "POST /repos/chaos-dotcom/Recibase/git/refs".to_string(),
+            "PUT /repos/chaos-dotcom/Recibase/contents/src/main/scala/se/reciba/api/recibase/recipes/PhoneTestSoup.scala".to_string(),
+            "POST /repos/chaos-dotcom/Recibase/pulls".to_string(),
         ]
     );
     for call in &recorded {

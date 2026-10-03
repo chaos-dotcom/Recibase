@@ -96,8 +96,8 @@ fn manifest_json_matches_the_scala_field_order() {
         json,
         concat!(
             "{\"version\":\"cafeba6\",\"name\":\"Recibase\",",
-            "\"source_url\":\"https://github.com/The-Silverwood-Institute/Recibase\",",
-            "\"base_commit_url\":\"https://github.com/The-Silverwood-Institute/Recibase/commit/\"}"
+            "\"source_url\":\"https://github.com/chaos-dotcom/Recibase\",",
+            "\"base_commit_url\":\"https://github.com/chaos-dotcom/Recibase/commit/\"}"
         )
     );
 }
@@ -250,7 +250,7 @@ fn config_defaults_repository_and_branch() {
     )
     .expect("configured");
     assert_eq!(config.passcode, "secret");
-    assert_eq!(config.github.repository, "The-Silverwood-Institute/Recibase");
+    assert_eq!(config.github.repository, "chaos-dotcom/Recibase");
     assert_eq!(config.github.base_branch, "master");
     assert!(config.turnstile.hostnames.contains("recipes.example"));
     assert!(config.turnstile.hostnames.contains("www.example"));

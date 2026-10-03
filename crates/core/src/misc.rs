@@ -15,10 +15,10 @@ impl Manifest {
     /// The fixed service name, reported in the manifest.
     pub const NAME: &'static str = "Recibase";
     /// The upstream repository, reported in the manifest.
-    pub const SOURCE_URL: &'static str = "https://github.com/The-Silverwood-Institute/Recibase";
+    pub const SOURCE_URL: &'static str = "https://github.com/chaos-dotcom/Recibase";
     /// The prefix of a URL to a specific upstream commit.
     pub const BASE_COMMIT_URL: &'static str =
-        "https://github.com/The-Silverwood-Institute/Recibase/commit/";
+        "https://github.com/chaos-dotcom/Recibase/commit/";
 
     /// `Manifest(version)`: fills in the fixed multi-tenancy fields.
     pub fn new(version: String) -> Self {

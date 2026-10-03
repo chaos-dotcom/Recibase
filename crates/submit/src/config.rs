@@ -21,7 +21,7 @@ pub struct RecipeSubmissionConfig {
     pub turnstile: TurnstileSettings,
 }
 
-pub const DEFAULT_REPOSITORY: &str = "The-Silverwood-Institute/Recibase";
+pub const DEFAULT_REPOSITORY: &str = "chaos-dotcom/Recibase";
 pub const DEFAULT_BRANCH: &str = "master";
 
 impl RecipeSubmissionConfig {
