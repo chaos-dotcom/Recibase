@@ -60,3 +60,26 @@ fn merge_keeps_ours_on_a_name_collision_and_links_the_peer() {
     assert_eq!(pasta["also"][0]["label"], "Kit & Alex");
     assert_eq!(pasta["also"][0]["url"], "https://reciba.se/pasta");
 }
+
+/// An equal digest means the same recipe, so there is nothing to hint at; a
+/// different digest (or a missing one) is a difference worth linking.
+#[test]
+fn merge_hints_only_when_the_digest_differs() {
+    let own = vec![json!({"name": "Pasta", "permalink": "pasta", "revision": "aaaa"})];
+    let peer = |revision: &str| {
+        vec![PeerList {
+            label: "Kit & Alex".to_string(),
+            site_url: "https://reciba.se".to_string(),
+            recipes: vec![json!({"name": "Pasta", "permalink": "pasta", "revision": revision})],
+        }]
+    };
+
+    let identical = merge_recipe_lists(&own, &peer("aaaa"));
+    assert_eq!(identical.len(), 1);
+    assert!(identical[0].get("also").is_none());
+    // The digest is the sender's, not ours: it is stripped from the drawer.
+    assert!(identical[0].get("revision").is_none());
+
+    let differing = merge_recipe_lists(&own, &peer("bbbb"));
+    assert_eq!(differing[0]["also"][0]["url"], "https://reciba.se/pasta");
+}

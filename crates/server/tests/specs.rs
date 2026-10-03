@@ -177,6 +177,27 @@ fn recipes_list_links_to_each_recipe() {
     );
 }
 
+/// `?withRevision=true` adds the content digest; the default response does not
+/// carry it, so it stays byte-identical to the Scala's.
+#[test]
+fn recipes_list_revision_is_opt_in() {
+    let plain = body(&route(&request("GET", "/recipes/"), &context()));
+    assert!(!plain.contains("\"revision\""), "{plain}");
+
+    let response = route(&request("GET", "/recipes/?withRevision=true"), &context());
+    let with = body(&response);
+    assert!(with.contains("\"revision\":\""), "{with}");
+
+    let entries: Vec<serde_json::Value> =
+        serde_json::from_str(&with).expect("the recipe list is JSON");
+    // Every entry gets a 16-hex-digit digest.
+    assert!(entries.iter().all(|entry| {
+        entry["revision"].as_str().is_some_and(|revision| {
+            revision.len() == 16 && revision.bytes().all(|byte| byte.is_ascii_hexdigit())
+        })
+    }));
+}
+
 #[test]
 fn recipes_list_marks_our_recipes_with_ours() {
     let response = route(&request("GET", "/recipes/"), &context());

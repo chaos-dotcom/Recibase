@@ -111,7 +111,10 @@ impl App {
         let backend = Arc::new(BackendClient::new(backend_url.clone()));
         let recipe_list = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
-            move || backend.get_json("recipes/")
+            // `withRevision` adds each recipe's content digest, which the
+            // drawer/merge uses to tell same-recipe from same-name; the plain
+            // `/recipes/` response is unchanged.
+            move || backend.get_json("recipes/?withRevision=true")
         }));
         let api_version = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
@@ -398,13 +401,24 @@ impl App {
         self.render("recipe.html", context)
     }
 
-    /// The peers that list a recipe with this name, as `{label, url}` for the
-    /// "also on" hint on the recipe page. A peer that cannot be reached is
-    /// skipped.
+    /// The peers that list a recipe with this name *and a different content
+    /// digest*, as `{label, url}` for the "also on" hint on the recipe page. A
+    /// peer the digest says is identical is skipped; a peer that cannot be
+    /// reached is skipped.
     fn peer_matches(&self, name: Option<&str>) -> Vec<Value> {
         let Some(name) = name else {
             return Vec::new();
         };
+        let our_revision = self.recipe_list.fetch_data().ok().and_then(|list| {
+            let entry = list
+                .as_array()?
+                .iter()
+                .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))?;
+            entry
+                .get("revision")
+                .and_then(Value::as_str)
+                .map(str::to_string)
+        });
         let mut matches = Vec::new();
         for peer in &self.peers {
             let Ok(list) = peer.recipes.fetch_data() else {
@@ -413,16 +427,23 @@ impl App {
             let Some(entries) = list.as_array() else {
                 continue;
             };
-            if let Some(entry) = entries
+            let Some(entry) = entries
                 .iter()
                 .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))
-            {
-                let permalink = entry
-                    .get("permalink")
-                    .and_then(Value::as_str)
-                    .unwrap_or_default();
-                matches.push(json!({ "label": peer.label, "url": peer.recipe_url(permalink) }));
+            else {
+                continue;
+            };
+            if crate::peer::same_revision(
+                our_revision.as_deref(),
+                entry.get("revision").and_then(Value::as_str),
+            ) {
+                continue;
             }
+            let permalink = entry
+                .get("permalink")
+                .and_then(Value::as_str)
+                .unwrap_or_default();
+            matches.push(json!({ "label": peer.label, "url": peer.recipe_url(permalink) }));
         }
         matches
     }

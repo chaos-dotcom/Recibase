@@ -3,9 +3,10 @@
 //! Ours wins a name collision, so a copy we hold never shadows the peer's
 //! entry; a peer-only recipe is added, labelled with their name and linked to
 //! their site; and our entry gains an `also` link when a peer lists the same
-//! name, which is the hint that they have this recipe too.
+//! name with a different content digest, which is the hint that they have a
+//! different version of this recipe.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use serde_json::{Value, json};
@@ -31,7 +32,7 @@ impl Peer {
         let backend = Arc::new(BackendClient::new(api_base_url));
         let recipes = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
-            move || backend.get_json("recipes/")
+            move || backend.get_json("recipes/?withRevision=true")
         }));
         Peer {
             label,
@@ -86,10 +87,11 @@ impl PeerList {
 /// `name`. See the module docs for the rules. Every entry ends up with an
 /// `href`; ours is the relative permalink, a peer's the absolute URL.
 pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
-    let mut seen: HashSet<&str> = HashSet::new();
+    // The names we have, and our content digest for each when we have one.
+    let mut known: HashMap<&str, Option<&str>> = HashMap::new();
     for entry in own {
         if let Some(name) = entry.get("name").and_then(Value::as_str) {
-            seen.insert(name);
+            known.insert(name, entry.get("revision").and_then(Value::as_str));
         }
     }
 
@@ -105,22 +107,30 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
                 .and_then(Value::as_str)
                 .unwrap_or_default();
             let link = json!({ "label": peer.label, "url": peer.recipe_url(permalink) });
-            if seen.contains(name) {
-                also.entry(name).or_default().push(link);
-            } else {
-                seen.insert(name);
-                let mut copy = entry.clone();
-                if let Value::Object(map) = &mut copy {
-                    // `ours` is relative to the server that sent the list, so a
-                    // peer's copy of one of ours is not "ours" in our drawer.
-                    map.remove("ours");
-                    map.insert(
-                        "href".to_string(),
-                        Value::String(peer.recipe_url(permalink)),
-                    );
-                    map.insert("source".to_string(), Value::String(peer.label.clone()));
+            match known.get(name).copied() {
+                // Same name. An equal digest is the same recipe, so there is
+                // nothing to point at; anything else is a difference to hint.
+                Some(our_revision) => {
+                    if !same_revision(our_revision, entry.get("revision").and_then(Value::as_str)) {
+                        also.entry(name).or_default().push(link);
+                    }
                 }
-                extras.push(copy);
+                None => {
+                    let mut copy = entry.clone();
+                    if let Value::Object(map) = &mut copy {
+                        // `ours` and the digest are the sending deployment's,
+                        // not ours, and neither belongs in the drawer.
+                        map.remove("ours");
+                        map.remove("revision");
+                        map.insert(
+                            "href".to_string(),
+                            Value::String(peer.recipe_url(permalink)),
+                        );
+                        map.insert("source".to_string(), Value::String(peer.label.clone()));
+                    }
+                    known.insert(name, None);
+                    extras.push(copy);
+                }
             }
         }
     }
@@ -134,6 +144,7 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
                 .and_then(Value::as_str)
                 .unwrap_or_default();
             if let Value::Object(map) = &mut copy {
+                map.remove("revision");
                 map.insert("href".to_string(), Value::String(permalink.to_string()));
                 if let Some(name) = entry.get("name").and_then(Value::as_str)
                     && let Some(links) = also.get(name)
@@ -147,6 +158,12 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
     merged.extend(extras);
     merged.sort_by(|a, b| name_of(a).cmp(name_of(b)));
     merged
+}
+
+/// Two digests agree only when both are present: a missing digest means the
+/// sender did not report one, which is not the same as "identical".
+pub fn same_revision(left: Option<&str>, right: Option<&str>) -> bool {
+    matches!((left, right), (Some(a), Some(b)) if a == b)
 }
 
 fn name_of(entry: &Value) -> &str {

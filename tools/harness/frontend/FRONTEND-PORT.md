@@ -75,8 +75,11 @@ deployments whose recipes the drawer lists alongside ours. Entries are
 `label|api|site`, separated by `;`, e.g.
 `Kit & Alex|https://api.reciba.se/|https://reciba.se`. A peer's recipe is
 labelled with their name and links out to `site/<permalink>`; a recipe we also
-have wins by name and shows an "also on" hint. An unreachable peer is skipped
-rather than failing the page.
+have wins by name. The "also on" hint is shown only when the two disagree,
+which the frontend decides from each backend's `recipes/?withRevision=true`
+content digest (opt-in, so the default API response is unchanged): an equal
+digest means the same recipe, a missing one means we cannot tell, so we hint.
+An unreachable peer is skipped rather than failing the page.
 
 When none of these is set the footer still names a commit: `crates/frontend/build.rs`
 bakes the checkout's `HEAD` - or a `SOURCE_COMMIT` / `GIT_COMMIT` / `GITHUB_SHA` build

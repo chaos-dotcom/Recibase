@@ -86,6 +86,11 @@ pub struct MenuEntry {
     /// True for our own (chaos-tagged) recipes. `ours` is serialised only when
     /// set, so Kit's and Alex's list entries stay byte-identical.
     pub ours: bool,
+    /// The recipe's content digest (`RecipeDef::revision`), serialised only when
+    /// the caller asks (`?withRevision=true`), so the default list stays
+    /// byte-identical to the Scala's. The frontend uses it to tell "same
+    /// recipe" from "same name, different recipe" across deployments.
+    pub revision: Option<String>,
 }
 
 impl MenuEntry {
@@ -94,6 +99,7 @@ impl MenuEntry {
             name: name.to_string(),
             permalink: permalink.to_string(),
             ours: false,
+            revision: None,
         }
     }
 
@@ -104,6 +110,9 @@ impl MenuEntry {
         ];
         if self.ours {
             fields.push(("ours", Value::Bool(true)));
+        }
+        if let Some(revision) = &self.revision {
+            fields.push(("revision", Value::String(revision.clone())));
         }
         obj(fields)
     }

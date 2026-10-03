@@ -210,6 +210,20 @@ impl RecipeDef {
         format!("{}/{}.rs", RECIPE_DIR, snake_case(&self.object_name))
     }
 
+    /// A short, stable digest of the recipe's content, for telling "the same
+    /// recipe" from "the same name, a different recipe" across deployments.
+    ///
+    /// `edit` is left out - it points at each deployment's own repository - and
+    /// so is the usage data (`dated_notes`), which differs per server. Two
+    /// servers holding the same recipe produce the same digest.
+    pub fn revision(&self) -> String {
+        let mut json = self.to_json_with_usage(&[]);
+        if let Value::Object(map) = &mut json {
+            map.remove("edit");
+        }
+        format!("{:016x}", fnv1a(&crate::json::to_bytes(&json)))
+    }
+
     /// `hasIngredient`, including the `!` negation prefix.
     pub fn has_ingredient(&self, ingredient: &str) -> bool {
         let normalised = unpluralise(&ingredient.to_lowercase());
@@ -302,4 +316,16 @@ impl RecipeDef {
             ),
         ])
     }
+}
+
+/// FNV-1a, 64-bit. A tiny, dependency-free, version-stable hash: the digest has
+/// to agree between two independently built servers, so it cannot be `std`'s
+/// `DefaultHasher`, whose output is not guaranteed stable across releases.
+fn fnv1a(bytes: &[u8]) -> u64 {
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for &byte in bytes {
+        hash ^= u64::from(byte);
+        hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    hash
 }

@@ -129,6 +129,12 @@ byte-identical after normalising `Date` and the manifest `version`.
 * `set_order` de-duplicates by `hashCode` (no `PartialEq` bound on the model
   types), so two *unequal* elements with an equal hash would collapse. The 31
   tag hashes and all 185 meal hashes are distinct; the test asserts it.
+* `?withRevision=true` on `/recipes/` adds each entry's `revision`: a 16-hex
+  FNV-1a digest of the recipe JSON (`RecipeDef::revision`) with the
+  deployment-specific `edit` link removed. It is opt-in, so the default
+  response stays byte-identical to the Scala's. Two deployments holding the
+  same recipe agree on the digest, which is how the frontend tells a copied
+  recipe from a same-named *different* one (see `FRONTEND-PORT.md`).
 
 ## Tests
 
