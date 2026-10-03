@@ -39,10 +39,13 @@ def run_one(args, workers):
         result["idle_rss_kb"] = idle["rss_kb"] if idle else None
         result["processes"] = idle["processes"] if idle else None
         before = tree_stats(process.pid)
+        flags = ["-k"] if args.keep_alive else []
         completed = subprocess.run(
-            [args.ab, "-k", "-c", str(args.concurrency), "-n", str(args.requests),
+            [args.ab] + flags + ["-c", str(args.concurrency), "-n", str(args.requests),
              "http://127.0.0.1:%d%s" % (args.port, args.url)],
             capture_output=True, text=True)
+        if completed.returncode != 0 and not completed.stdout.endswith("\n"):
+            result["ab_failed"] = completed.stderr.strip().splitlines()[-1:] or ["ab failed"]
         after = tree_stats(process.pid)
         import re
         def grab(pattern, cast=float):
@@ -83,6 +86,10 @@ def main():
     ap.add_argument("--concurrency", type=int, default=32)
     ap.add_argument("--settle", type=float, default=3.0)
     ap.add_argument("--ab", default="ab")
+    ap.add_argument("--keep-alive", dest="keep_alive", action="store_true", default=True,
+                    help="pass -k to ab (the default)")
+    ap.add_argument("--no-keep-alive", dest="keep_alive", action="store_false",
+                    help="one TCP connection per request, which is all the Python stack allows")
     ap.add_argument("--out", default=None)
     ap.add_argument("--label", default=None)
     args = ap.parse_args()

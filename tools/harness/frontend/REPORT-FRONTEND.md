@@ -16,10 +16,14 @@ which is what its `Procfile` says, so **one** synchronous worker - and, as a
 second row, with `--workers 4`. The Rust side is
 `target/release/recibase-frontend`.
 
-The headline, read against the Rust figure rather than against a config: one
-Rust process of 8 MiB serves 49,064 requests a second on the hardest endpoint
-measured, and it would take **23 to 48 gunicorn workers - more cores than this
-machine has - with 1 to 2 GiB of memory** to match it. Section 7 has the sweep.
+The headline, read against the Rust binary rather than against a configuration:
+one Rust process of 8 MiB serves **43,525 requests a second** on the busiest
+endpoint, and matching it would take **about 22 gunicorn workers if Python held
+its single-worker efficiency, or about 45 at the efficiency it really shows once
+ten are running** - 1 to 2 GiB of memory, 23 to 46 processes, and more cores than
+this machine has. Section 7 has the sweep, and the reason the Python cannot be
+pushed there at all: it is the stack that answers `Connection: close` on every
+response, so `ab -k` buys it nothing.
 
 Raw results: `tools/harness/frontend/results.json`; the protocol is in
 `tools/harness/frontend/bench_frontend.py` and `tools/harness/frontend/ab_frontend.py`, and the
@@ -143,7 +147,9 @@ environment. A deployment of the Rust frontend is one 3.10 MiB binary plus the
 The Python figures are the whole process tree, which is what the service costs
 the machine: gunicorn's master plus its worker or workers. The Rust server keeps
 one thread per open connection while a request is in flight, so its peak follows
-the largest body it holds at once - a 17 KB recipe page.
+the largest body it holds at once - a 17 KB recipe page. The clients of this
+workload keep their connections alive, but only the Rust server accepts that:
+see the note in section 6 and section 7.
 
 ## 6. CPU
 
@@ -182,11 +188,52 @@ these rates:
 95-entry drawer and asks the API for the recipe. The Rust server makes that
 upstream call too and still costs a third of a Python request's CPU.
 
-## 7. How many Python workers would it take to match the Rust server?
+Note when reading the throughput columns: `ab -k` is inert against the Python
+stack. Werkzeug answers `Connection: close` on every response, so gunicorn opens
+one connection per request whatever the client asks for, while the Rust server
+reuses them - `ab` reports 0 keep-alive requests out of 2,000 for the first and
+2,000 out of 2,000 for the second. Section 7 repeats this comparison with a
+connection per request on both sides, where the Rust server loses that advantage
+and still wins.
 
-Every row of this table is the same measurement: start the server, let it settle,
-run `ab -k -c 32 -n 30000` against `/`, and read the server's own process tree
-before and after. The last row is the Rust server, measured the same way.
+## 7. How many Python workers would it take to match the Rust binary?
+
+The target is the Rust frontend in this repository, `crates/frontend`, served by
+`target/release/recibase-frontend` as one process. On `/`, under `ab -k -c 32 -n
+20000`, three runs, it serves a median of **43,525 requests a second** - and that
+is the number to hold in mind, because the question is what gunicorn would have
+to be given to reach it.
+
+Before the table, one fact that has to be stated or the numbers look invented:
+**the Python stack does not use HTTP keep-alive, and the Rust server does.**
+
+```
+$ curl -s -o /dev/null -D - http://127.0.0.1:19080/   # gunicorn, 1 worker
+HTTP/1.1 200 OK
+Server: gunicorn
+Connection: close
+
+$ curl -s -o /dev/null -D - http://127.0.0.1:19081/   # the Rust server
+HTTP/1.1 200 OK
+Connection: keep-alive
+```
+
+Werkzeug answers `Connection: close` on every response - the Flask development
+server does the same, and it does it whether or not the client asked to keep the
+connection, and whether or not gunicorn was configured to - so `ab -k` buys the
+Python nothing: it opens one TCP connection per request, and one gunicorn worker
+per connection at a time. `ab` confirms it, and confirms the opposite for Rust:
+
+```
+gunicorn:  Keep-Alive requests: 0        # out of 2,000
+Rust:      Keep-Alive requests: 2,000
+```
+
+### The worker sweep
+
+Every row is the same measurement - start the server, let it settle, run
+`ab -k -c 32 -n 30000` against `/`, read the server's own process tree before and
+after.
 
 | gunicorn workers | req/s | CPU per request | cores busy | RSS at rest | processes | p95 |
 |---:|---:|---:|---:|---:|---:|---:|
@@ -200,45 +247,62 @@ before and after. The last row is the Rust server, measured the same way.
 | 16 | 7,083 | 0.990 ms | 7.01 | 678.0 MiB | 17 | 7 ms |
 | 20 | 7,608 | 0.973 ms | 7.40 | 837.9 MiB | 21 | 6 ms |
 | 24 | 7,516 | 0.973 ms | 7.31 | 999.8 MiB | 25 | 5 ms |
-| **Rust** | **49,064** | **0.097 ms** | **4.78** | **8.1 MiB** | **1** | **2 ms** |
 
-Three things to read out of it.
+Python stops climbing at about six workers: from there to 24 workers it serves
+between 7,083 and 7,608 requests a second while the memory it holds grows from
+274 MiB to 1,000 MiB and the process count from 7 to 25. **Twenty-four gunicorn
+workers, a gigabyte of memory and 25 processes serve one sixth of what one Rust
+process serves.**
 
-**Python stops climbing at about six workers.** From 6 to 24 workers it serves
-between 7,083 and 7,608 requests a second - a flat line - while the memory it
-holds grows from 274 MiB to 1,000 MiB and the process count from 7 to 25. The
-last row of the Python half therefore serves **one sixth** of the Rust server's
-throughput with 25 processes and a gigabyte of resident memory.
+### The answer
 
-**Every worker added makes the others less efficient.** One worker does 2,111
-requests a second per core; by 24 workers the same core does 1,028 - the cost of
-a request rises from 0.472 ms to 0.973 ms. The Python is not losing to a fixed
-overhead that more processes could amortise; its per-request cost *doubles*
-under load, so concurrency does not buy back what it spends.
+Workers are not the useful unit here, because a worker's throughput falls as
+workers are added. Cores are:
 
-**To match 49,064 req/s, gunicorn would need this many cores:**
+| | cores needed | workers it would take | RSS | processes |
+|---|---:|---:|---:|---:|
+| at a single worker's cost per request (0.47-0.50 ms) | **22** | 22 | ~0.9 GiB | 23 |
+| at the cost measured at ten workers (1.02 ms) | **45** | 45 | ~1.9 GiB | 46 |
+| the Rust binary | **4.9** | 1 process | 8.3 MiB at rest, 13.7 MiB peak | 1 |
 
-| | cores needed | RSS it would hold | processes |
+So: **about 22 gunicorn workers to match one Rust process, if Python could hold
+its single-worker efficiency; about 45 at the efficiency it actually shows once
+ten of them are running.** Either way it is 23 to 46 processes and 1 to 2 GiB of
+resident memory against 1 process and 8 MiB.
+
+And the second number is the real one, because on this machine the Python cannot
+be pushed to 43,525 req/s at all: it plateaus near 7,500 req/s and the box has 10
+cores. The 22-and-45 figures are what the *cost per request* implies, not a
+configuration anyone can run here.
+
+### The comparison that is most favourable to Python
+
+If the client opens one TCP connection per request, the Rust server loses its
+keep-alive advantage - it spawns a thread per connection - and drops from 43,525
+to 24,820 requests a second. That is the fairest ground to compare on, and
+Python still loses:
+
+| `ab -c 32 -n 20000`, one connection per request | req/s | CPU per request | cores busy |
 |---|---:|---:|---:|
-| at the efficiency of one worker (2,111 req/s per core) | **23** | ~1,000 MiB | 24 |
-| at the efficiency measured at scale (1,028 req/s per core) | **48** | ~2,000 MiB | 49 |
-| the Rust server | **4.8** | 8.1 MiB at rest, 13.7 MiB at peak | 1 |
+| gunicorn, 1 worker | 1,757 | 0.543 ms | 0.95 |
+| gunicorn, 4 workers | 4,356 | 0.808 ms | 3.52 |
+| gunicorn, 10 workers | 6,634 | 0.991 ms | 6.57 |
+| **the Rust binary** | **24,820** | **0.161 ms** | **3.98** |
 
-This machine has 10 cores and was carrying other load during the sweep, so the
-23-to-48 range is the honest answer: **the Python cannot reach the Rust server's
-figure here at all**, and on a machine large enough to try it would need roughly
-two to five times the cores, with 40 MiB of memory per core.
+To match that 24,820: **14 cores** at the cost of one Python worker (0.543 ms),
+or **25 cores** at the cost it shows at ten workers (0.991 ms) - still more than
+this machine has, and still 14 to 25 processes.
 
-Read the other way round, at **equal resources**:
+### At equal resources
 
-* **Equal CPU** - the Rust server's 4.78 cores buys 49,064 req/s; four or five
-  Python workers, which also take about 4.8 cores, serve 6,292 req/s. The Rust is
-  **7.8x** the throughput for the same CPU.
-* **Equal memory** - the Rust server's peak is 13.7 MiB. Python cannot run in
+* **Equal CPU** - the Rust binary's 4.9 cores buy 43,525 req/s; ten gunicorn
+  workers, which also take about 6 cores, serve 7,565 req/s. The Rust is **5.8x**
+  the throughput for the same CPU.
+* **Equal memory** - the Rust binary peaks at 13.7 MiB. Python cannot run in
   that: gunicorn's smallest configuration is a master and one worker, 2 processes
   and 74.7 MiB at rest.
 * **Equal processes** - one Rust process against gunicorn's master plus 24
-  workers, which together serve 15 % of what the single Rust process serves.
+  workers, which together serve 15 % of what that one process serves.
 
 The same shape holds on the mixed workload of section 5: 1 worker 1,326 req/s,
 4 workers 3,218, 8 workers 4,149, 16 workers 3,857 (676 MiB, 17 processes), and
@@ -298,6 +362,16 @@ python3 tools/harness/frontend/worker_sweep.py --workers 0 \
     --command "target/release/recibase-frontend" --port 19081 --url / \
     --requests 30000 --concurrency 32 --label rust \
     --out tools/harness/frontend/worker-sweep.json
+
+# the same sweep with one connection per request, and the Rust binary with and
+# without keep-alive (the Python stack only ever does the former)
+python3 tools/harness/frontend/worker_sweep.py --workers 1,4,10 \
+    --command "/path/to/Frontend/.venv/bin/gunicorn app:app --bind 0.0.0.0:19080" \
+    --cwd /path/to/Frontend --port 19080 --url / --requests 20000 --concurrency 32 \
+    --no-keep-alive --out tools/harness/frontend/results.json
+python3 tools/harness/frontend/worker_sweep.py --workers 0 \
+    --command "target/release/recibase-frontend" --port 19081 --url / \
+    --requests 20000 --concurrency 32 --no-keep-alive --out tools/harness/frontend/results.json
 
 # the test suite: first the Python checkout, then this repository
 cd /path/to/Frontend && .venv/bin/python -m pytest -q   # 0.274 s warm, 63 tests
