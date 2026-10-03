@@ -96,8 +96,18 @@ BACKEND_URL=https://api.recibase.shed.gay/
 ```
 
 `BACKEND_URL` does double duty: the frontend proxies the API through it, and the
-browser is handed it in `/manifest.json`. Leave it at the default
-`http://localhost:8081/` to browse a local `docker compose up` without a proxy.
+browser is handed it in `/manifest.json`.
+
+Nothing is published to the host - Traefik reaches both containers over
+`apps-internal` and forwards to the port in the labels - so the deployment needs
+no host ports at all, and the same file works on any machine that can reach that
+network. To run the same images on a laptop, with no Traefik, add the ports back
+with the override:
+
+```
+docker compose -f compose.yaml -f compose.local.yaml up --build
+open http://localhost:8080/
+```
 
 ## How the port was verified
 

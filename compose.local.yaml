@@ -1,0 +1,20 @@
+# Ports on the host, for developing without Traefik.
+#
+#   docker compose -f compose.yaml -f compose.local.yaml up --build
+#   open http://localhost:8080/
+#
+# This is an override, not a second deployment: it adds the published ports the
+# main file deliberately leaves out and points the website at the local API. The
+# Traefik labels stay in place and are harmless - nothing routes them if Traefik
+# is not watching this network.
+services:
+  recibase:
+    ports:
+      - "8081:8081"
+
+  frontend:
+    ports:
+      - "8080:8080"
+    environment:
+      # The browser is on this host, so localhost is the right address for it.
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}

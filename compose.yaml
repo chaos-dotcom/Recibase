@@ -2,8 +2,14 @@
 #
 #   cp .env.example .env          # optional: configure usage data / submissions
 #   docker compose up --build     # start
-#   curl localhost:8081/health    # -> ok
-#   open http://localhost:8080/   # the website
+#   curl https://recibase.shed.gay/health   # through Traefik
+#
+# Neither service publishes a port to the host - Traefik forwards to them over
+# the shared network. To reach them from the host instead (a laptop, no Traefik):
+#
+#   docker compose -f compose.yaml -f compose.local.yaml up --build
+#   curl localhost:8081/health
+#   open http://localhost:8080/
 #
 # The build context for both is this directory (where Cargo.toml lives). See the
 # Dockerfile for the API's image targets and crates/frontend/Dockerfile for the
@@ -38,12 +44,10 @@ services:
       # smallest image (~51 MB); it has no shell, so it has no HEALTHCHECK.
       target: runtime
     image: recibase-rust:slim
-    # The container listens on PORT, which the image defaults to 8081. If you
-    # change PORT in .env, change the port mapping below to match. The published
-    # port is for reaching the API directly from the host; Traefik does not need
-    # it, and it can be removed when the labels below are in use.
-    ports:
-      - "8081:8081"
+    # Nothing is published to the host: Traefik reaches this container over
+    # `apps-internal` and forwards to the port in the label below, which is the
+    # port the image listens on (PORT, 8081 by default). To reach it from the
+    # host while developing, add the port back with compose.local.yaml.
     # Optional; every variable in it is documented in .env.example. A missing
     # file is fine (the server then runs with an empty meal log and the
     # submission route answering 503, like the unconfigured Scala).
@@ -90,11 +94,10 @@ services:
       # smallest image; it has no shell, so it has no HEALTHCHECK.
       target: runtime
     image: recibase-frontend:slim
-    # The container listens on PORT, which the image defaults to 8080. The
-    # published port is for `open http://localhost:8080/`; Traefik does not need
-    # it, and it can be removed when the labels below are in use.
-    ports:
-      - "8080:8080"
+    # Nothing is published to the host: Traefik reaches this container over
+    # `apps-internal` and forwards to port 8080, which is the port the image
+    # listens on. Add the port back with compose.local.yaml to open the site
+    # directly.
     environment:
       # Two jobs: the frontend proxies the API through it, and the browser is
       # told it in /manifest.json and calls it directly for the search. So it must
