@@ -8,7 +8,7 @@ use chrono::NaiveDate;
 use serde_json::Value;
 
 pub const RECIPE_DIR: &str =
-    "https://github.com/chaos-dotcom/Recibase/tree/master/crates/core/src/recipes";
+    "https://github.com/chaos-dotcom/Recibase/tree/main/crates/core/src/recipes";
 
 /// `BeefStroganoff` -> `beef_stroganoff`, matching `tools/gen_recipes.py`.
 pub fn snake_case(name: &str) -> String {
@@ -40,17 +40,29 @@ pub struct Ingredient {
 impl Ingredient {
     /// `Ingredient(name)`.
     pub fn new(name: &str) -> Self {
-        Ingredient { name: name.to_string(), ..Default::default() }
+        Ingredient {
+            name: name.to_string(),
+            ..Default::default()
+        }
     }
 
     /// `Ingredient(name, quantity)`.
     pub fn q(name: &str, quantity: &str) -> Self {
-        Ingredient { name: name.to_string(), quantity: Some(quantity.to_string()), ..Default::default() }
+        Ingredient {
+            name: name.to_string(),
+            quantity: Some(quantity.to_string()),
+            ..Default::default()
+        }
     }
 
     /// `Ingredient(name, quantity, prep)`.
     pub fn qp(name: &str, quantity: &str, prep: &str) -> Self {
-        Ingredient { name: name.to_string(), quantity: Some(quantity.to_string()), prep: Some(prep.to_string()), notes: None }
+        Ingredient {
+            name: name.to_string(),
+            quantity: Some(quantity.to_string()),
+            prep: Some(prep.to_string()),
+            notes: None,
+        }
     }
 
     /// `Ingredient(name, quantity, prep, notes)`.
@@ -97,19 +109,28 @@ pub struct IngredientsBlock {
 
 impl IngredientsBlock {
     pub fn new(name: Option<&str>, ingredients: Vec<Ingredient>) -> Self {
-        IngredientsBlock { name: name.map(|s| s.to_string()), ingredients }
+        IngredientsBlock {
+            name: name.map(|s| s.to_string()),
+            ingredients,
+        }
     }
 
     /// `IngredientsBlock.simple(...)`.
     pub fn simple(ingredients: Vec<Ingredient>) -> Vec<IngredientsBlock> {
-        vec![IngredientsBlock { name: None, ingredients }]
+        vec![IngredientsBlock {
+            name: None,
+            ingredients,
+        }]
     }
 
     /// `prefixIngredients(additionalIngredients: _*)`.
     pub fn prefix_ingredients(&self, additional: Vec<Ingredient>) -> IngredientsBlock {
         let mut ingredients = additional;
         ingredients.extend(self.ingredients.iter().cloned());
-        IngredientsBlock { name: self.name.clone(), ingredients }
+        IngredientsBlock {
+            name: self.name.clone(),
+            ingredients,
+        }
     }
 
     pub fn to_json(&self) -> Value {
@@ -133,11 +154,19 @@ pub struct Image {
 impl Image {
     /// `Image(src)` - 1080x1080 by default.
     pub fn new(src: &str) -> Self {
-        Image { src: src.to_string(), width: 1080, height: 1080 }
+        Image {
+            src: src.to_string(),
+            width: 1080,
+            height: 1080,
+        }
     }
 
     pub fn sized(src: &str, width: i64, height: i64) -> Self {
-        Image { src: src.to_string(), width, height }
+        Image {
+            src: src.to_string(),
+            width,
+            height,
+        }
     }
 
     pub fn to_json(&self) -> Value {
@@ -220,7 +249,14 @@ impl RecipeDef {
             ("source", opt_str(&self.source)),
             ("description", opt_str(&self.description)),
             ("tagline", opt_str(&self.tagline)),
-            ("notes", arr(self.notes.iter().map(|n| Value::String(n.clone())).collect())),
+            (
+                "notes",
+                arr(self
+                    .notes
+                    .iter()
+                    .map(|n| Value::String(n.clone()))
+                    .collect()),
+            ),
             (
                 "dated_notes",
                 arr(dated_notes.iter().map(|n| n.to_json()).collect()),
@@ -241,13 +277,29 @@ impl RecipeDef {
                     .map(|t| Value::String(t.entry_name().to_string()))
                     .collect()),
             ),
-            ("image", self.image.as_ref().map(|i| i.to_json()).unwrap_or(Value::Null)),
+            (
+                "image",
+                self.image
+                    .as_ref()
+                    .map(|i| i.to_json())
+                    .unwrap_or(Value::Null),
+            ),
             (
                 "ingredients_blocks",
-                arr(self.ingredients_blocks.iter().map(|b| b.to_json()).collect()),
+                arr(self
+                    .ingredients_blocks
+                    .iter()
+                    .map(|b| b.to_json())
+                    .collect()),
             ),
-            ("method", arr(self.method.iter().map(|m| Value::String(m.clone())).collect())),
+            (
+                "method",
+                arr(self
+                    .method
+                    .iter()
+                    .map(|m| Value::String(m.clone()))
+                    .collect()),
+            ),
         ])
     }
-
 }
