@@ -126,8 +126,8 @@ open http://localhost:8080/
 
 ## How the port was verified
 
-`tools/harness/frontend/capture-flask.tar.gz` is the recorded Python: 578 requests and
-their raw response bytes, taken with
+`tools/harness/frontend/capture-flask.tar.gz` is the recorded Python: 578 requests
+and their raw response bytes, taken with
 
 ```
 # 1. record what the Flask application answers (needs it running on :8080)
@@ -166,6 +166,57 @@ trailing-slash variants of every route, and a handful of odd paths
 
 `tools/harness/frontend/results.json` holds the before/after measurements; `REPORT.md`
 reads them.
+
+## The capture is pinned to a commit
+
+`capture-flask` belongs to **`a8808f9`**, and `capture-flask.origin.json` says so.
+At that commit the repository answered all 573 comparable responses byte for
+byte; the harness checks that before it compares anything, and refuses when the
+paths that shape a response have changed since:
+
+```
+$ python3 tools/harness/frontend/verify_frontend.py --reference tools/harness/frontend/capture-flask ...
+capture-flask belongs to commit a8808f9, and this tree has moved on since:
+  changed: crates/core/src/misc.rs
+  changed: crates/core/src/recipe.rs
+  ...
+```
+
+The check is `git diff --quiet a8808f9 -- :/crates :/tools/harness/frontend/requests.json`.
+Two flags relax it:
+
+* `--allow-diverged` - compare anyway, knowing that it compares two different
+  applications. Off the pinned commit the answer is a list of what the product
+  changed, not a pass or a fail.
+* `--repo <path>` - check a different checkout, for when the binary was built
+  somewhere else.
+
+Why pin it at all: the capture was taken from the Python while the Rust answered
+the same bytes, and the Rust has since moved on - a new site description, more
+recipes, an only-ours filter. Comparing today's tree against it reports 42
+identical and 531 differing, every difference being one of those three changes
+(the recipe pages themselves are untouched: strip the drawer, the only-ours block
+and the description line from a recipe page and the two bodies differ by 18
+lines, all of them leftovers of the checkbox block).
+
+Reproducing the original result:
+
+```
+git worktree add /tmp/recibase-pinned a8808f9
+cd /tmp/recibase-pinned && cargo build -p recibase-server -p recibase-frontend
+PORT=8081 MEAL_LOG_CSV_URL=file:///path/to/meal-log.csv ./target/debug/recibase-server &
+python3 /path/to/recibase-rs/tools/harness/frontend/verify_frontend.py \
+    --reference /path/to/recibase-rs/tools/harness/frontend/capture-flask \
+    --binary target/debug/recibase-frontend --repo /tmp/recibase-pinned \
+    --requests /path/to/recibase-rs/tools/harness/frontend/requests.json \
+    --port 8080 --env BACKEND_URL=http://localhost:8081/ \
+    --env STATIC_DIR=/path/to/Frontend/static
+```
+
+What guards the frontend now is `cargo test --workspace`: 275 tests, including a
+ported pytest case for every Python one, 2,902 fixture cases generated from the
+Python's own output, and the golden rendering checks. The capture is the record of
+the port, not a live check.
 
 ## What is different from the Python
 

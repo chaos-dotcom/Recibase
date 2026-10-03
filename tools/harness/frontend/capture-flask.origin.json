@@ -1,0 +1,9 @@
+{
+ "reference": "capture-flask",
+ "captured_from": "The-Silverwood-Institute/Frontend (Flask), gunicorn on :8080, against the API on :8081",
+ "rust_commit": "a8808f9",
+ "rust_commit_subject": "Strip the comments from the compose files",
+ "verified": "573 of the 573 comparable responses are byte-identical; the other 5 requests are /random, whose recipe is chosen at random",
+ "comparable_requests": 573,
+ "note": "The capture describes the port as it stood at this commit: 95 recipes, the original site description, no only-ours feature. The application has since moved on (a new site description, more recipes, the only-ours filter), so the capture is a record of the port and not a live check. verify_frontend.py refuses to draw a conclusion unless the response-shaping paths still match rust_commit."
+}

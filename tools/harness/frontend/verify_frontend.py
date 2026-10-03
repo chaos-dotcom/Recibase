@@ -85,6 +85,82 @@ def resolve_reference(path):
     raise SystemExit("no capture at %s or %s" % (path, archive))
 
 
+# The paths that decide what a response looks like: the templates, the static
+# assets, the frontend itself, and the recipe corpus and API behind it. If any of
+# them has changed since the commit the capture belongs to, the comparison is
+# describing two different applications and says nothing.
+# `:/` so the pathspecs are relative to the repository root whatever the
+# working directory is; a pathspec that matches nothing makes `git diff
+# --quiet` report success, which would silently disable this check.
+SHAPING_PATHS = [":/crates", ":/tools/harness/frontend/requests.json"]
+
+
+def check_origin(reference, allow_diverged, repo_override=None):
+    """Refuse to compare unless the tree still matches the capture's commit.
+
+    Returns True when the comparison may go ahead. The capture was taken from the
+    Flask application while this repository answered the same bytes; both have
+    moved since, so a run off the recorded commit would report differences that
+    are simply the product changing.
+    """
+    origin = os.path.join(reference + ".origin.json")
+    if not os.path.exists(origin):
+        return True
+    recorded = json.load(open(origin))
+    commit = recorded.get("rust_commit")
+    if not commit:
+        return True
+    # <repo>/tools/harness/frontend/verify_frontend.py
+    repo = repo_override or os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__)))))
+
+    def git(*args):
+        return subprocess.run(["git", "-C", repo] + list(args),
+                              capture_output=True, text=True)
+
+    if git("rev-parse", "--git-dir").returncode != 0:
+        print("note: %s is not a git checkout, so the capture's commit (%s) cannot "
+              "be checked" % (repo, commit))
+        return True
+    if git("cat-file", "-e", commit + "^{commit}").returncode != 0:
+        print("note: %s records commit %s, which this checkout does not have"
+              % (origin, commit))
+        return True
+    if git("diff", "--quiet", commit, "--", *SHAPING_PATHS).returncode == 0:
+        print("comparing against %s, taken from the Flask application at %s "
+              "(unchanged since)" % (os.path.basename(reference), commit))
+        return True
+
+    changed = git("diff", "--name-only", commit, "--", *SHAPING_PATHS).stdout.split()
+    print("%s belongs to commit %s, and this tree has moved on since:"
+          % (os.path.basename(reference), commit))
+    for path in changed[:20]:
+        print("  changed: %s" % path)
+    if len(changed) > 20:
+        print("  ... and %d more" % (len(changed) - 20))
+    print("""
+The capture records the port: it was taken from the Flask application while this
+repository answered the same bytes (573 of 573 comparable responses identical).
+The paths above shape what a response looks like, so anything they have changed
+makes this a comparison of two different applications rather than a check.
+
+To reproduce the original result, compare against the recorded commit:
+
+  git worktree add /tmp/recibase-pinned %s
+  cd /tmp/recibase-pinned && cargo build -p recibase-server -p recibase-frontend
+  PORT=8081 MEAL_LOG_CSV_URL=file://$PWD/../recibase-rs/tools/harness/meal-log.csv \
+      ./target/debug/recibase-server &
+  python3 tools/harness/frontend/verify_frontend.py --reference \
+      tools/harness/frontend/capture-flask --binary target/debug/recibase-frontend \
+      --requests tools/harness/frontend/requests.json --port 8080 \
+      --env BACKEND_URL=http://localhost:8081/ --env STATIC_DIR=/path/to/Frontend/static
+
+Run that harness with --repo /tmp/recibase-pinned, since the binary was built
+there. Pass --allow-diverged to run the comparison anyway, knowing what it
+means.""" % commit)
+    return allow_diverged
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--reference", required=True)
@@ -93,12 +169,24 @@ def main():
     ap.add_argument("--requests", required=True)
     ap.add_argument("--port", type=int, default=0)
     ap.add_argument("--env", action="append", default=[])
+    ap.add_argument("--repo", default=None,
+                    help="the checkout to test the capture's commit against, when "
+                         "the binary was built somewhere else (a worktree of the "
+                         "capture's commit, say). Defaults to this repository.")
+    ap.add_argument("--allow-diverged", action="store_true",
+                    help="compare even when the tree has moved on from the "
+                         "capture's commit")
     ap.add_argument("--details", type=int, default=5,
                     help="how many differing responses to describe in full")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
-    args.reference = resolve_reference(args.reference)
+    # The origin file sits beside the archive, so check before resolving: that
+    # may unpack the capture into a temporary directory.
+    given = args.reference.rstrip("/")
+    args.reference = resolve_reference(given)
+    if not check_origin(given, args.allow_diverged, args.repo):
+        return 3
     port = args.port or free_port()
     env = dict(os.environ)
     env["PORT"] = str(port)
