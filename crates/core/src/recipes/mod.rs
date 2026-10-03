@@ -74,6 +74,7 @@ pub mod pancakes;
 pub mod paneer_jalfrezi;
 pub mod parsnip_ginger_soup;
 pub mod parsnip_lentil_lasagne;
+pub mod pasta_primavera;
 pub mod peanut_butter_biscuits;
 pub mod pistachio_ice_cream;
 pub mod polenta_with_balsamic_sausages_mushrooms;
