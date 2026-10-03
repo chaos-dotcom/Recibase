@@ -43,7 +43,7 @@ line and compares everything else, headers and body, byte for byte.
 1. **circe's JSON.** Compact printing, encoder field order, `None` as `null`,
    `LocalDate` as `YYYY-MM-DD`.
 2. **Scala 2.13 collection order.** `Set`s and `Map`s are serialised in CHAMP
-   trie order — not source order, not sorted order. `core/src/scala_hash.rs`
+   trie order — not source order, not sorted order. `crates/core/src/scala_hash.rs`
    reproduces `Hashing.improve`, the trie walk (payloads before sub-nodes), the
    `Set1..Set4` insertion-order rule for four or fewer elements, and Scala's
    hashing of case objects, case classes (`MurmurHash3.caseClassHash`), `Option`,

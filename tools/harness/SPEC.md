@@ -16,25 +16,26 @@ Goal: a Rust port of https://github.com/The-Silverwood-Institute/Recibase that i
 
 ```
 recibase-rs/
-  core/src/json.rs          JSON helpers (owned by W1)
-  core/src/scala_hash.rs    Scala hashCode + Set/Map iteration order (W2)
-  core/src/tag.rs           Tag enum (W1)
-  core/src/recipe.rs        Ingredient(sBlock), Image, RecipeDef (W1)
-  core/src/meal.rs          Source, MealStub(WithUsageData), DatedNote (W1)
-  core/src/misc.rs          Manifest, MenuEntry, docs map (W1)
-  core/src/permalink.rs     Permalink.fromRawString (W1)
-  core/src/stop_words.rs    generated from Scala StopWords.scala (W1)
-  core/src/utils.rs         StringUtils, IntUtils.TemperatureUtils (W1)
-  core/src/usage.rs         UsageData + meal log CSV (W6)
-  core/src/ice_cream.rs     the IceCream mixin (W1)
-  core/src/recipes/<Object>.rs + recipes/mod.rs + recipes/all.rs (W4)
-  core/src/meal_definitions.rs (W5)
-  submit/src/*.rs           submission, Scala literal, RecipeSource, GitHub,
-                            Turnstile, config (W3)
-  server/src/*.rs           controllers, routes, HTTP server (W1)
+  crates/
+    core/src/json.rs          JSON helpers (owned by W1)
+    core/src/scala_hash.rs    Scala hashCode + Set/Map iteration order (W2)
+    core/src/tag.rs           Tag enum (W1)
+    core/src/recipe.rs        Ingredient(sBlock), Image, RecipeDef (W1)
+    core/src/meal.rs          Source, MealStub(WithUsageData), DatedNote (W1)
+    core/src/misc.rs          Manifest, MenuEntry, docs map (W1)
+    core/src/permalink.rs     Permalink.fromRawString (W1)
+    core/src/stop_words.rs    generated from Scala StopWords.scala (W1)
+    core/src/utils.rs         StringUtils, IntUtils.TemperatureUtils (W1)
+    core/src/usage.rs         UsageData + meal log CSV (W6)
+    core/src/ice_cream.rs     the IceCream mixin (W1)
+    core/src/recipes/<Object>.rs + recipes/mod.rs + recipes/all.rs (W4)
+    core/src/meal_definitions.rs (W5)
+    submit/src/*.rs           submission, Scala literal, RecipeSource, GitHub,
+                              Turnstile, config (W3)
+    server/src/*.rs           controllers, routes, HTTP server (W1)
 ```
 
-Rules: only edit files you own. `core/src/{lib.rs,json.rs,tag.rs,recipe.rs,meal.rs,misc.rs}`
+Rules: only edit files you own. `crates/core/src/{lib.rs,json.rs,tag.rs,recipe.rs,meal.rs,misc.rs}`
 are the frozen interface - ask W1 before changing a signature.
 
 ## Compatibility rules

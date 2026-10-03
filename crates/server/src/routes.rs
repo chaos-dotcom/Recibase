@@ -6,16 +6,23 @@ use crate::meal_log;
 use recibase_core::json::obj;
 use serde_json::Value;
 
+/// The process environment, injectable so the harness and the tests can supply
+/// their own map.
+pub type Env = Box<dyn Fn(&str) -> Option<String> + Send + Sync>;
+
 pub struct Context {
     pub usage: Usage,
-    pub env: Box<dyn Fn(&str) -> Option<String> + Send + Sync>,
+    pub env: Env,
 }
 
 impl Context {
-    pub fn new(env: Box<dyn Fn(&str) -> Option<String> + Send + Sync>) -> Context {
+    pub fn new(env: Env) -> Context {
         let entries = meal_log::load_from_env(&*env);
         let today = controllers::today(&*env);
-        Context { usage: Usage { entries, today }, env }
+        Context {
+            usage: Usage { entries, today },
+            env,
+        }
     }
 }
 
@@ -73,7 +80,10 @@ fn dispatch(request: &Request, context: &Context) -> (Response, bool) {
             return (Response::plain("ok"), true);
         }
         if path == "/manifest" {
-            return (Response::json(&controllers::manifest_json(&*context.env)), true);
+            return (
+                Response::json(&controllers::manifest_json(&*context.env)),
+                true,
+            );
         }
         if path == "/recipes/" {
             let ingredient = request.query_param("hasIngredient");
@@ -99,7 +109,10 @@ fn dispatch(request: &Request, context: &Context) -> (Response, bool) {
             return (Response::not_found(), false);
         }
         if path == "/meals/" {
-            return (Response::json(&controllers::meals_json(&context.usage)), true);
+            return (
+                Response::json(&controllers::meals_json(&context.usage)),
+                true,
+            );
         }
         if path == "/meals/raw" {
             return (Response::plain(&controllers::meal_names()), true);

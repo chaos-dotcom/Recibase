@@ -7,8 +7,8 @@
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Utc};
 use recibase_core::meal::DatedNote;
 use recibase_core::usage::{
-    featured_meals, last_eaten, notes, parse_csv, totals, Clock, MealLogEntry, UsageData,
-    HARD_REFRESH_TIME_HOURS, SOFT_REFRESH_TIME_HOURS,
+    Clock, HARD_REFRESH_TIME_HOURS, MealLogEntry, SOFT_REFRESH_TIME_HOURS, UsageData,
+    featured_meals, last_eaten, notes, parse_csv, totals,
 };
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
@@ -219,9 +219,11 @@ fn csv_reader_drops_the_blank_meal_and_the_unparsable_date() {
     assert_eq!(entries.len(), 48);
     assert!(entries.iter().all(|e| !e.meal_name.is_empty()));
     assert!(!entries.iter().any(|e| e.meal_name == "Some Meal"));
-    assert!(!entries
-        .iter()
-        .any(|e| e.note.as_deref() == Some("should be dropped")));
+    assert!(
+        !entries
+            .iter()
+            .any(|e| e.note.as_deref() == Some("should be dropped"))
+    );
 }
 
 #[test]
@@ -324,20 +326,14 @@ fn csv_reader_matches_the_scala_capture() {
             "times_eaten for {}",
             name
         );
-        let expected_last: Option<String> = match meal["last_eaten"].as_str() {
-            Some(s) => Some(s.to_string()),
-            None => None,
-        };
+        let expected_last = meal["last_eaten"].as_str().map(str::to_string);
         assert_eq!(
             iso(last.get(name).copied()),
             expected_last,
             "last_eaten for {}",
             name
         );
-        let expected_featured: Option<String> = match meal["featured"].as_str() {
-            Some(s) => Some(s.to_string()),
-            None => None,
-        };
+        let expected_featured = meal["featured"].as_str().map(str::to_string);
         assert_eq!(
             iso(featured_by_meal.get(name).copied()),
             expected_featured,
@@ -559,9 +555,11 @@ fn from_env_reads_meal_log_csv_url() {
 #[test]
 fn csv_reader_accepts_an_empty_or_header_only_file() {
     assert!(parse_csv(b"".as_slice()).unwrap().is_empty());
-    assert!(parse_csv(b"Date,Meal,Notes,Feature\r\n".as_slice())
-        .unwrap()
-        .is_empty());
+    assert!(
+        parse_csv(b"Date,Meal,Notes,Feature\r\n".as_slice())
+            .unwrap()
+            .is_empty()
+    );
 }
 
 #[test]
@@ -575,9 +573,11 @@ fn csv_reader_fails_where_commons_csv_throws() {
         Some("Mapping for Meal not found, expected one of Date, Notes, Feature")
     );
     // A header without any data rows is never read, so it does not fail.
-    assert!(parse_csv(b"Date,Notes,Feature\r\n".as_slice())
-        .unwrap()
-        .is_empty());
+    assert!(
+        parse_csv(b"Date,Notes,Feature\r\n".as_slice())
+            .unwrap()
+            .is_empty()
+    );
 
     // `record.get("Notes")` past the end of a short record.
     let short_row = parse_csv(

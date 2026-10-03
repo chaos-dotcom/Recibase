@@ -6,7 +6,7 @@
 //! OWNER: workstream W5.
 
 use recibase_core::meal::{MealStub, Source};
-use recibase_core::meal_definitions::{declared_stubs, meal_stubs, same_meal, DECLARED_STUB_COUNT};
+use recibase_core::meal_definitions::{DECLARED_STUB_COUNT, declared_stubs, meal_stubs, same_meal};
 use recibase_core::recipes::recipes;
 use recibase_core::tag::Tag;
 
@@ -149,13 +149,21 @@ fn declared_stubs_are_pairwise_distinct() {
     assert_eq!(keys.len(), before, "the Scala Set literal repeats a stub");
 }
 
+/// One sampled stub: its name, its tags, and the Scala `Source` constructor
+/// plus argument (`None` for the two-argument `MealStub(name, tags)` form).
+type Sample = (
+    &'static str,
+    &'static [Tag],
+    Option<(&'static str, &'static str)>,
+);
+
 /// Twenty stubs copied out of the Scala text, in the order they appear there:
 /// indices 0, 4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79,
 /// 84, 87 and 89 of the 90 `MealStub(...)` literals. The source is the Scala
 /// constructor name plus its argument, or `None` for the two-argument
 /// `MealStub(name, tags)` form.
 #[rustfmt::skip]
-const SAMPLE: &[(&str, &[Tag], Option<(&str, &str)>)] = &[
+const SAMPLE: &[Sample] = &[
     (
         "Apple & Sausage Filo Casserole",
         &[Tag::Vegan, Tag::Scales, Tag::Slow],

@@ -6,11 +6,12 @@ HTTP API**.
 
 ```
 recibase-rs/
-  core/     model (Recipe, Tag, Meal, Permalink), the 95-recipe corpus, meal
+  crates/
+    core/   model (Recipe, Tag, Meal, Permalink), the 95-recipe corpus, meal
             definitions, usage data, and the Scala collection-order emulation
-  submit/   recipe submission: validation, Scala source generation, GitHub
+    submit/ recipe submission: validation, Scala source generation, GitHub
             client, Turnstile, config
-  server/   the controllers, the routes and the HTTP/1.1 server
+    server/ the controllers, the routes and the HTTP/1.1 server
   tools/    gen_recipes.py (registry generator)
 ```
 
@@ -52,20 +53,20 @@ stores the raw bytes; `diff_captures.py` compares two capture directories.
 ## What "byte-for-byte" needed
 
 1. **JSON printing.** circe prints compact JSON and keeps the encoder's field
-   order, so every object is built in declaration order (`core/src/json.rs`,
+   order, so every object is built in declaration order (`crates/core/src/json.rs`,
    `serde_json` with `preserve_order`) and `None` is `null`, not an absent key.
 2. **Scala collection order.** `Set`s and `Map`s serialise in Scala 2.13's
    iteration order, which is *not* source order and *not* sorted order. It is the
    CHAMP trie order of `Hashing.improve(hashCode)`; a set of four or fewer
    elements is a `Set1..Set4` and keeps insertion order. 13 of the 95 recipes,
    every `inherited_tags` list, the `/meals/` array (185 entries) and the `/`
-   docs map all depend on it. `core/src/scala_hash.rs` reproduces it, including
+   docs map all depend on it. `crates/core/src/scala_hash.rs` reproduces it, including
    `case object`/`case class` hashing, `MurmurHash3`, `Some`/`None`,
    `LocalDate`, `Set`/`List` hashing, and the rule that a `Set`'s `map`/`flatMap`
    result is a trie again while a small set's is inserted in order.
 3. **HTTP and CORS.** http4s' Ember backend writes
    `HTTP/1.1 <status>`, `Date`, `Connection: close`, `Content-Type`,
-   `Content-Length`, then the body. `server/src/http.rs` writes exactly that,
+   `Content-Length`, then the body. `crates/server/src/http.rs` writes exactly that,
    including `Content-Type: text/plain; charset=UTF-8` for plain text and
    http4s' `Not found` body for unmatched routes. The Scala wraps the routes in
    `CORS.policy.withAllowOriginAll`, so an `OPTIONS` request carrying both
@@ -97,7 +98,7 @@ stores the raw bytes; `diff_captures.py` compares two capture directories.
   TLS feature before deployment (the Scala uses the JDK client). Everything is
   exercised against fake servers instead.
 * Two `commons-csv` divergences, both outside the fixture (see
-  `core/tests/usage_data.rs`): a leading BOM is stripped here but breaks the
+  `crates/core/tests/usage_data.rs`): a leading BOM is stripped here but breaks the
   Scala's header lookup, and blank lines are skipped here while the Scala throws.
 * `set_order` de-duplicates by `hashCode` (no `PartialEq` bound on the model
   types), so two *unequal* elements with an equal hash would collapse. The 31

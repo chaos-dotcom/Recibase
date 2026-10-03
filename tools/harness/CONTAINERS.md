@@ -55,7 +55,6 @@ Native-vs-native (the arm64 Scala build against `recibase-rust:slim`):
 # rust images (build context = recibase-rs/)
 docker build -t recibase-rust:distroless --target distroless .
 docker build -t recibase-rust:slim       --target runtime .
-docker build -t recibase-rust:scratch    --target minimal .
 
 # the Scala container, built from this checkout (arm64 native)
 cd Recibase && JAVA_HOME=/opt/homebrew/opt/openjdk@25 sbt --batch --server Docker/publishLocal
@@ -73,8 +72,9 @@ Repeat runs of the two shipped Rust tags vary by a few percent
 (`recibase-rust:slim` 119,615 / 25,460 req/s and `recibase-rust:distroless`
 116,448 / 25,013 req/s on a second pass); the table quotes the first pass. The
 Rust `runtime` image carries the same `HEALTHCHECK` as the Scala image (bash +
-`/dev/tcp` on `/health`); the distroless and scratch images have no shell, so a
-healthcheck there would need an in-binary probe.
+`/dev/tcp` on `/health`); the distroless image has no shell, so a
+healthcheck there would need an in-binary probe. (The musl/`scratch` target has
+since been removed; the glibc `distroless` and `slim` images remain.)
 
 Raw numbers: `container-final.json` (the five-image run), `container-results.json`
 (the first pass through published host ports).

@@ -47,10 +47,14 @@ impl GithubClient {
         pull_body: &str,
     ) -> Result<String, PullRequestFailure> {
         if !branch_pattern_matches(&recipe.branch) {
-            return Err(PullRequestFailure::GithubRejected("invalid branch".to_string()));
+            return Err(PullRequestFailure::GithubRejected(
+                "invalid branch".to_string(),
+            ));
         }
         if !path_pattern_matches(&recipe.path) {
-            return Err(PullRequestFailure::GithubRejected("invalid path".to_string()));
+            return Err(PullRequestFailure::GithubRejected(
+                "invalid path".to_string(),
+            ));
         }
 
         let http = net::agent(Duration::from_secs(15), Duration::from_secs(30));
@@ -104,7 +108,11 @@ impl GithubClient {
         let (status, body) = self.post(http, &path, &payload)?;
         if status == 200 || status == 201 {
             Ok(())
-        } else if status == 422 && github_message(&body).to_lowercase().contains("already exists") {
+        } else if status == 422
+            && github_message(&body)
+                .to_lowercase()
+                .contains("already exists")
+        {
             log::info(&format!("recipe branch already exists: {}", branch));
             Err(PullRequestFailure::BranchAlreadyExists)
         } else {
@@ -193,19 +201,11 @@ impl GithubClient {
         PullRequestFailure::GithubRejected(message)
     }
 
-    fn get(
-        &self,
-        http: &ureq::Agent,
-        path: &str,
-    ) -> Result<(u16, String), PullRequestFailure> {
+    fn get(&self, http: &ureq::Agent, path: &str) -> Result<(u16, String), PullRequestFailure> {
         self.send(http, "GET", path, None)
     }
 
-    fn delete(
-        &self,
-        http: &ureq::Agent,
-        path: &str,
-    ) -> Result<(u16, String), PullRequestFailure> {
+    fn delete(&self, http: &ureq::Agent, path: &str) -> Result<(u16, String), PullRequestFailure> {
         self.send(http, "DELETE", path, None)
     }
 
@@ -367,7 +367,7 @@ const BASE64_ALPHABET: &[u8; 64] =
 
 /// `java.util.Base64.getEncoder.encodeToString`, including the padding.
 fn base64_encode(input: &[u8]) -> String {
-    let mut out = String::with_capacity((input.len() + 2) / 3 * 4);
+    let mut out = String::with_capacity(input.len().div_ceil(3) * 4);
     for chunk in input.chunks(3) {
         let first = chunk[0] as u32;
         let second = chunk.get(1).copied().unwrap_or(0) as u32;
