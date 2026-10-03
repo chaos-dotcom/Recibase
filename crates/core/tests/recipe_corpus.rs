@@ -11,6 +11,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use recibase_core as core;
+use recibase_core::recipe::CHAOS_TAG;
 
 fn capture_dir() -> PathBuf {
     if let Ok(dir) = std::env::var("RECIBASE_CAPTURE_DIR") {
@@ -81,6 +82,32 @@ fn captured_bodies() -> BTreeMap<String, String> {
     out
 }
 
+/// `crates/core/src/recipes`, where the one-file-per-recipe modules live.
+fn recipes_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src").join("recipes")
+}
+
+/// Mirror of `tools/gen_recipes.py`'s `snake`: an `_` before every interior
+/// capital, lowercased. Maps a recipe's `object_name` to its module file stem.
+fn module_stem(object_name: &str) -> String {
+    let mut out = String::new();
+    for (i, c) in object_name.chars().enumerate() {
+        if i > 0 && c.is_ascii_uppercase() {
+            out.push('_');
+        }
+        out.extend(c.to_lowercase());
+    }
+    out
+}
+
+/// A recipe is ours (not Kit's or Alex's ported corpus) when its module carries
+/// the chaos tag. The byte-for-byte comparison ignores those recipes, so they do
+/// not need a Scala capture.
+fn is_ours(object_name: &str) -> bool {
+    let path = recipes_dir().join(format!("{}.rs", module_stem(object_name)));
+    fs::read_to_string(path).is_ok_and(|src| src.contains(CHAOS_TAG))
+}
+
 #[test]
 fn every_recipe_equals_its_capture_byte_for_byte() {
     let captures = captured_bodies();
@@ -90,6 +117,11 @@ fn every_recipe_equals_its_capture_byte_for_byte() {
     let mut checked = 0usize;
     for recipe in recipes {
         let name = &recipe.object_name;
+        // Our own (chaos-tagged) recipes are not part of the upstream corpus and
+        // have no Scala capture; the byte-for-byte comparison ignores them.
+        if is_ours(name) {
+            continue;
+        }
         let expected = captures
             .get(name)
             .unwrap_or_else(|| panic!("no capture whose edit ends with /{name}.scala"));

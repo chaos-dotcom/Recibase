@@ -9,6 +9,13 @@ use serde_json::Value;
 
 pub const RECIPE_DIR: &str = "https://github.com/The-Silverwood-Institute/Recibase/tree/master/src/main/scala/se/reciba/api/recibase/recipes";
 
+/// Marker for recipes that are ours (Casa Chaos) rather than part of the
+/// upstream parity corpus of Kit's and Alex's recipes. It lives in a recipe
+/// file's module doc comment, e.g. `//! chaos-tag: casa-chaos`, so it is never
+/// serialised: the byte-for-byte comparison ignores the tag, and skips the
+/// tagged recipe (which has no Scala capture).
+pub const CHAOS_TAG: &str = "chaos-tag:";
+
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Ingredient {
     pub name: String,
