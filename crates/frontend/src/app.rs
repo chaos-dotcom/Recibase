@@ -1,4 +1,3 @@
-
 //! `app.py`: the routes.
 //!
 //! | route | method | page |
@@ -18,7 +17,7 @@
 use std::sync::Arc;
 
 use minijinja::value::Value as TemplateValue;
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value, json};
 
 use crate::backend::BackendClient;
 use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
@@ -57,9 +56,11 @@ impl Route {
             return Some(Route::Static(filename.to_string()));
         }
         if let Some(name) = path.strip_prefix('/')
-            && !name.is_empty() && !name.contains('/') {
-                return Some(Route::Recipe(name.to_string()));
-            }
+            && !name.is_empty()
+            && !name.contains('/')
+        {
+            return Some(Route::Recipe(name.to_string()));
+        }
         None
     }
 
@@ -149,7 +150,7 @@ impl App {
             Route::Home => self.render("home.html", empty_context()),
             Route::Manifest => Ok(self.manifest(request)),
             Route::Sitemap => self.sitemap(request),
-            Route::Random => self.random(),
+            Route::Random => self.random(request),
             Route::Contribute => self.contribute(request),
             Route::Static(filename) => self.static_file(request, &filename),
             Route::Recipe(name) => self.recipe(request, &name),
@@ -180,7 +181,10 @@ impl App {
     }
 
     fn backend_unavailable(&self) -> Response {
-        match self.templates.render("backendunavailable.html", empty_context()) {
+        match self
+            .templates
+            .render("backendunavailable.html", empty_context())
+        {
             Ok(rendered) => Response::html(503, rendered),
             Err(_) => Response::html(503, "<h1>503 - Backend Unavailable</h1>".to_string()),
         }
@@ -201,17 +205,17 @@ impl App {
     }
 
     fn sitemap(&self, request: &Request) -> Result<Response, RouteError> {
-        let base_url = request
-            .url_root()
-            .trim_end_matches('/')
-            .to_string();
+        let base_url = request.url_root().trim_end_matches('/').to_string();
         let context = TemplateValue::from_serialize(json!({ "baseUrl": base_url }));
         self.render("sitemap.xml", context)
     }
 
     /// `redirect(random.choice(fetchRecipeList())['permalink'], 302)`. The
     /// target carries no leading slash, so the `Location` header is relative.
-    fn random(&self) -> Result<Response, RouteError> {
+    ///
+    /// `?onlyOurs=true` restricts the draw to the recipes the API marks
+    /// `ours`, which is what the drawer's "only ours" toggle asks for.
+    fn random(&self, request: &Request) -> Result<Response, RouteError> {
         let recipes = self
             .recipe_list
             .fetch_data()
@@ -219,12 +223,22 @@ impl App {
         let Some(recipes) = recipes.as_array() else {
             return Err(RouteError::InternalError);
         };
-        if recipes.is_empty() {
+        let only_ours = request.query_param("onlyOurs").as_deref() == Some("true");
+        let candidates: Vec<&Value> = recipes
+            .iter()
+            .filter(|recipe| {
+                !only_ours || recipe.get("ours").and_then(Value::as_bool) == Some(true)
+            })
+            .collect();
+        if candidates.is_empty() {
             // `random.choice([])` raises IndexError, which is a 500.
             return Err(RouteError::InternalError);
         }
-        let index = random_index(recipes.len());
-        let Some(permalink) = recipes[index].get("permalink").and_then(|version| version.as_str()) else {
+        let index = random_index(candidates.len());
+        let Some(permalink) = candidates[index]
+            .get("permalink")
+            .and_then(|version| version.as_str())
+        else {
             return Err(RouteError::InternalError);
         };
         Ok(pages::redirect(302, permalink))
@@ -264,8 +278,7 @@ impl App {
     }
 
     fn contribute(&self, request: &Request) -> Result<Response, RouteError> {
-        if request.method.eq_ignore_ascii_case("GET")
-            || request.method.eq_ignore_ascii_case("HEAD")
+        if request.method.eq_ignore_ascii_case("GET") || request.method.eq_ignore_ascii_case("HEAD")
         {
             return self.render_contribute(None, None, None);
         }
@@ -289,9 +302,7 @@ impl App {
 
         if response.status == 200 {
             let body: Option<serde_json::Value> = serde_json::from_str(&response.text).ok();
-            let url = body
-                .as_ref()
-                .and_then(contribute::pull_request_url);
+            let url = body.as_ref().and_then(contribute::pull_request_url);
             return match url {
                 Some(url) => self.render_contribute(None, None, Some(&url)),
                 None => self.render_contribute(
@@ -302,11 +313,8 @@ impl App {
             };
         }
 
-        let message = contribute::failure_message(
-            response.status,
-            &response.content_type,
-            &response.text,
-        );
+        let message =
+            contribute::failure_message(response.status, &response.content_type, &response.text);
         self.render_contribute(Some(&form), Some(&message), None)
     }
 
@@ -328,8 +336,7 @@ impl App {
         let mut recipe: serde_json::Value =
             serde_json::from_str(&response.text).map_err(|_| RouteError::BackendUnavailable)?;
 
-        let scale_factor = match scaler::get_scale_factor(request.query_param("scale").as_deref())
-        {
+        let scale_factor = match scaler::get_scale_factor(request.query_param("scale").as_deref()) {
             Some(factor) => {
                 scale_blocks(&mut recipe, factor);
                 factor
@@ -344,8 +351,14 @@ impl App {
             .unwrap_or_default();
         if let Some(dated) = recipe.get("dated_notes").and_then(Value::as_array) {
             for note in dated {
-                let date = note.get("date").and_then(|version| version.as_str()).unwrap_or_default();
-                let text = note.get("note").and_then(|version| version.as_str()).unwrap_or_default();
+                let date = note
+                    .get("date")
+                    .and_then(|version| version.as_str())
+                    .unwrap_or_default();
+                let text = note
+                    .get("note")
+                    .and_then(|version| version.as_str())
+                    .unwrap_or_default();
                 combined_notes.push(serde_json::Value::from(format!("{}: {}", date, text)));
             }
         }
@@ -368,11 +381,17 @@ impl App {
 /// every block is replaced by an object with exactly those two keys, and
 /// each ingredient is scaled in place.
 fn scale_blocks(recipe: &mut serde_json::Value, factor: f64) {
-    let Some(blocks) = recipe.get_mut("ingredients_blocks").and_then(Value::as_array_mut) else {
+    let Some(blocks) = recipe
+        .get_mut("ingredients_blocks")
+        .and_then(Value::as_array_mut)
+    else {
         return;
     };
     for block in blocks.iter_mut() {
-        let name = block.get("name").cloned().unwrap_or(serde_json::Value::Null);
+        let name = block
+            .get("name")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null);
         if let Some(ingredients) = block.get_mut("ingredients").and_then(Value::as_array_mut) {
             for ingredient in ingredients.iter_mut() {
                 scaler::scale_ingredient(ingredient, factor);

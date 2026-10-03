@@ -7,6 +7,7 @@
   if (!box) {
     return;
   }
+  var randomLink = document.querySelector('.random-recipe a');
 
   function apply() {
     var onlyOurs = box.checked;
@@ -14,6 +15,10 @@
     for (var i = 0; i < links.length; i++) {
       var ours = links[i].getAttribute('data-ours') === 'true';
       links[i].style.display = (onlyOurs && !ours) ? 'none' : '';
+    }
+    if (randomLink) {
+      // Let /random draw from the same set the drawer is showing.
+      randomLink.href = onlyOurs ? '/random?onlyOurs=true' : '/random';
     }
   }
 

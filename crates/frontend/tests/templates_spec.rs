@@ -39,12 +39,12 @@ fn templates_with_list(list: serde_json::Value) -> Templates {
 /// The templates, with an API that cannot be reached.
 fn broken_templates() -> Templates {
     Templates::new(
-        Arc::new(CachedBackendCall::new(|| -> Result<serde_json::Value, BackendUnavailable> {
-            Err(BackendUnavailable)
-        })),
-        Arc::new(CachedBackendCall::new(|| -> Result<String, BackendUnavailable> {
-            Err(BackendUnavailable)
-        })),
+        Arc::new(CachedBackendCall::new(
+            || -> Result<serde_json::Value, BackendUnavailable> { Err(BackendUnavailable) },
+        )),
+        Arc::new(CachedBackendCall::new(
+            || -> Result<String, BackendUnavailable> { Err(BackendUnavailable) },
+        )),
         "latest",
     )
 }
@@ -61,7 +61,10 @@ fn every_template_is_embedded_and_renders() {
 
     let home = render("home.html", json!({}));
     assert!(home.contains("Recibase"), "{home}");
-    assert!(home.contains("Welcome to Recibase!"), "{home}");
+    assert!(
+        home.contains("Welcome to Chaos' Reciebase Server"),
+        "{home}"
+    );
     // The drawer lists the recipes the API returned.
     assert!(home.contains("href=\"test-recipe\""), "{home}");
 
@@ -69,17 +72,32 @@ fn every_template_is_embedded_and_renders() {
     assert!(not_found.contains("404 - Page not Found"), "{not_found}");
 
     let internal_error = render("internalerror.html", json!({}));
-    assert!(internal_error.contains("500 - Internal Error"), "{internal_error}");
+    assert!(
+        internal_error.contains("500 - Internal Error"),
+        "{internal_error}"
+    );
 
     let unavailable = render("backendunavailable.html", json!({}));
-    assert!(unavailable.contains("503 - Backend Unavailable"), "{unavailable}");
+    assert!(
+        unavailable.contains("503 - Backend Unavailable"),
+        "{unavailable}"
+    );
 
     let sitemap = working_templates("latest")
-        .render("sitemap.xml", TemplateValue::from_serialize(json!({"baseUrl": "https://reciba.se"})))
+        .render(
+            "sitemap.xml",
+            TemplateValue::from_serialize(json!({"baseUrl": "https://reciba.se"})),
+        )
         .expect("sitemap.xml renders");
     assert!(sitemap.contains("<urlset"), "{sitemap}");
-    assert!(sitemap.contains("<loc>https://reciba.se/</loc>"), "{sitemap}");
-    assert!(sitemap.contains("<loc>https://reciba.se/test-recipe</loc>"), "{sitemap}");
+    assert!(
+        sitemap.contains("<loc>https://reciba.se/</loc>"),
+        "{sitemap}"
+    );
+    assert!(
+        sitemap.contains("<loc>https://reciba.se/test-recipe</loc>"),
+        "{sitemap}"
+    );
 
     let recipe = render(
         "recipe.html",
@@ -106,7 +124,10 @@ fn every_template_is_embedded_and_renders() {
         }),
     );
     assert!(contribute.contains("Add a recipe"), "{contribute}");
-    assert!(contribute.contains("Could not submit the recipe."), "{contribute}");
+    assert!(
+        contribute.contains("Could not submit the recipe."),
+        "{contribute}"
+    );
     assert!(contribute.contains("name=\"passcode\""), "{contribute}");
 }
 
@@ -125,6 +146,8 @@ fn the_drawer_marks_our_recipes_for_the_only_ours_toggle() {
     assert!(home.contains("data-ours=\"false\""), "{home}");
     assert!(home.contains("id=\"onlyOurs\""), "{home}");
     assert!(home.contains("/static/onlyours.js"), "{home}");
+    // The random link is rewritten by onlyours.js to carry the toggle state.
+    assert!(home.contains("href=\"/random\""), "{home}");
 }
 
 /// The footer carries the frontend version the `App` was deployed as, and

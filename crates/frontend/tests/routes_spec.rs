@@ -66,6 +66,27 @@ fn random_recipe_redirects() {
     assert!(header_or(&response, "Location").ends_with("test-recipe"));
 }
 
+/// The drawer's "only ours" toggle sends `?onlyOurs=true`, which must keep
+/// the draw to the recipes the API marks `ours`.
+#[test]
+fn random_recipe_redirects_respects_only_ours() {
+    let stub = StubApi::start();
+    stub.on(
+        "GET",
+        "/recipes/",
+        Answer::json(
+            r#"[{"permalink": "our-recipe", "name": "Our Recipe", "ours": true},
+                 {"permalink": "their-recipe", "name": "Their Recipe"}]"#,
+        ),
+    );
+    let app = app_on(&stub);
+    for _ in 0..20 {
+        let response = app.handle(&get("/random?onlyOurs=true"));
+        assert_eq!(response.status, 302);
+        assert!(header_or(&response, "Location").ends_with("our-recipe"));
+    }
+}
+
 /// `test_recipe_page`.
 #[test]
 fn recipe_page() {
@@ -169,7 +190,10 @@ fn contribute_page() {
         assert!(body.contains(expected), "missing {expected} in {body}");
     }
     for unexpected in ["value=\"NeverEaten\"", "value=\"Popular\"", "value=\"New\""] {
-        assert!(!body.contains(unexpected), "unexpected {unexpected} in {body}");
+        assert!(
+            !body.contains(unexpected),
+            "unexpected {unexpected} in {body}"
+        );
     }
 }
 
@@ -305,7 +329,11 @@ fn contribute_shows_json_error() {
     let app = app_on(&stub);
     let response = app.handle(&post_form(
         "/contribute",
-        &[("passcode", "secret"), ("name", "Empty"), ("method", "Stir.")],
+        &[
+            ("passcode", "secret"),
+            ("name", "Empty"),
+            ("method", "Stir."),
+        ],
     ));
     assert_eq!(response.status, 200);
     assert!(body_of(&response).contains("Add at least one ingredient."));
@@ -336,7 +364,10 @@ fn contribute_rejects_unexpected_pull_request_url() {
     ));
     let body = body_of(&response);
     assert!(!body.contains("javascript:alert(1)"), "{body}");
-    assert!(body.contains("did not return a pull request link"), "{body}");
+    assert!(
+        body.contains("did not return a pull request link"),
+        "{body}"
+    );
     assert!(body.contains("value=\"Soup\""), "{body}");
 }
 
@@ -365,7 +396,10 @@ fn contribute_escapes_redisplayed_values() {
     ));
     let body = body_of(&response);
     assert!(!body.contains("<script>alert(1)</script>"), "{body}");
-    assert!(body.contains("&lt;script&gt;alert(1)&lt;/script&gt;"), "{body}");
+    assert!(
+        body.contains("&lt;script&gt;alert(1)&lt;/script&gt;"),
+        "{body}"
+    );
     assert!(body.contains("upstream failed"), "{body}");
 }
 
@@ -384,7 +418,11 @@ fn contribute_reports_unreachable_api() {
     let app = app_on(&stub);
     let response = app.handle(&post_form(
         "/contribute",
-        &[("passcode", "secret"), ("name", "Soup"), ("method", "Simmer.")],
+        &[
+            ("passcode", "secret"),
+            ("name", "Soup"),
+            ("method", "Simmer."),
+        ],
     ));
     assert_eq!(response.status, 200);
     let body = body_of(&response);
@@ -469,19 +507,32 @@ fn static_styles_css_is_served_conditionally() {
     let response = app.handle(&get("/static/styles.css"));
     assert_eq!(response.status, 200);
     let etag = header_or(&response, "ETag").to_string();
-    assert!(etag.starts_with('"') && etag.ends_with('"') && etag.len() > 2, "{etag}");
+    assert!(
+        etag.starts_with('"') && etag.ends_with('"') && etag.len() > 2,
+        "{etag}"
+    );
     assert_eq!(header_or(&response, "Accept-Ranges"), "bytes");
-    assert_eq!(header_or(&response, "Content-Type"), "text/css; charset=utf-8");
+    assert_eq!(
+        header_or(&response, "Content-Type"),
+        "text/css; charset=utf-8"
+    );
     let on_disk = std::fs::read(static_dir().join("styles.css")).expect("static/styles.css");
     assert_eq!(response.body, on_disk);
 
-    let conditional =
-        app.handle(&with_header(get("/static/styles.css"), "If-None-Match", &etag));
+    let conditional = app.handle(&with_header(
+        get("/static/styles.css"),
+        "If-None-Match",
+        &etag,
+    ));
     assert_eq!(conditional.status, 304);
     assert!(conditional.body.is_empty());
     assert_eq!(header_or(&conditional, "ETag"), etag.as_str());
 
-    let ranged = app.handle(&with_header(get("/static/styles.css"), "Range", "bytes=0-9"));
+    let ranged = app.handle(&with_header(
+        get("/static/styles.css"),
+        "Range",
+        "bytes=0-9",
+    ));
     assert_eq!(ranged.status, 206);
     assert_eq!(ranged.body, on_disk[..10]);
     assert_eq!(
