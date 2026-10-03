@@ -11,7 +11,7 @@ pub fn recipe() -> RecipeDef {
         name: "Cheddar & Leek Orzotto".to_string(),
         created_at: NaiveDate::from_ymd_opt(2024, 4, 1).unwrap(),
         permalink_override: None,
-        source: Some("Castello".to_string()),
+        source: Some("Waitrose".to_string()),
         description: Some("A pleasingly simple twist on risotto that's quicker to make but just as gratifying as the original.".to_string()),
         tagline: None,
         notes: vec![
