@@ -58,6 +58,47 @@ same defaults:
 The templates are compiled into the binary; only `static/` is read from disk, so
 a deployment is the binary plus that directory.
 
+## Behind a reverse proxy
+
+`compose.yaml` carries Traefik labels for the network `apps-internal` and routes
+by host name:
+
+```
+https://recibase.shed.gay/       -> the website  (port 8080)
+https://api.recibase.shed.gay/   -> the API      (port 8081)
+```
+
+**Two host names, not one**, and that is not decoration. The frontend renders the
+pages, but `search.js` reads the API's URL out of `/manifest.json` and calls it
+from the browser:
+
+```js
+fetch('/manifest.json').then(resp => resp.json()).then(json => {
+  apiUrl = json['apiUrl'];
+  ...
+  return fetch(`${apiUrl}recipes/?${params.toString()}`)
+```
+
+So the API has to be reachable from the browser under a name that resolves
+publicly - which is also why it answers CORS preflights - while the frontend's
+own server-side calls go through the compose network by service name. Put one
+host name in front of everything and the search box silently stops working.
+
+That is the same shape the Python deployment has (`reciba.se` and
+`api.reciba.se`), so this is a property of the application, not of the port.
+
+```
+# .env
+RECIBASE_HOST=recibase.shed.gay
+RECIBASE_API_HOST=api.recibase.shed.gay
+TRAEFIK_CERTRESOLVER=myresolver      # if yours is not called myresolver
+BACKEND_URL=https://api.recibase.shed.gay/
+```
+
+`BACKEND_URL` does double duty: the frontend proxies the API through it, and the
+browser is handed it in `/manifest.json`. Leave it at the default
+`http://localhost:8081/` to browse a local `docker compose up` without a proxy.
+
 ## How the port was verified
 
 `tools/harness/frontend/capture-flask.tar.gz` is the recorded Python: 578 requests and

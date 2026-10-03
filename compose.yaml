@@ -8,6 +8,27 @@
 # The build context for both is this directory (where Cargo.toml lives). See the
 # Dockerfile for the API's image targets and crates/frontend/Dockerfile for the
 # frontend's.
+#
+# Behind Traefik
+# --------------
+# Both services carry labels for an existing Traefik network called
+# `apps-internal` and are routed by host name:
+#
+#   https://recibase.shed.gay/       -> the website  (port 8080)
+#   https://api.recibase.shed.gay/   -> the API      (port 8081)
+#
+# Two host names, not one, because of how the site works: the frontend serves the
+# pages, but it tells the browser the API's URL in /manifest.json and the browser
+# calls that URL directly for the recipe search. A single host name would leave
+# the search box silently broken. Set RECIBASE_HOST, RECIBASE_API_HOST and, if
+# your resolver is not called `myresolver`, TRAEFIK_CERTRESOLVER in .env; and set
+# BACKEND_URL to the public API host so the browser is given the right address:
+#
+#   RECIBASE_HOST=recibase.shed.gay
+#   RECIBASE_API_HOST=api.recibase.shed.gay
+#   BACKEND_URL=https://api.recibase.shed.gay/
+#
+# Delete the labels and the `apps-internal` network to run this standalone.
 services:
   recibase:
     build:
@@ -18,7 +39,9 @@ services:
       target: runtime
     image: recibase-rust:slim
     # The container listens on PORT, which the image defaults to 8081. If you
-    # change PORT in .env, change the port mapping below to match.
+    # change PORT in .env, change the port mapping below to match. The published
+    # port is for reaching the API directly from the host; Traefik does not need
+    # it, and it can be removed when the labels below are in use.
     ports:
       - "8081:8081"
     # Optional; every variable in it is documented in .env.example. A missing
@@ -30,6 +53,20 @@ services:
     # To serve a local meal log, mount it and set MEAL_LOG_CSV_URL in .env:
     # volumes:
     #   - ./meal-log.csv:/data/meal-log.csv:ro
+    networks:
+      - default
+      - apps-internal
+    labels:
+      - "traefik.enable=true"
+      # This container is on two networks, so say which one Traefik should use to
+      # reach it. Without this Traefik picks one and it may pick the wrong one.
+      - "traefik.docker.network=apps-internal"
+      # The API. The browser calls it directly for the recipe search, which is
+      # why it answers CORS preflights.
+      - "traefik.http.routers.recibase-api.rule=Host(`${RECIBASE_API_HOST:-api.recibase.shed.gay}`)"
+      - "traefik.http.routers.recibase-api.entrypoints=websecure"
+      - "traefik.http.routers.recibase-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-myresolver}"
+      - "traefik.http.services.recibase-api.loadbalancer.server.port=8081"
     restart: unless-stopped
 
   # The website: the frontend ported from Flask.
@@ -53,18 +90,39 @@ services:
       # smallest image; it has no shell, so it has no HEALTHCHECK.
       target: runtime
     image: recibase-frontend:slim
-    # The container listens on PORT, which the image defaults to 8080.
+    # The container listens on PORT, which the image defaults to 8080. The
+    # published port is for `open http://localhost:8080/`; Traefik does not need
+    # it, and it can be removed when the labels below are in use.
     ports:
       - "8080:8080"
     environment:
-      # Handed to the browser in /manifest.json, so it must be an address the
-      # browser can reach - not the compose service name, which only resolves
-      # inside this network. Set it in .env, or in the environment, to point the
-      # website at an API that is not in this project.
+      # Two jobs: the frontend proxies the API through it, and the browser is
+      # told it in /manifest.json and calls it directly for the search. So it must
+      # be an address the browser can reach - the public API host, not the
+      # compose service name, which only resolves inside this network.
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}
     # Wait for the API to answer /health rather than just for the container to
     # exist, or the first page a visitor asks for is the 503 one.
     depends_on:
       recibase:
         condition: service_healthy
+    networks:
+      - default
+      - apps-internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=apps-internal"
+      # The website.
+      - "traefik.http.routers.recibase.rule=Host(`${RECIBASE_HOST:-recibase.shed.gay}`)"
+      - "traefik.http.routers.recibase.entrypoints=websecure"
+      - "traefik.http.routers.recibase.tls.certresolver=${TRAEFIK_CERTRESOLVER:-myresolver}"
+      - "traefik.http.services.recibase.loadbalancer.server.port=8080"
     restart: unless-stopped
+
+networks:
+  # The project's own network: the frontend reaches the API here by service name,
+  # whatever BACKEND_URL says.
+  default:
+  # The Traefik network. It must already exist - this file does not create it.
+  apps-internal:
+    external: true
