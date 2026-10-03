@@ -16,6 +16,11 @@ which is what its `Procfile` says, so **one** synchronous worker - and, as a
 second row, with `--workers 4`. The Rust side is
 `target/release/recibase-frontend`.
 
+The headline, read against the Rust figure rather than against a config: one
+Rust process of 8 MiB serves 49,064 requests a second on the hardest endpoint
+measured, and it would take **23 to 48 gunicorn workers - more cores than this
+machine has - with 1 to 2 GiB of memory** to match it. Section 7 has the sweep.
+
 Raw results: `tools/harness/frontend/results.json`; the protocol is in
 `tools/harness/frontend/bench_frontend.py` and `tools/harness/frontend/ab_frontend.py`, and the
 exact commands are in section 9.
@@ -177,7 +182,69 @@ these rates:
 95-entry drawer and asks the API for the recipe. The Rust server makes that
 upstream call too and still costs a third of a Python request's CPU.
 
-## 7. Latency
+## 7. How many Python workers would it take to match the Rust server?
+
+Every row of this table is the same measurement: start the server, let it settle,
+run `ab -k -c 32 -n 30000` against `/`, and read the server's own process tree
+before and after. The last row is the Rust server, measured the same way.
+
+| gunicorn workers | req/s | CPU per request | cores busy | RSS at rest | processes | p95 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 2,111 | 0.472 ms | 1.00 | 74.7 MiB | 2 | 16 ms |
+| 2 | 3,901 | 0.505 ms | 1.97 | 111.6 MiB | 3 | 9 ms |
+| 4 | 6,292 | 0.603 ms | 3.79 | 193.0 MiB | 5 | 6 ms |
+| 6 | 6,991 | 0.806 ms | 5.63 | 274.4 MiB | 7 | 5 ms |
+| 8 | 7,305 | 0.937 ms | 6.84 | 354.0 MiB | 9 | 6 ms |
+| 10 | 7,565 | 0.973 ms | 7.36 | 434.5 MiB | 11 | 6 ms |
+| 12 | 7,245 | 0.965 ms | 6.99 | 515.5 MiB | 13 | 7 ms |
+| 16 | 7,083 | 0.990 ms | 7.01 | 678.0 MiB | 17 | 7 ms |
+| 20 | 7,608 | 0.973 ms | 7.40 | 837.9 MiB | 21 | 6 ms |
+| 24 | 7,516 | 0.973 ms | 7.31 | 999.8 MiB | 25 | 5 ms |
+| **Rust** | **49,064** | **0.097 ms** | **4.78** | **8.1 MiB** | **1** | **2 ms** |
+
+Three things to read out of it.
+
+**Python stops climbing at about six workers.** From 6 to 24 workers it serves
+between 7,083 and 7,608 requests a second - a flat line - while the memory it
+holds grows from 274 MiB to 1,000 MiB and the process count from 7 to 25. The
+last row of the Python half therefore serves **one sixth** of the Rust server's
+throughput with 25 processes and a gigabyte of resident memory.
+
+**Every worker added makes the others less efficient.** One worker does 2,111
+requests a second per core; by 24 workers the same core does 1,028 - the cost of
+a request rises from 0.472 ms to 0.973 ms. The Python is not losing to a fixed
+overhead that more processes could amortise; its per-request cost *doubles*
+under load, so concurrency does not buy back what it spends.
+
+**To match 49,064 req/s, gunicorn would need this many cores:**
+
+| | cores needed | RSS it would hold | processes |
+|---|---:|---:|---:|
+| at the efficiency of one worker (2,111 req/s per core) | **23** | ~1,000 MiB | 24 |
+| at the efficiency measured at scale (1,028 req/s per core) | **48** | ~2,000 MiB | 49 |
+| the Rust server | **4.8** | 8.1 MiB at rest, 13.7 MiB at peak | 1 |
+
+This machine has 10 cores and was carrying other load during the sweep, so the
+23-to-48 range is the honest answer: **the Python cannot reach the Rust server's
+figure here at all**, and on a machine large enough to try it would need roughly
+two to five times the cores, with 40 MiB of memory per core.
+
+Read the other way round, at **equal resources**:
+
+* **Equal CPU** - the Rust server's 4.78 cores buys 49,064 req/s; four or five
+  Python workers, which also take about 4.8 cores, serve 6,292 req/s. The Rust is
+  **7.8x** the throughput for the same CPU.
+* **Equal memory** - the Rust server's peak is 13.7 MiB. Python cannot run in
+  that: gunicorn's smallest configuration is a master and one worker, 2 processes
+  and 74.7 MiB at rest.
+* **Equal processes** - one Rust process against gunicorn's master plus 24
+  workers, which together serve 15 % of what the single Rust process serves.
+
+The same shape holds on the mixed workload of section 5: 1 worker 1,326 req/s,
+4 workers 3,218, 8 workers 4,149, 16 workers 3,857 (676 MiB, 17 processes), and
+Rust 13,160 req/s from one process of 5.6 MiB.
+
+## 8. Latency
 
 `ab -k -c 32`, in milliseconds:
 
@@ -193,7 +260,7 @@ upstream call too and still costs a third of a Python request's CPU.
 Mixed workload, 16 keep-alive clients: mean p50 11.8 ms, p95 19.5 ms, p99 22.2 ms
 for gunicorn against **0.98 ms, 2.82 ms and 4.72 ms** for Rust.
 
-## 8. Start-up
+## 9. Start-up
 
 | | Python | Rust | ratio |
 |---|---:|---:|---:|
@@ -202,7 +269,7 @@ for gunicorn against **0.98 ms, 2.82 ms and 4.72 ms** for Rust.
 The Python figure is gunicorn's master and worker boot, the import of Flask and
 its dependencies, and the first request. The Rust figure is process spawn.
 
-## 9. Reproducing the measurements
+## 10. Reproducing the measurements
 
 ```
 # the application numbers: RAM, CPU, latency, start-up
@@ -221,6 +288,17 @@ python3 tools/harness/frontend/ab_frontend.py --label rust --command "target/rel
     --env BACKEND_URL=http://localhost:8081/ \
     --env STATIC_DIR=crates/frontend/static --out tools/harness/frontend/results.json
 
+# the worker sweep of section 7: gunicorn with 1..24 workers, then the Rust
+# server, one `ab` run each
+python3 tools/harness/frontend/worker_sweep.py --workers 1,2,4,6,8,10,12,16,20,24 \
+    --command "/path/to/Frontend/.venv/bin/gunicorn app:app --bind 0.0.0.0:19080" \
+    --cwd /path/to/Frontend --port 19080 --url / --requests 30000 --concurrency 32 \
+    --label python-gunicorn --out tools/harness/frontend/worker-sweep.json
+python3 tools/harness/frontend/worker_sweep.py --workers 0 \
+    --command "target/release/recibase-frontend" --port 19081 --url / \
+    --requests 30000 --concurrency 32 --label rust \
+    --out tools/harness/frontend/worker-sweep.json
+
 # the test suite: first the Python checkout, then this repository
 cd /path/to/Frontend && .venv/bin/python -m pytest -q   # 0.274 s warm, 63 tests
 cargo test -p recibase-frontend                         # 0.196 s warm, 130 tests
@@ -233,7 +311,7 @@ during the load and the maximum is reported. `ab`'s own client CPU is not
 reported: the client became the bottleneck for the Rust `/static/` row, which is
 why the per-request CPU column is the one to compare there.
 
-## 10. What is different, stated plainly
+## 11. What is different, stated plainly
 
 * Two template expressions are rewritten when the templates are loaded, because
   MiniJinja implements neither `Mapping.get` nor `str.startswith`. The template
