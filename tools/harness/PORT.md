@@ -50,6 +50,20 @@ header.
 `capture.py` sends one request per fresh connection with `Connection: close` and
 stores the raw bytes; `diff_captures.py` compares two capture directories.
 
+The Scala side can be regenerated with `capture_scala.py`, which sends the same
+requests but logs the Scala's per-request output to a file (a full stdout pipe
+would stall the JVM mid-capture):
+
+```
+sbt -batch stage
+python3 capture_scala.py \
+    --binary <Recibase>/target/out/jvm/scala-2.13.18/recibase/universal/stage/bin/recibase \
+    --requests requests.json --out capture-scala
+```
+
+The captures here were regenerated from `c02106f`; every response is
+byte-identical after normalising `Date`.
+
 ## What "byte-for-byte" needed
 
 1. **JSON printing.** circe prints compact JSON and keeps the encoder's field
@@ -88,6 +102,13 @@ stores the raw bytes; `diff_captures.py` compares two capture directories.
    `Permalink.fromRawString`, `unpluralise`, the temperature formatting
    (`Math.round`, gas marks) and the generated Scala source text are copied
    operation for operation.
+6. **The manifest.** `/manifest` reports the deployed commit plus the three
+   fixed multi-tenancy fields added upstream in
+   [`c02106f`](https://github.com/The-Silverwood-Institute/Recibase/commit/c02106f66a77ec67679fae51d916249bbd7536ad):
+   `version`, `name` (`Recibase`), `source_url` and `base_commit_url`, in that
+   order (circe's `Encoder.forProduct4`). `version` is the first of
+   `GIT_COMMIT` / `SOURCE_COMMIT` / `GITHUB_SHA` whose trimmed value matches
+   `[0-9a-fA-F]{7,40}`, otherwise `latest` (`crates/core/src/misc.rs`).
 
 ## Deliberate differences
 
