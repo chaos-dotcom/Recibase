@@ -112,3 +112,18 @@ pub fn recipes() -> &'static [RecipeDef] {
     });
     &RECIPES
 }
+
+/// The `object_name`s of recipes that are ours (the files carrying
+/// `chaos-tag:`). `recipe_corpus` skips them, and the API marks their
+/// list entries so the frontend can tell them from the upstream corpus.
+pub fn chaos_recipes() -> &'static [&'static str] {
+    &[
+        "CheddarLeekOrzotto",
+        "CoconutPotatoCurry",
+        "FishFingerKatsu",
+        "OlivePestoCasarecce",
+        "PolentaWithBalsamicSausagesMushrooms",
+        "ProsciuttoCabbageBeanStew",
+        "SummertimeMacNCheese",
+    ]
+}

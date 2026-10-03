@@ -144,6 +144,28 @@ fn recipes_list_links_to_each_recipe() {
 }
 
 #[test]
+fn recipes_list_marks_our_recipes_with_ours() {
+    let response = route(&request("GET", "/recipes/"), &context());
+    let entries: Vec<serde_json::Value> =
+        serde_json::from_str(&body(&response)).expect("the recipe list is JSON");
+
+    let marked = entries.iter().filter(|entry| entry["ours"] == true).count();
+    assert_eq!(
+        marked,
+        recibase_core::recipes::chaos_recipes().len(),
+        "exactly our (chaos-tagged) recipes are marked"
+    );
+
+    // `ours` is serialised only when set, so Kit's and Alex's entries stay
+    // byte-identical to before.
+    let theirs = entries
+        .iter()
+        .find(|entry| entry["permalink"] == "vegetable-primavera")
+        .expect("Vegetable Primavera is in the list");
+    assert!(theirs.get("ours").is_none(), "their entry must not carry ours");
+}
+
+#[test]
 fn filtered_list_returns_200() {
     let response = route(&request("GET", "/recipes/?hasIngredient=Thyme"), &context());
     assert_eq!(response.status, 200);

@@ -37,6 +37,7 @@
   <script defer src="/static/search.js?v={{ config.frontendVersion }}"></script>
   <script defer src="/static/copy.js?v={{ config.frontendVersion }}"></script>
   <script defer src="/static/wakelock.js?v={{ config.frontendVersion }}"></script>
+  <script defer src="/static/onlyours.js?v={{ config.frontendVersion }}"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   {% if imageSrc is defined and imageSrc %}
@@ -67,11 +68,15 @@
         <label class="mdl-textfield__label" for="search">Search...</label>
       </div>
     </form>
+    <label class="only-ours">
+      <input type="checkbox" id="onlyOurs">
+      Only ours
+    </label>
     <nav class="mdl-navigation">
       {% set current_recipe_url = recipeUrl|default('') %}
       <a class="mdl-navigation__link add-recipe{{ ' is-current' if current_recipe_url == 'contribute' else '' }}" href="/contribute">Add a recipe</a>
       {% for listItem in fetchRecipeList() %}
-        <a class="mdl-navigation__link {{ 'is-current' if listItem['permalink'] == current_recipe_url }}" href="{{ listItem['permalink'] }}">{{ listItem['name'] }}</a>
+        <a class="mdl-navigation__link {{ 'is-current' if listItem['permalink'] == current_recipe_url }}" data-ours="{{ 'true' if listItem['ours']|default(false) else 'false' }}" href="{{ listItem['permalink'] }}">{{ listItem['name'] }}</a>
       {% endfor %}
     </nav>
   </div>

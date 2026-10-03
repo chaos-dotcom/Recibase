@@ -31,13 +31,18 @@ impl Usage {
 
 /// `RecipeController.listRecipes`.
 pub fn list_recipes(has_ingredient: Option<&str>) -> Vec<MenuEntry> {
+    let ours = recibase_core::recipes::chaos_recipes();
     let mut entries: Vec<MenuEntry> = recibase_core::recipes::recipes()
         .iter()
         .filter(|recipe| match has_ingredient {
             None => true,
             Some(ingredient) => recipe.has_ingredient(ingredient),
         })
-        .map(|recipe| MenuEntry::new(&recipe.name, &recipe.permalink()))
+        .map(|recipe| {
+            let mut entry = MenuEntry::new(&recipe.name, &recipe.permalink());
+            entry.ours = ours.contains(&recipe.object_name.as_str());
+            entry
+        })
         .collect();
     entries.sort_by(|a, b| a.name.cmp(&b.name));
     entries

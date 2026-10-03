@@ -65,18 +65,25 @@ fn is_commit(value: &str) -> bool {
 pub struct MenuEntry {
     pub name: String,
     pub permalink: String,
+    /// True for our own (chaos-tagged) recipes. `ours` is serialised only when
+    /// set, so Kit's and Alex's list entries stay byte-identical.
+    pub ours: bool,
 }
 
 impl MenuEntry {
     pub fn new(name: &str, permalink: &str) -> Self {
-        MenuEntry { name: name.to_string(), permalink: permalink.to_string() }
+        MenuEntry { name: name.to_string(), permalink: permalink.to_string(), ours: false }
     }
 
     pub fn to_json(&self) -> Value {
-        obj(vec![
+        let mut fields = vec![
             ("name", Value::String(self.name.clone())),
             ("permalink", Value::String(self.permalink.clone())),
-        ])
+        ];
+        if self.ours {
+            fields.push(("ours", Value::Bool(true)));
+        }
+        obj(fields)
     }
 }
 

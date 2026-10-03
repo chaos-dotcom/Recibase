@@ -25,6 +25,17 @@ fn working_templates(frontend_version: &str) -> Templates {
     )
 }
 
+/// The templates, with the given recipe list.
+fn templates_with_list(list: serde_json::Value) -> Templates {
+    let list: Result<serde_json::Value, BackendUnavailable> = Ok(list);
+    let version: Result<String, BackendUnavailable> = Ok("deadbeef".to_string());
+    Templates::new(
+        Arc::new(CachedBackendCall::new(move || list.clone())),
+        Arc::new(CachedBackendCall::new(move || version.clone())),
+        "latest",
+    )
+}
+
 /// The templates, with an API that cannot be reached.
 fn broken_templates() -> Templates {
     Templates::new(
@@ -97,6 +108,23 @@ fn every_template_is_embedded_and_renders() {
     assert!(contribute.contains("Add a recipe"), "{contribute}");
     assert!(contribute.contains("Could not submit the recipe."), "{contribute}");
     assert!(contribute.contains("name=\"passcode\""), "{contribute}");
+}
+
+/// The temporary "only ours" toggle: our recipes carry `data-ours="true"`, the
+/// rest `"false"`, and the filter script is wired into the layout.
+#[test]
+fn the_drawer_marks_our_recipes_for_the_only_ours_toggle() {
+    let home = templates_with_list(json!([
+        {"name": "Our Recipe", "permalink": "our-recipe", "ours": true},
+        {"name": "Their Recipe", "permalink": "their-recipe"},
+    ]))
+    .render("home.html", TemplateValue::from_serialize(json!({})))
+    .expect("home.html renders");
+
+    assert!(home.contains("data-ours=\"true\""), "{home}");
+    assert!(home.contains("data-ours=\"false\""), "{home}");
+    assert!(home.contains("id=\"onlyOurs\""), "{home}");
+    assert!(home.contains("/static/onlyours.js"), "{home}");
 }
 
 /// The footer carries the frontend version the `App` was deployed as, and

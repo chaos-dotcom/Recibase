@@ -276,3 +276,15 @@ footer a:not(:hover) {
     padding-left: 20px;
   }
 }
+
+/* Temporary: the "only ours" recipe filter (see onlyours.js). */
+.only-ours {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem 0.5rem;
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.875rem;
+  cursor: pointer;
+  user-select: none;
+}

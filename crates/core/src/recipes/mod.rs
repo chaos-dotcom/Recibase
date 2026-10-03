@@ -108,4 +108,4 @@ pub mod wasabi_ice_cream;
 
 pub mod all;
 
-pub use all::recipes;
+pub use all::{chaos_recipes, recipes};
