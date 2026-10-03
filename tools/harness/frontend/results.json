@@ -1,0 +1,360 @@
+[
+ {
+  "label": "python-gunicorn-1worker",
+  "command": "/Users/chaos/projects/recibase-work/frontend-stuff/Frontend/.venv/bin/gunicorn app:app --bind 0.0.0.0:19080",
+  "port": 19080,
+  "mode": "keepalive",
+  "requests": 4000,
+  "concurrency": 16,
+  "paths": [
+   "/",
+   "/chicken-curry",
+   "/static/styles.css",
+   "/manifest.json",
+   "/does-not-exist"
+  ],
+  "startup_seconds": 0.19836902618408203,
+  "spawn_to_ready_seconds": 0.20113086700439453,
+  "idle": {
+   "rss_kb": 56288,
+   "cpu_seconds": 0.16,
+   "processes": 2,
+   "settle_seconds": 15.0,
+   "cpu_seconds_in_window": 0.0,
+   "cpu_percent_of_one_core": 0.0
+  },
+  "warmup": {
+   "requests": 992,
+   "wall_seconds": 0.7727692920016125,
+   "requests_per_second": 1283.6949012693558,
+   "latency_p50_ms": 11.921999976038933,
+   "latency_p95_ms": 19.78262502234429,
+   "latency_p99_ms": 34.91424990352243,
+   "latency_max_ms": 38.20108296349645,
+   "statuses": {
+    "200": 800,
+    "404": 192
+   }
+  },
+  "after_warmup": {
+   "rss_kb": 63904,
+   "cpu_seconds": 0.8,
+   "processes": 2
+  },
+  "load": {
+   "requests": 4000,
+   "wall_seconds": 3.0155401249649003,
+   "requests_per_second": 1326.462203863581,
+   "latency_p50_ms": 11.83800003491342,
+   "latency_p95_ms": 19.47237504646182,
+   "latency_p99_ms": 22.158290958032012,
+   "latency_max_ms": 39.47679209522903,
+   "statuses": {
+    "200": 3200,
+    "404": 800
+   },
+   "server_cpu_seconds": 2.5299999999999994,
+   "server_cpu_ms_per_request": 0.6324999999999998,
+   "peak_rss_kb": 64112,
+   "processes_during_load": 2
+  },
+  "after_load": {
+   "rss_kb": 64112,
+   "cpu_seconds": 3.34,
+   "processes": 2,
+   "settle_seconds": 15.0
+  }
+ },
+ {
+  "label": "rust",
+  "command": "/tmp/fe-dev/target/release/recibase-frontend",
+  "port": 19081,
+  "mode": "keepalive",
+  "requests": 4000,
+  "concurrency": 16,
+  "paths": [
+   "/",
+   "/chicken-curry",
+   "/static/styles.css",
+   "/manifest.json",
+   "/does-not-exist"
+  ],
+  "startup_seconds": 0.017901182174682617,
+  "spawn_to_ready_seconds": 0.02052140235900879,
+  "idle": {
+   "rss_kb": 5728,
+   "cpu_seconds": 0.01,
+   "processes": 1,
+   "settle_seconds": 15.0,
+   "cpu_seconds_in_window": 0.0,
+   "cpu_percent_of_one_core": 0.0
+  },
+  "warmup": {
+   "requests": 992,
+   "wall_seconds": 0.07295541698113084,
+   "requests_per_second": 13597.34535211512,
+   "latency_p50_ms": 0.9374159853905439,
+   "latency_p95_ms": 2.450166968628764,
+   "latency_p99_ms": 3.9100419962778687,
+   "latency_max_ms": 5.268500070087612,
+   "statuses": {
+    "200": 800,
+    "404": 192
+   }
+  },
+  "after_warmup": {
+   "rss_kb": 11616,
+   "cpu_seconds": 0.17,
+   "processes": 1
+  },
+  "load": {
+   "requests": 4000,
+   "wall_seconds": 0.30394304206129164,
+   "requests_per_second": 13160.360483571721,
+   "latency_p50_ms": 0.9839580161496997,
+   "latency_p95_ms": 2.81970901414752,
+   "latency_p99_ms": 4.716958035714924,
+   "latency_max_ms": 8.616124978289008,
+   "statuses": {
+    "200": 3200,
+    "404": 800
+   },
+   "server_cpu_seconds": 0.6,
+   "server_cpu_ms_per_request": 0.15,
+   "peak_rss_kb": 14016,
+   "processes_during_load": 1
+  },
+  "after_load": {
+   "rss_kb": 12976,
+   "cpu_seconds": 0.77,
+   "processes": 1,
+   "settle_seconds": 15.0
+  }
+ },
+ {
+  "label": "python-gunicorn-4workers",
+  "command": "/Users/chaos/projects/recibase-work/frontend-stuff/Frontend/.venv/bin/gunicorn app:app --bind 0.0.0.0:19082 --workers 4",
+  "port": 19082,
+  "mode": "keepalive",
+  "requests": 4000,
+  "concurrency": 16,
+  "paths": [
+   "/",
+   "/chicken-curry",
+   "/static/styles.css",
+   "/manifest.json",
+   "/does-not-exist"
+  ],
+  "startup_seconds": 0.24488425254821777,
+  "spawn_to_ready_seconds": 0.24741005897521973,
+  "idle": {
+   "rss_kb": 164864,
+   "cpu_seconds": 0.4,
+   "processes": 5,
+   "settle_seconds": 15.0,
+   "cpu_seconds_in_window": 0.020000000000000018,
+   "cpu_percent_of_one_core": 0.13298592090625283
+  },
+  "warmup": {
+   "requests": 992,
+   "wall_seconds": 0.4052333750296384,
+   "requests_per_second": 2447.9721097193587,
+   "latency_p50_ms": 4.783542011864483,
+   "latency_p95_ms": 15.208958997391164,
+   "latency_p99_ms": 31.85887506697327,
+   "latency_max_ms": 34.32679199613631,
+   "statuses": {
+    "200": 800,
+    "404": 192
+   }
+  },
+  "after_warmup": {
+   "rss_kb": 198288,
+   "cpu_seconds": 1.59,
+   "processes": 5
+  },
+  "load": {
+   "requests": 4000,
+   "wall_seconds": 1.2429338329238817,
+   "requests_per_second": 3218.1922271681883,
+   "latency_p50_ms": 4.7542499378323555,
+   "latency_p95_ms": 7.623582961969078,
+   "latency_p99_ms": 10.756916017271578,
+   "latency_max_ms": 17.15325005352497,
+   "statuses": {
+    "200": 3200,
+    "404": 800
+   },
+   "server_cpu_seconds": 4.22,
+   "server_cpu_ms_per_request": 1.055,
+   "peak_rss_kb": 198672,
+   "processes_during_load": 5
+  },
+  "after_load": {
+   "rss_kb": 75264,
+   "cpu_seconds": 5.81,
+   "processes": 5,
+   "settle_seconds": 15.0
+  }
+ },
+ {
+  "label": "python-gunicorn-1worker",
+  "url": "/",
+  "requests": 20000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 2000 requests\nCompleted 4000 requests\nCompleted 6000 requests\nCompleted 8000 requests\nCompleted 10000 requests\nCompleted 12000 requests\nCompleted 14000 requests\nCompleted 16000 requests\nCompleted 18000 requests\nCompleted 20000 requests\nFinished 20000 requests",
+  "server_rss_before_kb": 72960,
+  "server_rss_after_kb": 73696,
+  "server_cpu_seconds": 9.44,
+  "requests_per_second": 2084.09,
+  "time_per_request_ms": 15.354,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 15,
+  "ab_p95_ms": 17,
+  "ab_p99_ms": 24,
+  "ab_p100_ms": 36,
+  "server_cpu_ms_per_request": 0.472,
+  "requests_per_server_cpu_second": 2118.64406779661
+ },
+ {
+  "label": "python-gunicorn-1worker",
+  "url": "/chicken-curry",
+  "requests": 10000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 1000 requests\nCompleted 2000 requests\nCompleted 3000 requests\nCompleted 4000 requests\nCompleted 5000 requests\nCompleted 6000 requests\nCompleted 7000 requests\nCompleted 8000 requests\nCompleted 9000 requests\nCompleted 10000 requests\nFinished 10000 requests",
+  "server_rss_before_kb": 73024,
+  "server_rss_after_kb": 61712,
+  "server_cpu_seconds": 10.58,
+  "requests_per_second": 719.89,
+  "time_per_request_ms": 44.451,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 40,
+  "ab_p95_ms": 58,
+  "ab_p99_ms": 167,
+  "ab_p100_ms": 282,
+  "server_cpu_ms_per_request": 1.058,
+  "requests_per_server_cpu_second": 945.179584120983
+ },
+ {
+  "label": "python-gunicorn-1worker",
+  "url": "/static/styles.css",
+  "requests": 30000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 3000 requests\nCompleted 6000 requests\nCompleted 9000 requests\nCompleted 12000 requests\nCompleted 15000 requests\nCompleted 18000 requests\nCompleted 21000 requests\nCompleted 24000 requests\nCompleted 27000 requests\nCompleted 30000 requests\nFinished 30000 requests",
+  "server_rss_before_kb": 73760,
+  "server_rss_after_kb": 74608,
+  "server_cpu_seconds": 11.99,
+  "requests_per_second": 2477.21,
+  "time_per_request_ms": 12.918,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 13,
+  "ab_p95_ms": 13,
+  "ab_p99_ms": 19,
+  "ab_p100_ms": 35,
+  "server_cpu_ms_per_request": 0.39966666666666667,
+  "requests_per_server_cpu_second": 2502.0850708924104
+ },
+ {
+  "label": "python-gunicorn-4workers",
+  "url": "/",
+  "requests": 20000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 2000 requests\nCompleted 4000 requests\nCompleted 6000 requests\nCompleted 8000 requests\nCompleted 10000 requests\nCompleted 12000 requests\nCompleted 14000 requests\nCompleted 16000 requests\nCompleted 18000 requests\nCompleted 20000 requests\nFinished 20000 requests",
+  "server_rss_before_kb": 77568,
+  "server_rss_after_kb": 159728,
+  "server_cpu_seconds": 11.76,
+  "requests_per_second": 6291.26,
+  "time_per_request_ms": 5.086,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 5,
+  "ab_p95_ms": 6,
+  "ab_p99_ms": 13,
+  "ab_p100_ms": 25,
+  "server_cpu_ms_per_request": 0.588,
+  "requests_per_server_cpu_second": 1700.6802721088436
+ },
+ {
+  "label": "python-gunicorn-4workers",
+  "url": "/chicken-curry",
+  "requests": 10000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 1000 requests\nCompleted 2000 requests\nCompleted 3000 requests\nCompleted 4000 requests\nCompleted 5000 requests\nCompleted 6000 requests\nCompleted 7000 requests\nCompleted 8000 requests\nCompleted 9000 requests\nCompleted 10000 requests\nFinished 10000 requests",
+  "server_rss_before_kb": 196800,
+  "server_rss_after_kb": 211392,
+  "server_cpu_seconds": 12.17,
+  "requests_per_second": 2585.57,
+  "time_per_request_ms": 12.376,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 12,
+  "ab_p95_ms": 15,
+  "ab_p99_ms": 27,
+  "ab_p100_ms": 39,
+  "server_cpu_ms_per_request": 1.217,
+  "requests_per_server_cpu_second": 821.6926869350863
+ },
+ {
+  "label": "rust",
+  "url": "/",
+  "requests": 20000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 2000 requests\nCompleted 4000 requests\nCompleted 6000 requests\nCompleted 8000 requests\nCompleted 10000 requests\nCompleted 12000 requests\nCompleted 14000 requests\nCompleted 16000 requests\nCompleted 18000 requests\nCompleted 20000 requests\nFinished 20000 requests",
+  "server_rss_before_kb": 8400,
+  "server_rss_after_kb": 12960,
+  "server_cpu_seconds": 2.0900000000000003,
+  "requests_per_second": 46836.32,
+  "time_per_request_ms": 0.683,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 1,
+  "ab_p95_ms": 2,
+  "ab_p99_ms": 3,
+  "ab_p100_ms": 6,
+  "server_cpu_ms_per_request": 0.10450000000000002,
+  "requests_per_server_cpu_second": 9569.377990430621
+ },
+ {
+  "label": "rust",
+  "url": "/chicken-curry",
+  "requests": 10000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 1000 requests\nCompleted 2000 requests\nCompleted 3000 requests\nCompleted 4000 requests\nCompleted 5000 requests\nCompleted 6000 requests\nCompleted 7000 requests\nCompleted 8000 requests\nCompleted 9000 requests\nCompleted 10000 requests\nFinished 10000 requests",
+  "server_rss_before_kb": 8368,
+  "server_rss_after_kb": 18608,
+  "server_cpu_seconds": 3.11,
+  "requests_per_second": 8574.42,
+  "time_per_request_ms": 3.732,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 3,
+  "ab_p95_ms": 8,
+  "ab_p99_ms": 12,
+  "ab_p100_ms": 23,
+  "server_cpu_ms_per_request": 0.311,
+  "requests_per_server_cpu_second": 3215.434083601286
+ },
+ {
+  "label": "rust",
+  "url": "/static/styles.css",
+  "requests": 30000,
+  "concurrency": 32,
+  "ab_stderr": "Completed 3000 requests\nCompleted 6000 requests\nCompleted 9000 requests\nCompleted 12000 requests\nCompleted 15000 requests\nCompleted 18000 requests\nCompleted 21000 requests\nCompleted 24000 requests\nCompleted 27000 requests\nCompleted 30000 requests\nFinished 30000 requests",
+  "server_rss_before_kb": 8304,
+  "server_rss_after_kb": 10576,
+  "server_cpu_seconds": 1.62,
+  "requests_per_second": 95654.42,
+  "time_per_request_ms": 0.335,
+  "failed_requests": 0,
+  "non_2xx": null,
+  "ab_p50_ms": 0,
+  "ab_p95_ms": 1,
+  "ab_p99_ms": 1,
+  "ab_p100_ms": 5,
+  "server_cpu_ms_per_request": 0.054,
+  "requests_per_server_cpu_second": 18518.51851851852
+ }
+]

@@ -1,0 +1,2978 @@
+[
+ {
+  "name": "home",
+  "path": "/",
+  "method": "GET"
+ },
+ {
+  "name": "home-query",
+  "path": "/?x=1",
+  "method": "GET"
+ },
+ {
+  "name": "manifest",
+  "path": "/manifest.json",
+  "method": "GET"
+ },
+ {
+  "name": "manifest-query",
+  "path": "/manifest.json?v=2",
+  "method": "GET"
+ },
+ {
+  "name": "sitemap",
+  "path": "/sitemap.xml",
+  "method": "GET"
+ },
+ {
+  "name": "contribute",
+  "path": "/contribute",
+  "method": "GET"
+ },
+ {
+  "name": "contribute-query",
+  "path": "/contribute?x=1",
+  "method": "GET"
+ },
+ {
+  "name": "notfound",
+  "path": "/does-not-exist",
+  "method": "GET"
+ },
+ {
+  "name": "notfound-deep",
+  "path": "/a/b/c",
+  "method": "GET"
+ },
+ {
+  "name": "notfound-recipes",
+  "path": "/recipes",
+  "method": "GET"
+ },
+ {
+  "name": "notfound-upper",
+  "path": "/Does-Not-Exist",
+  "method": "GET"
+ },
+ {
+  "name": "lower-301",
+  "path": "/Vegetable-Primavera",
+  "method": "GET"
+ },
+ {
+  "name": "upper-301",
+  "path": "/CHICKEN-CURRY",
+  "method": "GET"
+ },
+ {
+  "name": "upper-manifest-301",
+  "path": "/MANIFEST.JSON",
+  "method": "GET"
+ },
+ {
+  "name": "mixed-sitemap-301",
+  "path": "/Sitemap.XML",
+  "method": "GET"
+ },
+ {
+  "name": "scale-0",
+  "path": "/chicken-curry?scale=0",
+  "method": "GET"
+ },
+ {
+  "name": "scale-1",
+  "path": "/chicken-curry?scale=1",
+  "method": "GET"
+ },
+ {
+  "name": "scale-1.0",
+  "path": "/chicken-curry?scale=1.0",
+  "method": "GET"
+ },
+ {
+  "name": "scale-0.0",
+  "path": "/chicken-curry?scale=0.0",
+  "method": "GET"
+ },
+ {
+  "name": "scale--1",
+  "path": "/chicken-curry?scale=-1",
+  "method": "GET"
+ },
+ {
+  "name": "scale--1.0",
+  "path": "/chicken-curry?scale=-1.0",
+  "method": "GET"
+ },
+ {
+  "name": "scale-51",
+  "path": "/chicken-curry?scale=51",
+  "method": "GET"
+ },
+ {
+  "name": "scale-50",
+  "path": "/chicken-curry?scale=50",
+  "method": "GET"
+ },
+ {
+  "name": "scale-49.9",
+  "path": "/chicken-curry?scale=49.9",
+  "method": "GET"
+ },
+ {
+  "name": "scale-abc",
+  "path": "/chicken-curry?scale=abc",
+  "method": "GET"
+ },
+ {
+  "name": "scale-empty",
+  "path": "/chicken-curry?scale=",
+  "method": "GET"
+ },
+ {
+  "name": "scale-2.5",
+  "path": "/chicken-curry?scale=2.5",
+  "method": "GET"
+ },
+ {
+  "name": "scale-.5",
+  "path": "/chicken-curry?scale=.5",
+  "method": "GET"
+ },
+ {
+  "name": "scale-2",
+  "path": "/chicken-curry?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "scale-3",
+  "path": "/chicken-curry?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "scale-0.5",
+  "path": "/chicken-curry?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "scale-1e2",
+  "path": "/chicken-curry?scale=1e2",
+  "method": "GET"
+ },
+ {
+  "name": "scale-2",
+  "path": "/chicken-curry?scale=%202",
+  "method": "GET"
+ },
+ {
+  "name": "scale-2",
+  "path": "/chicken-curry?scale=2%20",
+  "method": "GET"
+ },
+ {
+  "name": "scale-+2",
+  "path": "/chicken-curry?scale=%2B2",
+  "method": "GET"
+ },
+ {
+  "name": "scale-nan",
+  "path": "/chicken-curry?scale=nan",
+  "method": "GET"
+ },
+ {
+  "name": "scale-inf",
+  "path": "/chicken-curry?scale=inf",
+  "method": "GET"
+ },
+ {
+  "name": "scale-1_0",
+  "path": "/chicken-curry?scale=1_0",
+  "method": "GET"
+ },
+ {
+  "name": "scale-2.0",
+  "path": "/chicken-curry?scale=2.0",
+  "method": "GET"
+ },
+ {
+  "name": "scale-+1",
+  "path": "/chicken-curry?scale=%2B1",
+  "method": "GET"
+ },
+ {
+  "name": "scale-00",
+  "path": "/chicken-curry?scale=00",
+  "method": "GET"
+ },
+ {
+  "name": "scale-repeated",
+  "path": "/chicken-curry?scale=2&scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "scale-with-other",
+  "path": "/chicken-curry?scale=2&other=1",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-baked-rigatoni-aubergine",
+  "path": "/baked-rigatoni-aubergine",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-salmon-olive-spaghetti",
+  "path": "/salmon-olive-spaghetti",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-baobab-ice-cream",
+  "path": "/baobab-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-basa-pathia",
+  "path": "/basa-pathia",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-beef-stroganoff",
+  "path": "/beef-stroganoff",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-beef-wraps",
+  "path": "/beef-wraps",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-beetroot-ice-cream",
+  "path": "/beetroot-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-birthday-cake",
+  "path": "/birthday-cake",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-birthday-cake-classic",
+  "path": "/birthday-cake-classic",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-blue-cheese-gnocchi",
+  "path": "/blue-cheese-gnocchi",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-broccoli-salmon-quiche",
+  "path": "/broccoli-salmon-quiche",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-broccoli-stilton-soup",
+  "path": "/broccoli-stilton-soup",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-brownies",
+  "path": "/brownies",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-butternut-chilli",
+  "path": "/butternut-chilli",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-butternut-squash-pad-thai",
+  "path": "/butternut-squash-pad-thai",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-cheese-scones",
+  "path": "/cheese-scones",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-cheesy-cod",
+  "path": "/cheesy-cod",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-chicken-curry",
+  "path": "/chicken-curry",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-chilli-con-carne",
+  "path": "/chilli-con-carne",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-chinese-fusion",
+  "path": "/chinese-fusion",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-chipotle-burgers",
+  "path": "/chipotle-burgers",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-chipotle-mac-n-cheese",
+  "path": "/chipotle-mac-n-cheese",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-christmas-naanwidge",
+  "path": "/christmas-naanwidge",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-vegetable-crumble",
+  "path": "/vegetable-crumble",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-coconut-lime-dahl",
+  "path": "/coconut-lime-dahl",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-cod-lentils",
+  "path": "/cod-lentils",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-courgette-broccoli-pasta",
+  "path": "/courgette-broccoli-pasta",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-courgette-spinach-pasties",
+  "path": "/courgette-spinach-pasties",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-cranberry-relish",
+  "path": "/cranberry-relish",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-creamy-cauliflower-cheese",
+  "path": "/creamy-cauliflower-cheese",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-coffee-cake",
+  "path": "/coffee-cake",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-dahl",
+  "path": "/dahl",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-dukaten-cookies",
+  "path": "/dukaten-cookies",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-egg-tapas",
+  "path": "/egg-tapas",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-goan-king-prawn-balchao",
+  "path": "/goan-king-prawn-balchao",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-greek-wraps",
+  "path": "/greek-wraps",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-halloumi-wraps",
+  "path": "/halloumi-wraps",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-duck-wraps",
+  "path": "/duck-wraps",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-indian-patties",
+  "path": "/indian-patties",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-kashtouri",
+  "path": "/kashtouri",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-lamb-aubergine-daube",
+  "path": "/lamb-aubergine-daube",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-lemon-feta-pasta",
+  "path": "/lemon-feta-pasta",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-lentil-spinach-stew",
+  "path": "/lentil-spinach-stew",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-macaroni",
+  "path": "/macaroni",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-marmalade-ice-cream",
+  "path": "/marmalade-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-mascarpone-ice-cream",
+  "path": "/mascarpone-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-mead",
+  "path": "/mead",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-melty-mushroom-wellingtons",
+  "path": "/melty-mushroom-wellingtons",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-mexican-polenta-pie",
+  "path": "/mexican-polenta-pie",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-mushroom-quiche",
+  "path": "/mushroom-quiche",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-mushroom-risotto",
+  "path": "/mushroom-risotto",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-mushroom-stroganoff",
+  "path": "/mushroom-stroganoff",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-new-york-bagels",
+  "path": "/new-york-bagels",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-nut-roast",
+  "path": "/nut-roast",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-pancakes",
+  "path": "/pancakes",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-paneer-jalfrezi",
+  "path": "/paneer-jalfrezi",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-parsnip-and-ginger-soup",
+  "path": "/parsnip-and-ginger-soup",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-parsnip-and-lentil-lasagne",
+  "path": "/parsnip-and-lentil-lasagne",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-peanut-butter-biscuits",
+  "path": "/peanut-butter-biscuits",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-pistachio-ice-cream",
+  "path": "/pistachio-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-pomegranate-lime-ice-cream",
+  "path": "/pomegranate-lime-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-pomegranate-persian-halloumi",
+  "path": "/pomegranate-persian-halloumi",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-quesadillas",
+  "path": "/quesadillas",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-red-pepper-soup",
+  "path": "/red-pepper-soup",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-rhubarb-crumble",
+  "path": "/rhubarb-crumble",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-roast-beetroot-dahl",
+  "path": "/roast-beetroot-dahl",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-beetroot-risotto",
+  "path": "/beetroot-risotto",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-roasted-artichoke-pasta",
+  "path": "/roasted-artichoke-pasta",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-roasted-vegetable-lasagne",
+  "path": "/roasted-vegetable-lasagne",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-roasted-vegetable-moroccan-tagine",
+  "path": "/roasted-vegetable-moroccan-tagine",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-roasted-vegetable-tart",
+  "path": "/roasted-vegetable-tart",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-russian-mushroom-julienne",
+  "path": "/russian-mushroom-julienne",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-saag-paneer",
+  "path": "/saag-paneer",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-scotch-pancakes",
+  "path": "/scotch-pancakes",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-scrambled-eggs",
+  "path": "/scrambled-eggs",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-seafood-lasagne",
+  "path": "/seafood-lasagne",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-shawarma-wraps",
+  "path": "/shawarma-wraps",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-vegetarian-mexican",
+  "path": "/vegetarian-mexican",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-smoky-sweet-potato-chickpea-stew",
+  "path": "/smoky-sweet-potato-chickpea-stew",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-smoky-fish-curry",
+  "path": "/smoky-fish-curry",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-spanakopita",
+  "path": "/spanakopita",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-spiced-apple-winter-soup",
+  "path": "/spiced-apple-winter-soup",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-spicy-smoked-paprika-chorizo",
+  "path": "/spicy-smoked-paprika-chorizo",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-squash-gnocchi-gratin",
+  "path": "/squash-gnocchi-gratin",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-strawberry-basil-ice-cream",
+  "path": "/strawberry-basil-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-sweet-chilli-feta-pasta",
+  "path": "/sweet-chilli-feta-pasta",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-tangy-vegetable-pad-thai",
+  "path": "/tangy-vegetable-pad-thai",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-toad-in-the-hole",
+  "path": "/toad-in-the-hole",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-tofu-katsu-curry",
+  "path": "/tofu-katsu-curry",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-truffle-burgers",
+  "path": "/truffle-burgers",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-turmeric-ginger-ice-cream",
+  "path": "/turmeric-ginger-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-vegan-brownies",
+  "path": "/vegan-brownies",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-vegetable-primavera",
+  "path": "/vegetable-primavera",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-veggie-shepherds-pie",
+  "path": "/veggie-shepherds-pie",
+  "method": "GET"
+ },
+ {
+  "name": "recipe-wasabi-ice-cream",
+  "path": "/wasabi-ice-cream",
+  "method": "GET"
+ },
+ {
+  "name": "r2-baked-rigatoni-aubergine",
+  "path": "/baked-rigatoni-aubergine?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-salmon-olive-spaghetti",
+  "path": "/salmon-olive-spaghetti?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-baobab-ice-cream",
+  "path": "/baobab-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-basa-pathia",
+  "path": "/basa-pathia?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-beef-stroganoff",
+  "path": "/beef-stroganoff?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-beef-wraps",
+  "path": "/beef-wraps?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-beetroot-ice-cream",
+  "path": "/beetroot-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-birthday-cake",
+  "path": "/birthday-cake?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-birthday-cake-classic",
+  "path": "/birthday-cake-classic?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-blue-cheese-gnocchi",
+  "path": "/blue-cheese-gnocchi?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-broccoli-salmon-quiche",
+  "path": "/broccoli-salmon-quiche?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-broccoli-stilton-soup",
+  "path": "/broccoli-stilton-soup?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-brownies",
+  "path": "/brownies?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-butternut-chilli",
+  "path": "/butternut-chilli?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-butternut-squash-pad-thai",
+  "path": "/butternut-squash-pad-thai?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-cheese-scones",
+  "path": "/cheese-scones?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-cheesy-cod",
+  "path": "/cheesy-cod?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-chicken-curry",
+  "path": "/chicken-curry?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-chilli-con-carne",
+  "path": "/chilli-con-carne?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-chinese-fusion",
+  "path": "/chinese-fusion?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-chipotle-burgers",
+  "path": "/chipotle-burgers?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-chipotle-mac-n-cheese",
+  "path": "/chipotle-mac-n-cheese?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-christmas-naanwidge",
+  "path": "/christmas-naanwidge?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-vegetable-crumble",
+  "path": "/vegetable-crumble?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-coconut-lime-dahl",
+  "path": "/coconut-lime-dahl?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-cod-lentils",
+  "path": "/cod-lentils?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-courgette-broccoli-pasta",
+  "path": "/courgette-broccoli-pasta?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-courgette-spinach-pasties",
+  "path": "/courgette-spinach-pasties?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-cranberry-relish",
+  "path": "/cranberry-relish?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-creamy-cauliflower-cheese",
+  "path": "/creamy-cauliflower-cheese?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-coffee-cake",
+  "path": "/coffee-cake?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-dahl",
+  "path": "/dahl?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-dukaten-cookies",
+  "path": "/dukaten-cookies?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-egg-tapas",
+  "path": "/egg-tapas?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-goan-king-prawn-balchao",
+  "path": "/goan-king-prawn-balchao?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-greek-wraps",
+  "path": "/greek-wraps?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-halloumi-wraps",
+  "path": "/halloumi-wraps?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-duck-wraps",
+  "path": "/duck-wraps?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-indian-patties",
+  "path": "/indian-patties?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-kashtouri",
+  "path": "/kashtouri?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-lamb-aubergine-daube",
+  "path": "/lamb-aubergine-daube?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-lemon-feta-pasta",
+  "path": "/lemon-feta-pasta?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-lentil-spinach-stew",
+  "path": "/lentil-spinach-stew?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-macaroni",
+  "path": "/macaroni?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-marmalade-ice-cream",
+  "path": "/marmalade-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-mascarpone-ice-cream",
+  "path": "/mascarpone-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-mead",
+  "path": "/mead?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-melty-mushroom-wellingtons",
+  "path": "/melty-mushroom-wellingtons?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-mexican-polenta-pie",
+  "path": "/mexican-polenta-pie?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-mushroom-quiche",
+  "path": "/mushroom-quiche?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-mushroom-risotto",
+  "path": "/mushroom-risotto?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-mushroom-stroganoff",
+  "path": "/mushroom-stroganoff?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-new-york-bagels",
+  "path": "/new-york-bagels?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-nut-roast",
+  "path": "/nut-roast?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-pancakes",
+  "path": "/pancakes?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-paneer-jalfrezi",
+  "path": "/paneer-jalfrezi?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-parsnip-and-ginger-soup",
+  "path": "/parsnip-and-ginger-soup?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-parsnip-and-lentil-lasagne",
+  "path": "/parsnip-and-lentil-lasagne?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-peanut-butter-biscuits",
+  "path": "/peanut-butter-biscuits?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-pistachio-ice-cream",
+  "path": "/pistachio-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-pomegranate-lime-ice-cream",
+  "path": "/pomegranate-lime-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-pomegranate-persian-halloumi",
+  "path": "/pomegranate-persian-halloumi?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-quesadillas",
+  "path": "/quesadillas?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-red-pepper-soup",
+  "path": "/red-pepper-soup?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-rhubarb-crumble",
+  "path": "/rhubarb-crumble?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-roast-beetroot-dahl",
+  "path": "/roast-beetroot-dahl?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-beetroot-risotto",
+  "path": "/beetroot-risotto?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-roasted-artichoke-pasta",
+  "path": "/roasted-artichoke-pasta?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-roasted-vegetable-lasagne",
+  "path": "/roasted-vegetable-lasagne?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-roasted-vegetable-moroccan-tagine",
+  "path": "/roasted-vegetable-moroccan-tagine?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-roasted-vegetable-tart",
+  "path": "/roasted-vegetable-tart?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-russian-mushroom-julienne",
+  "path": "/russian-mushroom-julienne?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-saag-paneer",
+  "path": "/saag-paneer?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-scotch-pancakes",
+  "path": "/scotch-pancakes?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-scrambled-eggs",
+  "path": "/scrambled-eggs?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-seafood-lasagne",
+  "path": "/seafood-lasagne?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-shawarma-wraps",
+  "path": "/shawarma-wraps?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-vegetarian-mexican",
+  "path": "/vegetarian-mexican?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-smoky-sweet-potato-chickpea-stew",
+  "path": "/smoky-sweet-potato-chickpea-stew?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-smoky-fish-curry",
+  "path": "/smoky-fish-curry?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-spanakopita",
+  "path": "/spanakopita?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-spiced-apple-winter-soup",
+  "path": "/spiced-apple-winter-soup?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-spicy-smoked-paprika-chorizo",
+  "path": "/spicy-smoked-paprika-chorizo?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-squash-gnocchi-gratin",
+  "path": "/squash-gnocchi-gratin?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-strawberry-basil-ice-cream",
+  "path": "/strawberry-basil-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-sweet-chilli-feta-pasta",
+  "path": "/sweet-chilli-feta-pasta?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-tangy-vegetable-pad-thai",
+  "path": "/tangy-vegetable-pad-thai?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-toad-in-the-hole",
+  "path": "/toad-in-the-hole?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-tofu-katsu-curry",
+  "path": "/tofu-katsu-curry?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-truffle-burgers",
+  "path": "/truffle-burgers?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-turmeric-ginger-ice-cream",
+  "path": "/turmeric-ginger-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-vegan-brownies",
+  "path": "/vegan-brownies?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-vegetable-primavera",
+  "path": "/vegetable-primavera?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-veggie-shepherds-pie",
+  "path": "/veggie-shepherds-pie?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "r2-wasabi-ice-cream",
+  "path": "/wasabi-ice-cream?scale=2",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-baked-rigatoni-aubergine",
+  "path": "/baked-rigatoni-aubergine?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-salmon-olive-spaghetti",
+  "path": "/salmon-olive-spaghetti?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-baobab-ice-cream",
+  "path": "/baobab-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-basa-pathia",
+  "path": "/basa-pathia?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-beef-stroganoff",
+  "path": "/beef-stroganoff?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-beef-wraps",
+  "path": "/beef-wraps?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-beetroot-ice-cream",
+  "path": "/beetroot-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-birthday-cake",
+  "path": "/birthday-cake?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-birthday-cake-classic",
+  "path": "/birthday-cake-classic?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-blue-cheese-gnocchi",
+  "path": "/blue-cheese-gnocchi?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-broccoli-salmon-quiche",
+  "path": "/broccoli-salmon-quiche?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-broccoli-stilton-soup",
+  "path": "/broccoli-stilton-soup?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-brownies",
+  "path": "/brownies?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-butternut-chilli",
+  "path": "/butternut-chilli?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-butternut-squash-pad-thai",
+  "path": "/butternut-squash-pad-thai?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-cheese-scones",
+  "path": "/cheese-scones?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-cheesy-cod",
+  "path": "/cheesy-cod?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-chicken-curry",
+  "path": "/chicken-curry?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-chilli-con-carne",
+  "path": "/chilli-con-carne?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-chinese-fusion",
+  "path": "/chinese-fusion?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-chipotle-burgers",
+  "path": "/chipotle-burgers?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-chipotle-mac-n-cheese",
+  "path": "/chipotle-mac-n-cheese?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-christmas-naanwidge",
+  "path": "/christmas-naanwidge?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-vegetable-crumble",
+  "path": "/vegetable-crumble?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-coconut-lime-dahl",
+  "path": "/coconut-lime-dahl?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-cod-lentils",
+  "path": "/cod-lentils?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-courgette-broccoli-pasta",
+  "path": "/courgette-broccoli-pasta?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-courgette-spinach-pasties",
+  "path": "/courgette-spinach-pasties?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-cranberry-relish",
+  "path": "/cranberry-relish?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-creamy-cauliflower-cheese",
+  "path": "/creamy-cauliflower-cheese?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-coffee-cake",
+  "path": "/coffee-cake?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-dahl",
+  "path": "/dahl?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-dukaten-cookies",
+  "path": "/dukaten-cookies?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-egg-tapas",
+  "path": "/egg-tapas?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-goan-king-prawn-balchao",
+  "path": "/goan-king-prawn-balchao?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-greek-wraps",
+  "path": "/greek-wraps?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-halloumi-wraps",
+  "path": "/halloumi-wraps?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-duck-wraps",
+  "path": "/duck-wraps?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-indian-patties",
+  "path": "/indian-patties?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-kashtouri",
+  "path": "/kashtouri?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-lamb-aubergine-daube",
+  "path": "/lamb-aubergine-daube?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-lemon-feta-pasta",
+  "path": "/lemon-feta-pasta?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-lentil-spinach-stew",
+  "path": "/lentil-spinach-stew?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-macaroni",
+  "path": "/macaroni?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-marmalade-ice-cream",
+  "path": "/marmalade-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-mascarpone-ice-cream",
+  "path": "/mascarpone-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-mead",
+  "path": "/mead?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-melty-mushroom-wellingtons",
+  "path": "/melty-mushroom-wellingtons?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-mexican-polenta-pie",
+  "path": "/mexican-polenta-pie?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-mushroom-quiche",
+  "path": "/mushroom-quiche?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-mushroom-risotto",
+  "path": "/mushroom-risotto?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-mushroom-stroganoff",
+  "path": "/mushroom-stroganoff?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-new-york-bagels",
+  "path": "/new-york-bagels?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-nut-roast",
+  "path": "/nut-roast?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-pancakes",
+  "path": "/pancakes?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-paneer-jalfrezi",
+  "path": "/paneer-jalfrezi?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-parsnip-and-ginger-soup",
+  "path": "/parsnip-and-ginger-soup?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-parsnip-and-lentil-lasagne",
+  "path": "/parsnip-and-lentil-lasagne?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-peanut-butter-biscuits",
+  "path": "/peanut-butter-biscuits?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-pistachio-ice-cream",
+  "path": "/pistachio-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-pomegranate-lime-ice-cream",
+  "path": "/pomegranate-lime-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-pomegranate-persian-halloumi",
+  "path": "/pomegranate-persian-halloumi?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-quesadillas",
+  "path": "/quesadillas?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-red-pepper-soup",
+  "path": "/red-pepper-soup?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-rhubarb-crumble",
+  "path": "/rhubarb-crumble?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-roast-beetroot-dahl",
+  "path": "/roast-beetroot-dahl?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-beetroot-risotto",
+  "path": "/beetroot-risotto?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-roasted-artichoke-pasta",
+  "path": "/roasted-artichoke-pasta?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-roasted-vegetable-lasagne",
+  "path": "/roasted-vegetable-lasagne?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-roasted-vegetable-moroccan-tagine",
+  "path": "/roasted-vegetable-moroccan-tagine?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-roasted-vegetable-tart",
+  "path": "/roasted-vegetable-tart?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-russian-mushroom-julienne",
+  "path": "/russian-mushroom-julienne?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-saag-paneer",
+  "path": "/saag-paneer?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-scotch-pancakes",
+  "path": "/scotch-pancakes?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-scrambled-eggs",
+  "path": "/scrambled-eggs?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-seafood-lasagne",
+  "path": "/seafood-lasagne?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-shawarma-wraps",
+  "path": "/shawarma-wraps?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-vegetarian-mexican",
+  "path": "/vegetarian-mexican?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-smoky-sweet-potato-chickpea-stew",
+  "path": "/smoky-sweet-potato-chickpea-stew?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-smoky-fish-curry",
+  "path": "/smoky-fish-curry?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-spanakopita",
+  "path": "/spanakopita?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-spiced-apple-winter-soup",
+  "path": "/spiced-apple-winter-soup?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-spicy-smoked-paprika-chorizo",
+  "path": "/spicy-smoked-paprika-chorizo?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-squash-gnocchi-gratin",
+  "path": "/squash-gnocchi-gratin?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-strawberry-basil-ice-cream",
+  "path": "/strawberry-basil-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-sweet-chilli-feta-pasta",
+  "path": "/sweet-chilli-feta-pasta?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-tangy-vegetable-pad-thai",
+  "path": "/tangy-vegetable-pad-thai?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-toad-in-the-hole",
+  "path": "/toad-in-the-hole?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-tofu-katsu-curry",
+  "path": "/tofu-katsu-curry?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-truffle-burgers",
+  "path": "/truffle-burgers?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-turmeric-ginger-ice-cream",
+  "path": "/turmeric-ginger-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-vegan-brownies",
+  "path": "/vegan-brownies?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-vegetable-primavera",
+  "path": "/vegetable-primavera?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-veggie-shepherds-pie",
+  "path": "/veggie-shepherds-pie?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "rhalf-wasabi-ice-cream",
+  "path": "/wasabi-ice-cream?scale=0.5",
+  "method": "GET"
+ },
+ {
+  "name": "r3-baked-rigatoni-aubergine",
+  "path": "/baked-rigatoni-aubergine?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-salmon-olive-spaghetti",
+  "path": "/salmon-olive-spaghetti?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-baobab-ice-cream",
+  "path": "/baobab-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-basa-pathia",
+  "path": "/basa-pathia?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-beef-stroganoff",
+  "path": "/beef-stroganoff?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-beef-wraps",
+  "path": "/beef-wraps?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-beetroot-ice-cream",
+  "path": "/beetroot-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-birthday-cake",
+  "path": "/birthday-cake?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-birthday-cake-classic",
+  "path": "/birthday-cake-classic?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-blue-cheese-gnocchi",
+  "path": "/blue-cheese-gnocchi?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-broccoli-salmon-quiche",
+  "path": "/broccoli-salmon-quiche?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-broccoli-stilton-soup",
+  "path": "/broccoli-stilton-soup?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-brownies",
+  "path": "/brownies?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-butternut-chilli",
+  "path": "/butternut-chilli?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-butternut-squash-pad-thai",
+  "path": "/butternut-squash-pad-thai?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-cheese-scones",
+  "path": "/cheese-scones?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-cheesy-cod",
+  "path": "/cheesy-cod?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-chicken-curry",
+  "path": "/chicken-curry?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-chilli-con-carne",
+  "path": "/chilli-con-carne?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-chinese-fusion",
+  "path": "/chinese-fusion?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-chipotle-burgers",
+  "path": "/chipotle-burgers?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-chipotle-mac-n-cheese",
+  "path": "/chipotle-mac-n-cheese?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-christmas-naanwidge",
+  "path": "/christmas-naanwidge?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-vegetable-crumble",
+  "path": "/vegetable-crumble?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-coconut-lime-dahl",
+  "path": "/coconut-lime-dahl?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-cod-lentils",
+  "path": "/cod-lentils?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-courgette-broccoli-pasta",
+  "path": "/courgette-broccoli-pasta?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-courgette-spinach-pasties",
+  "path": "/courgette-spinach-pasties?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-cranberry-relish",
+  "path": "/cranberry-relish?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-creamy-cauliflower-cheese",
+  "path": "/creamy-cauliflower-cheese?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-coffee-cake",
+  "path": "/coffee-cake?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-dahl",
+  "path": "/dahl?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-dukaten-cookies",
+  "path": "/dukaten-cookies?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-egg-tapas",
+  "path": "/egg-tapas?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-goan-king-prawn-balchao",
+  "path": "/goan-king-prawn-balchao?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-greek-wraps",
+  "path": "/greek-wraps?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-halloumi-wraps",
+  "path": "/halloumi-wraps?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-duck-wraps",
+  "path": "/duck-wraps?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-indian-patties",
+  "path": "/indian-patties?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-kashtouri",
+  "path": "/kashtouri?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-lamb-aubergine-daube",
+  "path": "/lamb-aubergine-daube?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-lemon-feta-pasta",
+  "path": "/lemon-feta-pasta?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-lentil-spinach-stew",
+  "path": "/lentil-spinach-stew?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-macaroni",
+  "path": "/macaroni?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-marmalade-ice-cream",
+  "path": "/marmalade-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-mascarpone-ice-cream",
+  "path": "/mascarpone-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-mead",
+  "path": "/mead?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-melty-mushroom-wellingtons",
+  "path": "/melty-mushroom-wellingtons?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-mexican-polenta-pie",
+  "path": "/mexican-polenta-pie?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-mushroom-quiche",
+  "path": "/mushroom-quiche?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-mushroom-risotto",
+  "path": "/mushroom-risotto?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-mushroom-stroganoff",
+  "path": "/mushroom-stroganoff?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-new-york-bagels",
+  "path": "/new-york-bagels?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-nut-roast",
+  "path": "/nut-roast?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-pancakes",
+  "path": "/pancakes?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-paneer-jalfrezi",
+  "path": "/paneer-jalfrezi?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-parsnip-and-ginger-soup",
+  "path": "/parsnip-and-ginger-soup?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-parsnip-and-lentil-lasagne",
+  "path": "/parsnip-and-lentil-lasagne?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-peanut-butter-biscuits",
+  "path": "/peanut-butter-biscuits?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-pistachio-ice-cream",
+  "path": "/pistachio-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-pomegranate-lime-ice-cream",
+  "path": "/pomegranate-lime-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-pomegranate-persian-halloumi",
+  "path": "/pomegranate-persian-halloumi?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-quesadillas",
+  "path": "/quesadillas?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-red-pepper-soup",
+  "path": "/red-pepper-soup?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-rhubarb-crumble",
+  "path": "/rhubarb-crumble?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-roast-beetroot-dahl",
+  "path": "/roast-beetroot-dahl?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-beetroot-risotto",
+  "path": "/beetroot-risotto?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-roasted-artichoke-pasta",
+  "path": "/roasted-artichoke-pasta?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-roasted-vegetable-lasagne",
+  "path": "/roasted-vegetable-lasagne?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-roasted-vegetable-moroccan-tagine",
+  "path": "/roasted-vegetable-moroccan-tagine?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-roasted-vegetable-tart",
+  "path": "/roasted-vegetable-tart?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-russian-mushroom-julienne",
+  "path": "/russian-mushroom-julienne?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-saag-paneer",
+  "path": "/saag-paneer?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-scotch-pancakes",
+  "path": "/scotch-pancakes?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-scrambled-eggs",
+  "path": "/scrambled-eggs?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-seafood-lasagne",
+  "path": "/seafood-lasagne?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-shawarma-wraps",
+  "path": "/shawarma-wraps?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-vegetarian-mexican",
+  "path": "/vegetarian-mexican?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-smoky-sweet-potato-chickpea-stew",
+  "path": "/smoky-sweet-potato-chickpea-stew?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-smoky-fish-curry",
+  "path": "/smoky-fish-curry?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-spanakopita",
+  "path": "/spanakopita?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-spiced-apple-winter-soup",
+  "path": "/spiced-apple-winter-soup?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-spicy-smoked-paprika-chorizo",
+  "path": "/spicy-smoked-paprika-chorizo?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-squash-gnocchi-gratin",
+  "path": "/squash-gnocchi-gratin?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-strawberry-basil-ice-cream",
+  "path": "/strawberry-basil-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-sweet-chilli-feta-pasta",
+  "path": "/sweet-chilli-feta-pasta?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-tangy-vegetable-pad-thai",
+  "path": "/tangy-vegetable-pad-thai?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-toad-in-the-hole",
+  "path": "/toad-in-the-hole?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-tofu-katsu-curry",
+  "path": "/tofu-katsu-curry?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-truffle-burgers",
+  "path": "/truffle-burgers?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-turmeric-ginger-ice-cream",
+  "path": "/turmeric-ginger-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-vegan-brownies",
+  "path": "/vegan-brownies?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-vegetable-primavera",
+  "path": "/vegetable-primavera?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-veggie-shepherds-pie",
+  "path": "/veggie-shepherds-pie?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r3-wasabi-ice-cream",
+  "path": "/wasabi-ice-cream?scale=3",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-baked-rigatoni-aubergine",
+  "path": "/baked-rigatoni-aubergine?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-salmon-olive-spaghetti",
+  "path": "/salmon-olive-spaghetti?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-baobab-ice-cream",
+  "path": "/baobab-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-basa-pathia",
+  "path": "/basa-pathia?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-beef-stroganoff",
+  "path": "/beef-stroganoff?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-beef-wraps",
+  "path": "/beef-wraps?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-beetroot-ice-cream",
+  "path": "/beetroot-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-birthday-cake",
+  "path": "/birthday-cake?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-birthday-cake-classic",
+  "path": "/birthday-cake-classic?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-blue-cheese-gnocchi",
+  "path": "/blue-cheese-gnocchi?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-broccoli-salmon-quiche",
+  "path": "/broccoli-salmon-quiche?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-broccoli-stilton-soup",
+  "path": "/broccoli-stilton-soup?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-brownies",
+  "path": "/brownies?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-butternut-chilli",
+  "path": "/butternut-chilli?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-butternut-squash-pad-thai",
+  "path": "/butternut-squash-pad-thai?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-cheese-scones",
+  "path": "/cheese-scones?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-cheesy-cod",
+  "path": "/cheesy-cod?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-chicken-curry",
+  "path": "/chicken-curry?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-chilli-con-carne",
+  "path": "/chilli-con-carne?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-chinese-fusion",
+  "path": "/chinese-fusion?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-chipotle-burgers",
+  "path": "/chipotle-burgers?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-chipotle-mac-n-cheese",
+  "path": "/chipotle-mac-n-cheese?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-christmas-naanwidge",
+  "path": "/christmas-naanwidge?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-vegetable-crumble",
+  "path": "/vegetable-crumble?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-coconut-lime-dahl",
+  "path": "/coconut-lime-dahl?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-cod-lentils",
+  "path": "/cod-lentils?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-courgette-broccoli-pasta",
+  "path": "/courgette-broccoli-pasta?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-courgette-spinach-pasties",
+  "path": "/courgette-spinach-pasties?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-cranberry-relish",
+  "path": "/cranberry-relish?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-creamy-cauliflower-cheese",
+  "path": "/creamy-cauliflower-cheese?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-coffee-cake",
+  "path": "/coffee-cake?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-dahl",
+  "path": "/dahl?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-dukaten-cookies",
+  "path": "/dukaten-cookies?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-egg-tapas",
+  "path": "/egg-tapas?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-goan-king-prawn-balchao",
+  "path": "/goan-king-prawn-balchao?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-greek-wraps",
+  "path": "/greek-wraps?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-halloumi-wraps",
+  "path": "/halloumi-wraps?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-duck-wraps",
+  "path": "/duck-wraps?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-indian-patties",
+  "path": "/indian-patties?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-kashtouri",
+  "path": "/kashtouri?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-lamb-aubergine-daube",
+  "path": "/lamb-aubergine-daube?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-lemon-feta-pasta",
+  "path": "/lemon-feta-pasta?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-lentil-spinach-stew",
+  "path": "/lentil-spinach-stew?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-macaroni",
+  "path": "/macaroni?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-marmalade-ice-cream",
+  "path": "/marmalade-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-mascarpone-ice-cream",
+  "path": "/mascarpone-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-mead",
+  "path": "/mead?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-melty-mushroom-wellingtons",
+  "path": "/melty-mushroom-wellingtons?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-mexican-polenta-pie",
+  "path": "/mexican-polenta-pie?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-mushroom-quiche",
+  "path": "/mushroom-quiche?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-mushroom-risotto",
+  "path": "/mushroom-risotto?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-mushroom-stroganoff",
+  "path": "/mushroom-stroganoff?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-new-york-bagels",
+  "path": "/new-york-bagels?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-nut-roast",
+  "path": "/nut-roast?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-pancakes",
+  "path": "/pancakes?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-paneer-jalfrezi",
+  "path": "/paneer-jalfrezi?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-parsnip-and-ginger-soup",
+  "path": "/parsnip-and-ginger-soup?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-parsnip-and-lentil-lasagne",
+  "path": "/parsnip-and-lentil-lasagne?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-peanut-butter-biscuits",
+  "path": "/peanut-butter-biscuits?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-pistachio-ice-cream",
+  "path": "/pistachio-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-pomegranate-lime-ice-cream",
+  "path": "/pomegranate-lime-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-pomegranate-persian-halloumi",
+  "path": "/pomegranate-persian-halloumi?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-quesadillas",
+  "path": "/quesadillas?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-red-pepper-soup",
+  "path": "/red-pepper-soup?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-rhubarb-crumble",
+  "path": "/rhubarb-crumble?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-roast-beetroot-dahl",
+  "path": "/roast-beetroot-dahl?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-beetroot-risotto",
+  "path": "/beetroot-risotto?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-roasted-artichoke-pasta",
+  "path": "/roasted-artichoke-pasta?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-roasted-vegetable-lasagne",
+  "path": "/roasted-vegetable-lasagne?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-roasted-vegetable-moroccan-tagine",
+  "path": "/roasted-vegetable-moroccan-tagine?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-roasted-vegetable-tart",
+  "path": "/roasted-vegetable-tart?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-russian-mushroom-julienne",
+  "path": "/russian-mushroom-julienne?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-saag-paneer",
+  "path": "/saag-paneer?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-scotch-pancakes",
+  "path": "/scotch-pancakes?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-scrambled-eggs",
+  "path": "/scrambled-eggs?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-seafood-lasagne",
+  "path": "/seafood-lasagne?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-shawarma-wraps",
+  "path": "/shawarma-wraps?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-vegetarian-mexican",
+  "path": "/vegetarian-mexican?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-smoky-sweet-potato-chickpea-stew",
+  "path": "/smoky-sweet-potato-chickpea-stew?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-smoky-fish-curry",
+  "path": "/smoky-fish-curry?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-spanakopita",
+  "path": "/spanakopita?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-spiced-apple-winter-soup",
+  "path": "/spiced-apple-winter-soup?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-spicy-smoked-paprika-chorizo",
+  "path": "/spicy-smoked-paprika-chorizo?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-squash-gnocchi-gratin",
+  "path": "/squash-gnocchi-gratin?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-strawberry-basil-ice-cream",
+  "path": "/strawberry-basil-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-sweet-chilli-feta-pasta",
+  "path": "/sweet-chilli-feta-pasta?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-tangy-vegetable-pad-thai",
+  "path": "/tangy-vegetable-pad-thai?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-toad-in-the-hole",
+  "path": "/toad-in-the-hole?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-tofu-katsu-curry",
+  "path": "/tofu-katsu-curry?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-truffle-burgers",
+  "path": "/truffle-burgers?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-turmeric-ginger-ice-cream",
+  "path": "/turmeric-ginger-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-vegan-brownies",
+  "path": "/vegan-brownies?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-vegetable-primavera",
+  "path": "/vegetable-primavera?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-veggie-shepherds-pie",
+  "path": "/veggie-shepherds-pie?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "r1.5-wasabi-ice-cream",
+  "path": "/wasabi-ice-cream?scale=1.5",
+  "method": "GET"
+ },
+ {
+  "name": "static-styles.css",
+  "path": "/static/styles.css",
+  "method": "GET"
+ },
+ {
+  "name": "static-copy.js",
+  "path": "/static/copy.js",
+  "method": "GET"
+ },
+ {
+  "name": "static-search.js",
+  "path": "/static/search.js",
+  "method": "GET"
+ },
+ {
+  "name": "static-wakelock.js",
+  "path": "/static/wakelock.js",
+  "method": "GET"
+ },
+ {
+  "name": "static-material.min.js",
+  "path": "/static/material.min.js",
+  "method": "GET"
+ },
+ {
+  "name": "static-contribute.js",
+  "path": "/static/contribute.js",
+  "method": "GET"
+ },
+ {
+  "name": "static-material.indigo-deep_purple.min.css",
+  "path": "/static/material.indigo-deep_purple.min.css",
+  "method": "GET"
+ },
+ {
+  "name": "static-versioned",
+  "path": "/static/styles.css?v=abc123",
+  "method": "GET"
+ },
+ {
+  "name": "static-missing",
+  "path": "/static/nope.js",
+  "method": "GET"
+ },
+ {
+  "name": "static-dir",
+  "path": "/static/",
+  "method": "GET"
+ },
+ {
+  "name": "static-root",
+  "path": "/static",
+  "method": "GET"
+ },
+ {
+  "name": "static-traversal",
+  "path": "/static/../app.py",
+  "method": "GET"
+ },
+ {
+  "name": "static-nested",
+  "path": "/static/sub/dir/file.js",
+  "method": "GET"
+ },
+ {
+  "name": "head-static",
+  "path": "/static/styles.css",
+  "method": "HEAD"
+ },
+ {
+  "name": "head-home",
+  "path": "/",
+  "method": "HEAD"
+ },
+ {
+  "name": "head-recipe",
+  "path": "/chicken-curry",
+  "method": "HEAD"
+ },
+ {
+  "name": "head-missing",
+  "path": "/does-not-exist",
+  "method": "HEAD"
+ },
+ {
+  "name": "head-manifest",
+  "path": "/manifest.json",
+  "method": "HEAD"
+ },
+ {
+  "name": "post-contribute",
+  "path": "/contribute",
+  "method": "POST",
+  "headers": {
+   "Content-Type": "application/x-www-form-urlencoded"
+  },
+  "body": "passcode=p&name=Soup&method=Simmer."
+ },
+ {
+  "name": "post-empty-contribute",
+  "path": "/contribute",
+  "method": "POST",
+  "headers": {
+   "Content-Type": "application/x-www-form-urlencoded"
+  },
+  "body": ""
+ },
+ {
+  "name": "post-contribute-empty-name",
+  "path": "/contribute",
+  "method": "POST",
+  "headers": {
+   "Content-Type": "application/x-www-form-urlencoded"
+  },
+  "body": "passcode=p&name=&method="
+ },
+ {
+  "name": "put-contribute",
+  "path": "/contribute",
+  "method": "PUT"
+ },
+ {
+  "name": "delete-contribute",
+  "path": "/contribute",
+  "method": "DELETE"
+ },
+ {
+  "name": "patch-home",
+  "path": "/",
+  "method": "PATCH"
+ },
+ {
+  "name": "options-home",
+  "path": "/",
+  "method": "OPTIONS"
+ },
+ {
+  "name": "trailing-contribute",
+  "path": "/contribute/",
+  "method": "GET"
+ },
+ {
+  "name": "trailing-recipe",
+  "path": "/chicken-curry/",
+  "method": "GET"
+ },
+ {
+  "name": "trailing-manifest",
+  "path": "/manifest.json/",
+  "method": "GET"
+ },
+ {
+  "name": "double-slash",
+  "path": "//chicken-curry",
+  "method": "GET"
+ },
+ {
+  "name": "percent-encoded",
+  "path": "/chicken%2Dcurry",
+  "method": "GET"
+ },
+ {
+  "name": "dot-segment",
+  "path": "/./chicken-curry",
+  "method": "GET"
+ },
+ {
+  "name": "static-if-none-match",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-None-Match": "\"1790891551.0-4074-2129665481\""
+  }
+ },
+ {
+  "name": "static-if-none-match-stale",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-None-Match": "\"deadbeef\""
+  }
+ },
+ {
+  "name": "static-if-modified-since",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Modified-Since": "Thu, 01 Oct 2026 21:52:31 GMT"
+  }
+ },
+ {
+  "name": "static-if-modified-since-old",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Modified-Since": "Thu, 01 Jan 1970 00:00:00 GMT"
+  }
+ },
+ {
+  "name": "static-range-0-9",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "Range": "bytes=0-9"
+  }
+ },
+ {
+  "name": "static-range-open",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "Range": "bytes=10-"
+  }
+ },
+ {
+  "name": "static-range-suffix",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "Range": "bytes=-5"
+  }
+ },
+ {
+  "name": "static-range-invalid",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "Range": "bytes=999999-1000000"
+  }
+ },
+ {
+  "name": "static-range-multi",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "Range": "bytes=0-1,4-5"
+  }
+ },
+ {
+  "name": "static-if-range",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "Range": "bytes=0-9",
+   "If-Range": "\"1790891551.0-4074-2129665481\""
+  }
+ },
+ {
+  "name": "static-if-match",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Match": "\"1790891551.0-4074-2129665481\""
+  }
+ },
+ {
+  "name": "static-if-match-unquoted",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Match": "1790891551.0-4074-2129665481"
+  }
+ },
+ {
+  "name": "static-if-match-stale",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Match": "\"deadbeef\""
+  }
+ },
+ {
+  "name": "static-if-match-weak",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Match": "W/\"deadbeef\""
+  }
+ },
+ {
+  "name": "static-if-match-star",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Match": "*"
+  }
+ },
+ {
+  "name": "static-if-match-garbage",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Match": "garbage!!"
+  }
+ },
+ {
+  "name": "static-if-none-match-star",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-None-Match": "*"
+  }
+ },
+ {
+  "name": "static-if-none-match-wins-over-if-match",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-None-Match": "\"1790891551.0-4074-2129665481\"",
+   "If-Match": "\"deadbeef\""
+  }
+ },
+ {
+  "name": "static-if-unmodified-since-old",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Unmodified-Since": "Thu, 01 Jan 1970 00:00:00 GMT"
+  }
+ },
+ {
+  "name": "static-if-unmodified-since-new",
+  "path": "/static/styles.css",
+  "method": "GET",
+  "headers": {
+   "If-Unmodified-Since": "Thu, 01 Jan 2100 00:00:00 GMT"
+  }
+ },
+ {
+  "name": "origin-home",
+  "path": "/",
+  "method": "GET",
+  "headers": {
+   "Origin": "http://example.com"
+  }
+ },
+ {
+  "name": "origin-contribute",
+  "path": "/contribute",
+  "method": "GET",
+  "headers": {
+   "Origin": "http://example.com"
+  }
+ },
+ {
+  "name": "accept-json",
+  "path": "/recipes/",
+  "method": "GET",
+  "headers": {
+   "Accept": "application/json"
+  }
+ },
+ {
+  "name": "unknown-header",
+  "path": "/chicken-curry",
+  "method": "GET",
+  "headers": {
+   "X-Nonsense": "1"
+  }
+ },
+ {
+  "name": "random-0",
+  "path": "/random",
+  "method": "GET"
+ },
+ {
+  "name": "random-1",
+  "path": "/random",
+  "method": "GET"
+ },
+ {
+  "name": "random-2",
+  "path": "/random",
+  "method": "GET"
+ },
+ {
+  "name": "random-3",
+  "path": "/random",
+  "method": "GET"
+ },
+ {
+  "name": "random-4",
+  "path": "/random",
+  "method": "GET"
+ }
+]

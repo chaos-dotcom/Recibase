@@ -1,0 +1,278 @@
+body.mdl-base {
+  background-color: white !important;
+}
+
+.mdl-layout {
+    background: none !important;
+}
+
+main > section {
+  max-width: 1080px;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+.random-recipe {
+  width: 24px;
+  position: absolute;
+  top: 18px;
+  right: 25px;
+}
+
+.description {
+  margin-top: 16px;
+}
+
+.mdl-layout-title {
+  display: inline;
+}
+
+.mdl-layout-title > a, .random-recipe a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.mdl-layout__drawer-button > i {
+  margin-top: 4px;
+}
+
+.mdl-navigation.mdl-navigation .mdl-navigation__link {
+  padding: 10px 40px;
+}
+
+.mdl-navigation.mdl-navigation {
+  padding-bottom: 25px;
+}
+
+.mdl-navigation__link.is-current {
+  background-color: #e0e0e0;
+}
+
+#searchForm {
+  padding: 0px 16px;
+}
+
+.mdl-layout__drawer .mdl-navigation {
+  padding-top: 0px;
+}
+
+#ingredients-heading {
+  margin-bottom: 12px;
+}
+
+#ingredient-tools {
+  margin-left: 1.5rem;
+  display: flow-root;
+}
+
+#ingredient-tools #copy {
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+#ingredient-tools #copy.is-copied {
+  animation: copy-pulse 1s ease-out;
+}
+
+@keyframes copy-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(97, 97, 97, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(97, 97, 97, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(97, 97, 97, 0);
+  }
+}
+
+#ingredient-tools span {
+  float: left;
+  margin: 2px;
+}
+
+#ingredient-tools span.scaler {
+  margin-top: 4px;
+}
+
+#ingredient-tools .trailing-icons span {
+  margin: 2px 0px;
+}
+
+#ingredient-tools a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+#ingredient-tools .scaler a {
+  border: 2px solid rgb(97, 97, 97);
+  border-radius: 4px;
+  padding: 2px;
+  font-weight: bold;
+}
+
+#ingredient-tools .scaler a.is-current {
+  background: rgb(97, 97, 97);
+  color: white;
+}
+
+.wakelock-unsupported {
+  display: none;
+}
+
+#wakelock:hover {
+  cursor: pointer;
+}
+
+div#ingredients span {
+  padding: 0.2em;
+}
+
+div#ingredients span.scaled {
+  background-color: rgba(255, 255, 0, 0.2);
+}
+
+footer {
+  margin-top: .5rem;
+  text-align: center;
+}
+
+footer a:not(:hover) {
+  color: grey;
+}
+
+.mdl-navigation__link.add-recipe {
+  font-weight: 500;
+}
+
+.form-error {
+  background: #fdecea;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+
+.contribute-form .field {
+  display: block;
+  margin-top: 1rem;
+}
+
+.contribute-form .field span,
+.contribute-form legend,
+.tag-group h3 {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.tag-group h3 {
+  font-size: 0.95rem;
+  margin-top: 0.75rem;
+}
+
+.contribute-form input[type="text"],
+.contribute-form input[type="password"],
+.contribute-form select,
+.contribute-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 0.6rem;
+}
+
+.contribute-form fieldset {
+  border: 0;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.tag-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.diet-flags {
+  margin-top: 0.5rem;
+}
+
+.tag-options label {
+  font-weight: normal;
+}
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.25rem 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.ingredient-row .field {
+  margin-top: 0.25rem;
+}
+
+.contribute-form button {
+  font: inherit;
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  border: 1px solid #3f51b5;
+  background: white;
+  color: #3f51b5;
+}
+
+.contribute-form button[type="submit"] {
+  background: #3f51b5;
+  color: white;
+}
+
+.contribute-form button:disabled {
+  opacity: 0.6;
+}
+
+.draft-note {
+  margin: 1.25rem 0 0;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.row-actions button {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .row-actions button {
+    padding-left: 0.55rem;
+    padding-right: 0.55rem;
+  }
+}
+
+@media (min-width: 800px) {
+  .ingredient-row {
+    grid-template-columns: 2fr 1fr 1fr 1.5fr auto;
+    align-items: end;
+  }
+
+  .ingredient-row button {
+    margin-top: 0;
+  }
+}
+
+@media (min-width: 1025px) {
+  section.mdl-grid {
+    padding-left: 20px;
+  }
+}

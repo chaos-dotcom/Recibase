@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>{{ pageName }} • Recibase</title>
+
+  <meta name="author" content="The Silverwood Institute">
+
+  {% if pageDescription is defined and pageDescription %}
+    <meta name="description" content="{{ pageDescription }}">
+    <meta property="og:description" content="{{ pageDescription }}">
+  {% else %}
+    <meta name="description" content="Kit and Alex's curated recipe collection. Mostly vegetarian, all delicious">
+    <meta property="og:description" content="Kit and Alex's curated recipe collection. Mostly vegetarian, all delicious">
+  {% endif %}
+
+  {% if imageSrc is defined and imageSrc %}
+    <meta name="twitter:card" content="summary_large_image">
+  {% else %}
+    <meta name="twitter:card" content="summary">
+  {% endif %}
+
+  <meta name="twitter:site" content="@kittsville">
+  <meta property="og:title" content="{{ pageName }}">
+  <meta property="og:site_name" content="Recibase">
+  <meta property="og:type" content="website">
+
+  {% if pagePath is defined and pagePath %}
+    <meta property="og:url" content="https://reciba.se/{{ pagePath }}">
+  {% endif %}
+
+  <link rel="stylesheet" href="/static/material.indigo-deep_purple.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script defer src="/static/material.min.js"></script>
+  <link rel="stylesheet" href="/static/styles.css?v={{ config.frontendVersion }}" />
+  <script defer src="/static/search.js?v={{ config.frontendVersion }}"></script>
+  <script defer src="/static/copy.js?v={{ config.frontendVersion }}"></script>
+  <script defer src="/static/wakelock.js?v={{ config.frontendVersion }}"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  {% if imageSrc is defined and imageSrc %}
+    <meta property="og:image" content="{{ imageSrc }}">
+  {% endif %}
+  {% if imageWidth is defined and imageWidth %}
+    <meta property="og:image:width" content="{{ imageWidth }}">
+  {% endif %}
+  {% if imageHeight is defined and imageHeight %}
+    <meta property="og:image:height" content="{{ imageHeight }}">
+  {% endif %}
+</head>
+
+<body class="mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout-title">
+      <a href="/">Recibase</a>
+    </span>
+    <span class="material-icons random-recipe">
+      <a href="/random">
+        shuffle
+      </a>
+    </span>
+    <form id="searchForm">
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" type="text" id="search" autocomplete="off" disabled>
+        <label class="mdl-textfield__label" for="search">Search...</label>
+      </div>
+    </form>
+    <nav class="mdl-navigation">
+      {% set current_recipe_url = recipeUrl|default('') %}
+      <a class="mdl-navigation__link add-recipe{{ ' is-current' if current_recipe_url == 'contribute' else '' }}" href="/contribute">Add a recipe</a>
+      {% for listItem in fetchRecipeList() %}
+        <a class="mdl-navigation__link {{ 'is-current' if listItem['permalink'] == current_recipe_url }}" href="{{ listItem['permalink'] }}">{{ listItem['name'] }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+  <main class="mdl-layout__content">
+    <section class="section--center mdl-grid">
+      <div class="mdl-cell mdl-cell--12-col">
+        {% block content %}{% endblock %}
+      </div>
+    </section>
+  </main>
+  <footer>
+    v<a href="https://github.com/The-Silverwood-Institute/Recibase/commit/{{ fetchApiVersion() }}">{{ fetchApiVersion()[:6] }}</a>.<a href="https://github.com/The-Silverwood-Institute/Frontend/commit/{{ config.frontendVersion }}">{{ config.frontendVersion[:6] }}</a>
+    | <a href="https://github.com/The-Silverwood-Institute/Recibase">Source Code</a>
+    | <a href="https://c.reciba.se/">Meal Planner</a>
+  </footer>
+</div>
+</body>
+</html>

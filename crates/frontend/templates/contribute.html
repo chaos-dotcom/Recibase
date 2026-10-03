@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+{% set pageName = 'Add a recipe' %}
+{% set recipeUrl = 'contribute' %}
+{% block content %}
+<h2>Add a recipe</h2>
+
+{% if pr_url %}
+  <p class="form-success">Pull request opened. <a href="{{ pr_url }}">Review it on GitHub</a>. It is not published until that request is merged.</p>
+  <p><a href="/contribute">Add another recipe</a></p>
+  <script>document.cookie = "recipe_draft=; Max-Age=0; Path=/contribute; SameSite=Lax";</script>
+{% else %}
+  <p>This opens a pull request against Recibase. The recipe stays unpublished until that request is merged.</p>
+  {% if error %}
+    <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
+  <form class="contribute-form" method="post" action="/contribute" accept-charset="UTF-8">
+    <label class="field">
+      <span>Passcode</span>
+      <input type="password" name="passcode" autocomplete="current-password" required value="{{ form.passcode }}">
+    </label>
+
+    <label class="field">
+      <span>Name</span>
+      <input type="text" name="name" required autocapitalize="words" value="{{ form.name }}">
+    </label>
+
+    <label class="field">
+      <span>Source</span>
+      <input type="text" name="source" autocapitalize="sentences" value="{{ form.source }}" placeholder="Who or what this comes from">
+    </label>
+
+    <label class="field">
+      <span>Description</span>
+      <textarea name="description" rows="3">{{ form.description }}</textarea>
+    </label>
+
+    <fieldset>
+      <legend>Tags</legend>
+      {% for group_name, tags in tag_groups %}
+        <div class="tag-group">
+          <h3>{{ group_name }}</h3>
+          {% if group_name == "Diet" %}
+            <select name="tags">
+              <option value="">None</option>
+              {% for value, label in tags %}
+                <option value="{{ value }}"{% if value in form.tags %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <div class="tag-options diet-flags">
+              {% for value, label in diet_checkboxes %}
+                <label>
+                  <input type="checkbox" name="tags" value="{{ value }}"{% if value in form.tags %} checked{% endif %}>
+                  {{ label }}
+                </label>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="tag-options">
+              {% for value, label in tags %}
+                <label>
+                  <input type="checkbox" name="tags" value="{{ value }}"{% if value in form.tags %} checked{% endif %}>
+                  {{ label }}
+                </label>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </fieldset>
+
+    <fieldset>
+      <legend>Ingredients</legend>
+      <div id="ingredient-rows">
+        {% for row in form.ingredients %}
+          <div class="ingredient-row">
+            <label class="field">
+              <span>Name</span>
+              <input type="text" name="ingredient_name" autocapitalize="words" value="{{ row.name }}">
+            </label>
+            <label class="field">
+              <span>Quantity (optional)</span>
+              <input type="text" name="ingredient_quantity" value="{{ row.quantity }}">
+            </label>
+            <label class="field">
+              <span>Prep (optional)</span>
+              <input type="text" name="ingredient_prep" value="{{ row.prep }}">
+            </label>
+            <label class="field">
+              <span>Notes (optional)</span>
+              <input type="text" name="ingredient_notes" value="{{ row.notes }}">
+            </label>
+            <button type="button" data-remove-ingredient>Remove</button>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="add-ingredient">Add ingredient</button>
+    </fieldset>
+
+    <label class="field">
+      <span>Method</span>
+      <textarea name="method" rows="8" required placeholder="One step per line">{{ form.method }}</textarea>
+    </label>
+
+    <label class="field">
+      <span>Notes</span>
+      <textarea name="notes" rows="4" placeholder="One note per line">{{ form.notes }}</textarea>
+    </label>
+
+    <div
+      class="cf-turnstile"
+      data-sitekey="0x4AAAAAAFFMifPD-G1JDoui"
+      data-action="contribute"
+      data-theme="light"
+    ></div>
+
+    <p class="draft-note">Drafts saved for 7 days using a cookie, or until submitted.</p>
+    <div class="row-actions">
+      <button type="submit">Open pull request</button>
+      <button type="button" id="save-draft">Save Draft</button>
+      <button type="button" id="delete-draft" hidden>Delete Draft</button>
+    </div>
+  </form>
+  <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer
+  ></script>
+  <script src="/static/contribute.js?v={{ config.frontendVersion }}"></script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% set pageName = recipe['name'] %}
+{% set pageDescription = recipe['description'] %}
+{% set pagePath = recipe['permalink'] %}
+{% set recipeUrl = recipe['permalink'] %}
+{% if recipe['image'] %}
+  {% set imageSrc = recipe['image']['src'] %}
+  {% set imageWidth = recipe['image']['width'] %}
+  {% set imageHeight = recipe['image']['height'] %}
+{% endif %}
+
+{% block content %}
+<h2>{{ recipe['name'] }}</h2>
+{% if recipe['tagline'] %}
+  <em>{{ recipe['tagline'] }}</em>
+{% endif %}
+{% if recipe['description'] %}
+  <p class="description">{{ recipe['description'] }}</p>
+{% endif %}
+<h3 id="ingredients-heading">Ingredients</h3>
+<div id="ingredient-tools">
+  <span id="copy" class="material-icons" title="Copy ingredients to clipboard" data-ingredients="{{ copy_ingredients }}">content_copy</span>
+  {% for scale in [(0.5, "&frac12;"), (1, "1X"), (2, "2X"), (3, "3X")] %}
+    {% set itemClass = 'is-current' if scale[0] == scale_factor else '' %}
+    <span class="scaler" title="Scale by a factor of {{ scale[0] }}">
+      <a href="?scale={{ scale[0] }}" class="{{ itemClass }}">{{ scale[1]|safe }}</a>
+    </span>
+  {% endfor %}
+  <div class="trailing-icons">
+    <a href="{{ recipe['edit'] }}">
+      <span class="material-icons" title="Edit recipe on GitHub">edit</span>
+    </a>
+    <span id="wakelock" class="material-icons wakelock-unsupported" title="Prevent screen lock">visibility</span>
+  </div>
+</div>
+<div id="ingredients">
+{% for ingredients_block in recipe['ingredients_blocks'] %}
+  <div class="ingredients-block">
+    {% if ingredients_block['name'] %}
+      <h4>{{ ingredients_block['name'] }}</h4>
+    {% endif %}
+    <ul>
+      {% for ingredient in ingredients_block['ingredients'] %}
+        {% set quantity = (": " + ingredient['quantity']) if ingredient['quantity'] else "" %}
+        {% set prep = (", " + ingredient['prep']) if ingredient['prep'] else "" %}
+        {% set notes = (" (" + ingredient['notes'] + ")") if ingredient['notes'] else "" %}
+        {% set ingredientText = ingredient['name'] + quantity + prep + notes %}
+        {% set is_scaled = 'scaled' if ingredient.get('scaled') else '' %}
+      <li><span class="ingredient {{ is_scaled }}">{{ ingredientText }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endfor %}
+</div>
+<h3>Method</h3>
+<ol>
+{% for step in recipe['method'] %}
+  <li>{{ step }}</li>
+{% endfor %}
+</ol>
+{% if combined_notes|length > 0 %}
+  <h3>Notes</h3>
+  {% if combined_notes|length == 1 %}
+    <p>{{ combined_notes[0] }}</p>
+  {% else %}
+    <ul>
+    {% for note in combined_notes %}
+      <li>{{ note }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endif %}
+{% if 'AI' in recipe['tags'] %}
+  <em>⚠️ Carefully review this recipe as AI was used to generate it</em>
+{% endif %}
+{% if recipe['source'] and recipe['source'].startswith('http') %}
+  <em><a href="{{ recipe['source'] }}" rel="nofollow">Recipe Source</a></em>
+{% elif recipe['source'] %}
+  <em>Recipe Source: {{ recipe['source'] }}</em>
+{% endif %}
+{% endblock %}

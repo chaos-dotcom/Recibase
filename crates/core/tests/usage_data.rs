@@ -176,14 +176,22 @@ fn fixture_entries() -> Vec<MealLogEntry> {
 /// The capture directory produced by the Scala server. Missing means the
 /// capture has not been made in this checkout, so those assertions are skipped.
 fn capture_dir() -> Option<std::path::PathBuf> {
-    let dir = std::env::var("RECIBASE_CAPTURE_DIR")
-        .unwrap_or_else(|_| "/Users/chaos/recibase-work/capture-scala-csv".to_string());
-    let path = std::path::Path::new(&dir);
-    if path.join("011_meals.raw").is_file() {
-        Some(path.to_path_buf())
-    } else {
-        None
+    if let Ok(dir) = std::env::var("RECIBASE_CAPTURE_DIR") {
+        let path = std::path::PathBuf::from(dir);
+        return path.join("011_meals.raw").is_file().then_some(path);
     }
+    let repo = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(std::path::Path::parent)
+        .expect("crates/core/ lives two levels below the repository root");
+    [
+        // Where the captures are made, if they are still there, then the
+        // repository's own copy of them.
+        std::path::PathBuf::from("/Users/chaos/recibase-work/capture-scala-csv"),
+        repo.join("tools").join("harness").join("capture-scala-csv"),
+    ]
+    .into_iter()
+    .find(|path| path.join("011_meals.raw").is_file())
 }
 
 #[test]

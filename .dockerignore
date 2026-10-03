@@ -1,4 +1,5 @@
 target/
+tools/harness/frontend/capture-*
 tools/harness/capture-*/
 tools/harness/capture-*
 .git/

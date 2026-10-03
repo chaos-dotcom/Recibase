@@ -48,10 +48,19 @@ fn scala_recipes_dir() -> PathBuf {
 /// The capture directories to check, in order. `capture-scala` is required.
 fn capture_dirs() -> Vec<PathBuf> {
     let work = work_dir();
+    let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .expect("crates/core/ lives two levels below the repository root")
+        .to_path_buf();
     let mut dirs = Vec::new();
     for name in ["capture-scala", "capture-scala-csv"] {
-        let dir = work.join(name);
-        assert!(dir.is_dir(), "missing capture directory {}", dir.display());
+        // The captures are made in the work directory, but the repository keeps
+        // its own copy of them under tools/harness/.
+        let dir = [work.join(name), repo.join("tools").join("harness").join(name)]
+            .into_iter()
+            .find(|dir| dir.is_dir())
+            .unwrap_or_else(|| panic!("missing capture directory {}", work.join(name).display()));
         dirs.push(dir);
     }
     dirs

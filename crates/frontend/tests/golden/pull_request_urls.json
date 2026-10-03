@@ -1,0 +1,58 @@
+[
+ {
+  "payload": "{\"url\": \"https://github.com/The-Silverwood-Institute/Recibase/pull/12\"}",
+  "url": "https://github.com/The-Silverwood-Institute/Recibase/pull/12"
+ },
+ {
+  "payload": "{\"url\": \"http://github.com/x\"}",
+  "url": null
+ },
+ {
+  "payload": "{\"url\": \"https://github.com/\"}",
+  "url": "https://github.com/"
+ },
+ {
+  "payload": "{\"url\": \"javascript:alert(1)\"}",
+  "url": null
+ },
+ {
+  "payload": "{\"url\": \"https://github.com/a b\"}",
+  "url": null
+ },
+ {
+  "payload": "{\"url\": \"\"}",
+  "url": null
+ },
+ {
+  "payload": "{\"url\": null}",
+  "url": null
+ },
+ {
+  "payload": "{\"url\": 5}",
+  "url": null
+ },
+ {
+  "payload": "{}",
+  "url": null
+ },
+ {
+  "payload": "\"not a dict\"",
+  "url": null
+ },
+ {
+  "payload": "[]",
+  "url": null
+ },
+ {
+  "payload": "null",
+  "url": null
+ },
+ {
+  "payload": "{\"url\": \"https://github.com/x\\t\"}",
+  "url": null
+ },
+ {
+  "payload": "{\"url\": \" https://github.com/x\"}",
+  "url": null
+ }
+]

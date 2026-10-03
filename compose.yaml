@@ -1,11 +1,13 @@
-# Compose file for the Recibase Rust backend.
+# Compose file for the Recibase Rust service: the API and the frontend.
 #
 #   cp .env.example .env          # optional: configure usage data / submissions
 #   docker compose up --build     # start
 #   curl localhost:8081/health    # -> ok
+#   open http://localhost:8080/   # the website
 #
-# The build context is this directory (where Cargo.toml lives). See the
-# Dockerfile for the image targets.
+# The build context for both is this directory (where Cargo.toml lives). See the
+# Dockerfile for the API's image targets and crates/frontend/Dockerfile for the
+# frontend's.
 services:
   recibase:
     build:
@@ -28,4 +30,24 @@ services:
     # To serve a local meal log, mount it and set MEAL_LOG_CSV_URL in .env:
     # volumes:
     #   - ./meal-log.csv:/data/meal-log.csv:ro
+    restart: unless-stopped
+
+  # The website. It proxies the API above, and tells the browser that API's URL
+  # in /manifest.json, so `BACKEND_URL` must be reachable from the browser and
+  # not just from inside the compose network.
+  frontend:
+    build:
+      context: .
+      dockerfile: crates/frontend/Dockerfile
+      # `runtime` is the glibc slim image and carries the image HEALTHCHECK.
+      # Swap to `distroless` for the smallest image; it has no shell, so it has
+      # no HEALTHCHECK.
+      target: runtime
+    image: recibase-frontend:slim
+    ports:
+      - "8080:8080"
+    environment:
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}
+    depends_on:
+      - recibase
     restart: unless-stopped

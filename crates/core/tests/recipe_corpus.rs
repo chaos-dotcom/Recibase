@@ -23,6 +23,13 @@ fn capture_dir() -> PathBuf {
             .join("..")
             .join("..")
             .join("capture-scala"),
+        // The repository keeps its own copy of the captures under tools/.
+        manifest
+            .join("..")
+            .join("..")
+            .join("tools")
+            .join("harness")
+            .join("capture-scala"),
         PathBuf::from("/Users/chaos/recibase-work/capture-scala"),
     ];
     candidates

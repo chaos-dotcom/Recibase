@@ -1,0 +1,1062 @@
+[
+ {
+  "quantity": "1",
+  "kind": "SimpleQuantity",
+  "str": "1"
+ },
+ {
+  "quantity": "1 1/2 tsp",
+  "kind": "MixedFractionQuantity",
+  "str": "1 1/2 tsp"
+ },
+ {
+  "quantity": "1 3 inch stem crush into rough segments",
+  "kind": "DescriptiveQuantity",
+  "str": "1 3 inch stem crush into rough segments"
+ },
+ {
+  "quantity": "1 400g tin",
+  "kind": "CompoundQuantity",
+  "str": "1 400g tin"
+ },
+ {
+  "quantity": "1 400ml tin",
+  "kind": "CompoundQuantity",
+  "str": "1 400ml tin"
+ },
+ {
+  "quantity": "1 410g tin",
+  "kind": "CompoundQuantity",
+  "str": "1 410g tin"
+ },
+ {
+  "quantity": "1 80g tin",
+  "kind": "CompoundQuantity",
+  "str": "1 80g tin"
+ },
+ {
+  "quantity": "1 Tin",
+  "kind": "SimpleQuantity",
+  "str": "1 Tin"
+ },
+ {
+  "quantity": "1 block",
+  "kind": "SimpleQuantity",
+  "str": "1 block"
+ },
+ {
+  "quantity": "1 block (225g)",
+  "kind": "ParentheticalQuantity",
+  "str": "1 block (225g)"
+ },
+ {
+  "quantity": "1 block, approx. 200g",
+  "kind": "ParentheticalQuantity",
+  "str": "1 block, approx 200g"
+ },
+ {
+  "quantity": "1 clove",
+  "kind": "SimpleQuantity",
+  "str": "1 clove"
+ },
+ {
+  "quantity": "1 cloves",
+  "kind": "SimpleQuantity",
+  "str": "1 cloves"
+ },
+ {
+  "quantity": "1 cm piece",
+  "kind": "LengthQuantity",
+  "str": "1 cm piece"
+ },
+ {
+  "quantity": "1 cup",
+  "kind": "SimpleQuantity",
+  "str": "1 cup"
+ },
+ {
+  "quantity": "1 head",
+  "kind": "SimpleQuantity",
+  "str": "1 head"
+ },
+ {
+  "quantity": "1 heaped tablespoon",
+  "kind": "DescriptiveQuantity",
+  "str": "1 heaped tablespoon"
+ },
+ {
+  "quantity": "1 knob",
+  "kind": "SimpleQuantity",
+  "str": "1 knob"
+ },
+ {
+  "quantity": "1 large",
+  "kind": "SimpleQuantity",
+  "str": "1 large"
+ },
+ {
+  "quantity": "1 large bag minimum",
+  "kind": "DescriptiveQuantity",
+  "str": "1 large bag minimum"
+ },
+ {
+  "quantity": "1 large clove",
+  "kind": "DescriptiveQuantity",
+  "str": "1 large clove"
+ },
+ {
+  "quantity": "1 large tin",
+  "kind": "DescriptiveQuantity",
+  "str": "1 large tin"
+ },
+ {
+  "quantity": "1 medium",
+  "kind": "SimpleQuantity",
+  "str": "1 medium"
+ },
+ {
+  "quantity": "1 onion",
+  "kind": "SimpleQuantity",
+  "str": "1 onion"
+ },
+ {
+  "quantity": "1 per person",
+  "kind": "DescriptiveQuantity",
+  "str": "1 per person"
+ },
+ {
+  "quantity": "1 sheet",
+  "kind": "SimpleQuantity",
+  "str": "1 sheet"
+ },
+ {
+  "quantity": "1 sprig",
+  "kind": "SimpleQuantity",
+  "str": "1 sprig"
+ },
+ {
+  "quantity": "1 stick",
+  "kind": "SimpleQuantity",
+  "str": "1 stick"
+ },
+ {
+  "quantity": "1 tbsp",
+  "kind": "SimpleQuantity",
+  "str": "1 tbsp"
+ },
+ {
+  "quantity": "1 tin",
+  "kind": "SimpleQuantity",
+  "str": "1 tin"
+ },
+ {
+  "quantity": "1 tin (400g)",
+  "kind": "ParentheticalQuantity",
+  "str": "1 tin (400g)"
+ },
+ {
+  "quantity": "1 top",
+  "kind": "SimpleQuantity",
+  "str": "1 top"
+ },
+ {
+  "quantity": "1 tsp",
+  "kind": "SimpleQuantity",
+  "str": "1 tsp"
+ },
+ {
+  "quantity": "1-2",
+  "kind": "RangeQuantity",
+  "str": "1-2"
+ },
+ {
+  "quantity": "1-2 tbsp",
+  "kind": "RangeQuantity",
+  "str": "1-2 tbsp"
+ },
+ {
+  "quantity": "1-2 tsp",
+  "kind": "RangeQuantity",
+  "str": "1-2 tsp"
+ },
+ {
+  "quantity": "1/2",
+  "kind": "FractionQuantity",
+  "str": "1/2"
+ },
+ {
+  "quantity": "1/2 pint (or more)",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "1/2 tbsp",
+  "kind": "FractionQuantity",
+  "str": "1/2 tbsp"
+ },
+ {
+  "quantity": "1/2 tsp",
+  "kind": "FractionQuantity",
+  "str": "1/2 tsp"
+ },
+ {
+  "quantity": "1/3 tsp",
+  "kind": "FractionQuantity",
+  "str": "1/3 tsp"
+ },
+ {
+  "quantity": "1/4",
+  "kind": "FractionQuantity",
+  "str": "1/4"
+ },
+ {
+  "quantity": "1/4 tsp",
+  "kind": "FractionQuantity",
+  "str": "1/4 tsp"
+ },
+ {
+  "quantity": "10-20CL",
+  "kind": "RangeQuantity",
+  "str": "10-20CL"
+ },
+ {
+  "quantity": "100g",
+  "kind": "SimpleQuantity",
+  "str": "100g"
+ },
+ {
+  "quantity": "100ml",
+  "kind": "SimpleQuantity",
+  "str": "100ml"
+ },
+ {
+  "quantity": "105g",
+  "kind": "SimpleQuantity",
+  "str": "105g"
+ },
+ {
+  "quantity": "10g",
+  "kind": "SimpleQuantity",
+  "str": "10g"
+ },
+ {
+  "quantity": "12",
+  "kind": "SimpleQuantity",
+  "str": "12"
+ },
+ {
+  "quantity": "12.5g",
+  "kind": "SimpleQuantity",
+  "str": "12.50g"
+ },
+ {
+  "quantity": "120g",
+  "kind": "SimpleQuantity",
+  "str": "120g"
+ },
+ {
+  "quantity": "120ml",
+  "kind": "SimpleQuantity",
+  "str": "120ml"
+ },
+ {
+  "quantity": "125g",
+  "kind": "SimpleQuantity",
+  "str": "125g"
+ },
+ {
+  "quantity": "125ml",
+  "kind": "SimpleQuantity",
+  "str": "125ml"
+ },
+ {
+  "quantity": "130g",
+  "kind": "SimpleQuantity",
+  "str": "130g"
+ },
+ {
+  "quantity": "136g",
+  "kind": "SimpleQuantity",
+  "str": "136g"
+ },
+ {
+  "quantity": "140g",
+  "kind": "SimpleQuantity",
+  "str": "140g"
+ },
+ {
+  "quantity": "150g",
+  "kind": "SimpleQuantity",
+  "str": "150g"
+ },
+ {
+  "quantity": "150ml",
+  "kind": "SimpleQuantity",
+  "str": "150ml"
+ },
+ {
+  "quantity": "15g",
+  "kind": "SimpleQuantity",
+  "str": "15g"
+ },
+ {
+  "quantity": "15ml",
+  "kind": "SimpleQuantity",
+  "str": "15ml"
+ },
+ {
+  "quantity": "160g",
+  "kind": "SimpleQuantity",
+  "str": "160g"
+ },
+ {
+  "quantity": "170ml",
+  "kind": "SimpleQuantity",
+  "str": "170ml"
+ },
+ {
+  "quantity": "171g",
+  "kind": "SimpleQuantity",
+  "str": "171g"
+ },
+ {
+  "quantity": "175g",
+  "kind": "SimpleQuantity",
+  "str": "175g"
+ },
+ {
+  "quantity": "180g",
+  "kind": "SimpleQuantity",
+  "str": "180g"
+ },
+ {
+  "quantity": "180ml",
+  "kind": "SimpleQuantity",
+  "str": "180ml"
+ },
+ {
+  "quantity": "186g",
+  "kind": "SimpleQuantity",
+  "str": "186g"
+ },
+ {
+  "quantity": "190g",
+  "kind": "SimpleQuantity",
+  "str": "190g"
+ },
+ {
+  "quantity": "1L",
+  "kind": "SimpleQuantity",
+  "str": "1L"
+ },
+ {
+  "quantity": "1cm piece",
+  "kind": "LengthQuantity",
+  "str": "1cm piece"
+ },
+ {
+  "quantity": "1tsp",
+  "kind": "SimpleQuantity",
+  "str": "1tsp"
+ },
+ {
+  "quantity": "2",
+  "kind": "SimpleQuantity",
+  "str": "2"
+ },
+ {
+  "quantity": "2 110g fillets",
+  "kind": "CompoundQuantity",
+  "str": "2 110g fillets"
+ },
+ {
+  "quantity": "2 400g tin",
+  "kind": "CompoundQuantity",
+  "str": "2 400g tins"
+ },
+ {
+  "quantity": "2 400g tins",
+  "kind": "CompoundQuantity",
+  "str": "2 400g tins"
+ },
+ {
+  "quantity": "2 Cloves",
+  "kind": "SimpleQuantity",
+  "str": "2 Cloves"
+ },
+ {
+  "quantity": "2 cloves",
+  "kind": "SimpleQuantity",
+  "str": "2 cloves"
+ },
+ {
+  "quantity": "2 fork-fulls",
+  "kind": "DescriptiveQuantity",
+  "str": "2 fork-fulls"
+ },
+ {
+  "quantity": "2 heads",
+  "kind": "SimpleQuantity",
+  "str": "2 heads"
+ },
+ {
+  "quantity": "2 large",
+  "kind": "SimpleQuantity",
+  "str": "2 large"
+ },
+ {
+  "quantity": "2 medium",
+  "kind": "SimpleQuantity",
+  "str": "2 medium"
+ },
+ {
+  "quantity": "2 sheets",
+  "kind": "SimpleQuantity",
+  "str": "2 sheets"
+ },
+ {
+  "quantity": "2 slices",
+  "kind": "SimpleQuantity",
+  "str": "2 slices"
+ },
+ {
+  "quantity": "2 small or 1 large",
+  "kind": "DescriptiveQuantity",
+  "str": "2 small or 1 larges"
+ },
+ {
+  "quantity": "2 stems",
+  "kind": "SimpleQuantity",
+  "str": "2 stems"
+ },
+ {
+  "quantity": "2 tbsp",
+  "kind": "SimpleQuantity",
+  "str": "2 tbsp"
+ },
+ {
+  "quantity": "2 tins",
+  "kind": "SimpleQuantity",
+  "str": "2 tins"
+ },
+ {
+  "quantity": "2 tsp",
+  "kind": "SimpleQuantity",
+  "str": "2 tsp"
+ },
+ {
+  "quantity": "2 tsps",
+  "kind": "SimpleQuantity",
+  "str": "2 tsps"
+ },
+ {
+  "quantity": "2-3",
+  "kind": "RangeQuantity",
+  "str": "2-3"
+ },
+ {
+  "quantity": "2-3 cloves",
+  "kind": "RangeQuantity",
+  "str": "2-3 cloves"
+ },
+ {
+  "quantity": "2.5cm",
+  "kind": "LengthQuantity",
+  "str": "2.50cm"
+ },
+ {
+  "quantity": "200g",
+  "kind": "SimpleQuantity",
+  "str": "200g"
+ },
+ {
+  "quantity": "200ml",
+  "kind": "SimpleQuantity",
+  "str": "200ml"
+ },
+ {
+  "quantity": "208g",
+  "kind": "SimpleQuantity",
+  "str": "208g"
+ },
+ {
+  "quantity": "20g",
+  "kind": "SimpleQuantity",
+  "str": "20g"
+ },
+ {
+  "quantity": "214ml",
+  "kind": "SimpleQuantity",
+  "str": "214ml"
+ },
+ {
+  "quantity": "21g",
+  "kind": "SimpleQuantity",
+  "str": "21g"
+ },
+ {
+  "quantity": "220g",
+  "kind": "SimpleQuantity",
+  "str": "220g"
+ },
+ {
+  "quantity": "225g",
+  "kind": "SimpleQuantity",
+  "str": "225g"
+ },
+ {
+  "quantity": "230g",
+  "kind": "SimpleQuantity",
+  "str": "230g"
+ },
+ {
+  "quantity": "240g",
+  "kind": "SimpleQuantity",
+  "str": "240g"
+ },
+ {
+  "quantity": "250g",
+  "kind": "SimpleQuantity",
+  "str": "250g"
+ },
+ {
+  "quantity": "250ml",
+  "kind": "SimpleQuantity",
+  "str": "250ml"
+ },
+ {
+  "quantity": "25g",
+  "kind": "SimpleQuantity",
+  "str": "25g"
+ },
+ {
+  "quantity": "25g approx",
+  "kind": "ApproximateQuantity",
+  "str": "25g approx"
+ },
+ {
+  "quantity": "25ml",
+  "kind": "SimpleQuantity",
+  "str": "25ml"
+ },
+ {
+  "quantity": "260g",
+  "kind": "SimpleQuantity",
+  "str": "260g"
+ },
+ {
+  "quantity": "275g",
+  "kind": "SimpleQuantity",
+  "str": "275g"
+ },
+ {
+  "quantity": "280g",
+  "kind": "SimpleQuantity",
+  "str": "280g"
+ },
+ {
+  "quantity": "285g",
+  "kind": "SimpleQuantity",
+  "str": "285g"
+ },
+ {
+  "quantity": "28g",
+  "kind": "SimpleQuantity",
+  "str": "28g"
+ },
+ {
+  "quantity": "2cm",
+  "kind": "LengthQuantity",
+  "str": "2cm"
+ },
+ {
+  "quantity": "2lt",
+  "kind": "SimpleQuantity",
+  "str": "2lt"
+ },
+ {
+  "quantity": "2tsp",
+  "kind": "SimpleQuantity",
+  "str": "2tsp"
+ },
+ {
+  "quantity": "3",
+  "kind": "SimpleQuantity",
+  "str": "3"
+ },
+ {
+  "quantity": "3 - 5",
+  "kind": "DescriptiveQuantity",
+  "str": "3 - 5s"
+ },
+ {
+  "quantity": "3 cloves",
+  "kind": "SimpleQuantity",
+  "str": "3 cloves"
+ },
+ {
+  "quantity": "3 handfulls",
+  "kind": "SimpleQuantity",
+  "str": "3 handfulls"
+ },
+ {
+  "quantity": "3 large",
+  "kind": "SimpleQuantity",
+  "str": "3 large"
+ },
+ {
+  "quantity": "3 minimum",
+  "kind": "SimpleQuantity",
+  "str": "3 minimum"
+ },
+ {
+  "quantity": "3 sticks",
+  "kind": "SimpleQuantity",
+  "str": "3 sticks"
+ },
+ {
+  "quantity": "3 tbsp",
+  "kind": "SimpleQuantity",
+  "str": "3 tbsp"
+ },
+ {
+  "quantity": "3 tins",
+  "kind": "SimpleQuantity",
+  "str": "3 tins"
+ },
+ {
+  "quantity": "3 tsp",
+  "kind": "SimpleQuantity",
+  "str": "3 tsp"
+ },
+ {
+  "quantity": "3-4 varieties",
+  "kind": "RangeQuantity",
+  "str": "3-4 varieties"
+ },
+ {
+  "quantity": "300g",
+  "kind": "SimpleQuantity",
+  "str": "300g"
+ },
+ {
+  "quantity": "300ml",
+  "kind": "SimpleQuantity",
+  "str": "300ml"
+ },
+ {
+  "quantity": "30g",
+  "kind": "SimpleQuantity",
+  "str": "30g"
+ },
+ {
+  "quantity": "30ml",
+  "kind": "SimpleQuantity",
+  "str": "30ml"
+ },
+ {
+  "quantity": "320g",
+  "kind": "SimpleQuantity",
+  "str": "320g"
+ },
+ {
+  "quantity": "32g",
+  "kind": "SimpleQuantity",
+  "str": "32g"
+ },
+ {
+  "quantity": "340g",
+  "kind": "SimpleQuantity",
+  "str": "340g"
+ },
+ {
+  "quantity": "350g",
+  "kind": "SimpleQuantity",
+  "str": "350g"
+ },
+ {
+  "quantity": "350ml",
+  "kind": "SimpleQuantity",
+  "str": "350ml"
+ },
+ {
+  "quantity": "375g",
+  "kind": "SimpleQuantity",
+  "str": "375g"
+ },
+ {
+  "quantity": "4",
+  "kind": "SimpleQuantity",
+  "str": "4"
+ },
+ {
+  "quantity": "4 Cloves",
+  "kind": "SimpleQuantity",
+  "str": "4 Cloves"
+ },
+ {
+  "quantity": "4 Inches",
+  "kind": "SimpleQuantity",
+  "str": "4 Inches"
+ },
+ {
+  "quantity": "4 cloves",
+  "kind": "SimpleQuantity",
+  "str": "4 cloves"
+ },
+ {
+  "quantity": "4 medium or 2 large",
+  "kind": "DescriptiveQuantity",
+  "str": "4 medium or 2 larges"
+ },
+ {
+  "quantity": "4 sheets",
+  "kind": "SimpleQuantity",
+  "str": "4 sheets"
+ },
+ {
+  "quantity": "4 slices",
+  "kind": "SimpleQuantity",
+  "str": "4 slices"
+ },
+ {
+  "quantity": "4 sprigs, or 2 tbsp dried",
+  "kind": "DescriptiveQuantity",
+  "str": "4 sprigs, or 2 tbsp drieds"
+ },
+ {
+  "quantity": "4 tbsp",
+  "kind": "SimpleQuantity",
+  "str": "4 tbsp"
+ },
+ {
+  "quantity": "4 tsp",
+  "kind": "SimpleQuantity",
+  "str": "4 tsp"
+ },
+ {
+  "quantity": "4-6",
+  "kind": "RangeQuantity",
+  "str": "4-6"
+ },
+ {
+  "quantity": "4.5 tsp",
+  "kind": "SimpleQuantity",
+  "str": "4.50 tsp"
+ },
+ {
+  "quantity": "400g",
+  "kind": "SimpleQuantity",
+  "str": "400g"
+ },
+ {
+  "quantity": "400g tin",
+  "kind": "CompoundQuantity",
+  "str": "400g tin"
+ },
+ {
+  "quantity": "400ml",
+  "kind": "SimpleQuantity",
+  "str": "400ml"
+ },
+ {
+  "quantity": "40g",
+  "kind": "SimpleQuantity",
+  "str": "40g"
+ },
+ {
+  "quantity": "416ml",
+  "kind": "SimpleQuantity",
+  "str": "416ml"
+ },
+ {
+  "quantity": "450g",
+  "kind": "SimpleQuantity",
+  "str": "450g"
+ },
+ {
+  "quantity": "450ml",
+  "kind": "SimpleQuantity",
+  "str": "450ml"
+ },
+ {
+  "quantity": "460g",
+  "kind": "SimpleQuantity",
+  "str": "460g"
+ },
+ {
+  "quantity": "485g",
+  "kind": "SimpleQuantity",
+  "str": "485g"
+ },
+ {
+  "quantity": "5",
+  "kind": "SimpleQuantity",
+  "str": "5"
+ },
+ {
+  "quantity": "5 cloves",
+  "kind": "SimpleQuantity",
+  "str": "5 cloves"
+ },
+ {
+  "quantity": "5 large",
+  "kind": "SimpleQuantity",
+  "str": "5 large"
+ },
+ {
+  "quantity": "5 sprigs",
+  "kind": "SimpleQuantity",
+  "str": "5 sprigs"
+ },
+ {
+  "quantity": "5 tsp",
+  "kind": "SimpleQuantity",
+  "str": "5 tsp"
+ },
+ {
+  "quantity": "5-6",
+  "kind": "RangeQuantity",
+  "str": "5-6"
+ },
+ {
+  "quantity": "500g",
+  "kind": "SimpleQuantity",
+  "str": "500g"
+ },
+ {
+  "quantity": "50g",
+  "kind": "SimpleQuantity",
+  "str": "50g"
+ },
+ {
+  "quantity": "55g",
+  "kind": "SimpleQuantity",
+  "str": "55g"
+ },
+ {
+  "quantity": "5g",
+  "kind": "SimpleQuantity",
+  "str": "5g"
+ },
+ {
+  "quantity": "5oz",
+  "kind": "SimpleQuantity",
+  "str": "5oz"
+ },
+ {
+  "quantity": "6",
+  "kind": "SimpleQuantity",
+  "str": "6"
+ },
+ {
+  "quantity": "6 cloves",
+  "kind": "SimpleQuantity",
+  "str": "6 cloves"
+ },
+ {
+  "quantity": "6 tbsp",
+  "kind": "SimpleQuantity",
+  "str": "6 tbsp"
+ },
+ {
+  "quantity": "600ml",
+  "kind": "SimpleQuantity",
+  "str": "600ml"
+ },
+ {
+  "quantity": "60g",
+  "kind": "SimpleQuantity",
+  "str": "60g"
+ },
+ {
+  "quantity": "620g",
+  "kind": "SimpleQuantity",
+  "str": "620g"
+ },
+ {
+  "quantity": "630ml",
+  "kind": "SimpleQuantity",
+  "str": "630ml"
+ },
+ {
+  "quantity": "7 tsp",
+  "kind": "SimpleQuantity",
+  "str": "7 tsp"
+ },
+ {
+  "quantity": "700ml",
+  "kind": "SimpleQuantity",
+  "str": "700ml"
+ },
+ {
+  "quantity": "750g",
+  "kind": "SimpleQuantity",
+  "str": "750g"
+ },
+ {
+  "quantity": "75g",
+  "kind": "SimpleQuantity",
+  "str": "75g"
+ },
+ {
+  "quantity": "75ml",
+  "kind": "SimpleQuantity",
+  "str": "75ml"
+ },
+ {
+  "quantity": "8",
+  "kind": "SimpleQuantity",
+  "str": "8"
+ },
+ {
+  "quantity": "80-125g",
+  "kind": "RangeQuantity",
+  "str": "80-125g"
+ },
+ {
+  "quantity": "800ml",
+  "kind": "SimpleQuantity",
+  "str": "800ml"
+ },
+ {
+  "quantity": "80g",
+  "kind": "SimpleQuantity",
+  "str": "80g"
+ },
+ {
+  "quantity": "85g",
+  "kind": "SimpleQuantity",
+  "str": "85g"
+ },
+ {
+  "quantity": "8ml",
+  "kind": "SimpleQuantity",
+  "str": "8ml"
+ },
+ {
+  "quantity": "8oz",
+  "kind": "SimpleQuantity",
+  "str": "8oz"
+ },
+ {
+  "quantity": "9 handfuls",
+  "kind": "SimpleQuantity",
+  "str": "9 handfuls"
+ },
+ {
+  "quantity": "90-100ml",
+  "kind": "RangeQuantity",
+  "str": "90-100ml"
+ },
+ {
+  "quantity": "90g",
+  "kind": "SimpleQuantity",
+  "str": "90g"
+ },
+ {
+  "quantity": "A decent slosh",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "A pinch",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "Knob",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "Pinch",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "Several",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "Several teaspoons",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "Some",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "Wedge",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "a few tablespoons",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "a large handful",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "a pinch",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "as needed to prevent stickage",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "generous dash",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "handful",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "knob",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "large handful",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "pinch",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "several teaspoons",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "tbsp",
+  "kind": null,
+  "str": null
+ },
+ {
+  "quantity": "up to 75g",
+  "kind": "ApproximateQuantity",
+  "str": "up to 75g"
+ },
+ {
+  "quantity": "~70g",
+  "kind": "ApproximateQuantity",
+  "str": "~70g"
+ }
+]

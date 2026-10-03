@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/core", "crates/submit", "crates/server"]
+members = ["crates/core", "crates/submit", "crates/server", "crates/frontend"]
 
 [workspace.package]
 edition = "2024"
@@ -14,6 +14,7 @@ recibase-submit = { path = "crates/submit" }
 # External crates.
 chrono = "0.4"
 csv = "1"
+minijinja = "2.24"
 serde_json = { version = "1", features = ["preserve_order"] }
 unicode-normalization = "0.1"
 ureq = { version = "3", default-features = false, features = ["json"] }

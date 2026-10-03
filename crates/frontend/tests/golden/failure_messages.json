@@ -1,0 +1,120 @@
+[
+ {
+  "status": 401,
+  "headers": {
+   "Content-Type": "text/plain"
+  },
+  "text": "invalid passcode",
+  "message": "invalid passcode"
+ },
+ {
+  "status": 400,
+  "headers": {
+   "Content-Type": "application/json"
+  },
+  "text": "{\"error\": \"Add at least one ingredient.\"}",
+  "message": "Add at least one ingredient."
+ },
+ {
+  "status": 502,
+  "headers": {
+   "Content-Type": "text/plain"
+  },
+  "text": "upstream failed",
+  "message": "upstream failed"
+ },
+ {
+  "status": 409,
+  "headers": {},
+  "text": "",
+  "message": "A recipe with this name already exists."
+ },
+ {
+  "status": 403,
+  "headers": {},
+  "text": "",
+  "message": "Could not verify this submission."
+ },
+ {
+  "status": 503,
+  "headers": {},
+  "text": "",
+  "message": "Recipe submission is not available."
+ },
+ {
+  "status": 500,
+  "headers": {},
+  "text": "",
+  "message": "Could not submit the recipe."
+ },
+ {
+  "status": 418,
+  "headers": {},
+  "text": "",
+  "message": "Could not submit the recipe."
+ },
+ {
+  "status": 200,
+  "headers": {
+   "Content-Type": "text/html"
+  },
+  "text": "<html>nope</html>",
+  "message": "Could not submit the recipe."
+ },
+ {
+  "status": 400,
+  "headers": {
+   "Content-Type": "application/json"
+  },
+  "text": "{\"message\": \"  spaced  \"}",
+  "message": "spaced"
+ },
+ {
+  "status": 400,
+  "headers": {
+   "Content-Type": "application/json"
+  },
+  "text": "{\"error\": \"   \"}",
+  "message": "Could not submit the recipe."
+ },
+ {
+  "status": 400,
+  "headers": {
+   "Content-Type": "application/json"
+  },
+  "text": "{\"error\": 5}",
+  "message": "Could not submit the recipe."
+ },
+ {
+  "status": 400,
+  "headers": {
+   "Content-Type": "text/plain"
+  },
+  "text": "{not json}",
+  "message": "Could not submit the recipe."
+ },
+ {
+  "status": 400,
+  "headers": {
+   "content-type": "application/json"
+  },
+  "text": "{\"error\":\"lower\"}",
+  "message": "lower"
+ },
+ {
+  "status": 400,
+  "headers": {
+   "Content-Type": "text/plain"
+  },
+  "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "message": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+ },
+ {
+  "status": 400,
+  "headers": {
+   "Content-Type": "application/json"
+  },
+  "text": "",
+  "message": "Could not submit the recipe."
+ }
+]
