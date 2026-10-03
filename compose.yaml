@@ -1,111 +1,32 @@
-# Compose file for the Recibase Rust service: the API and the frontend.
-#
-#   cp .env.example .env          # optional: configure usage data / submissions
-#   docker compose up --build     # start
-#   curl https://recibase.shed.gay/health   # through Traefik
-#
-# Neither service publishes a port to the host - Traefik forwards to them over
-# the shared network. To reach them from the host instead (a laptop, no Traefik):
-#
-#   docker compose -f compose.yaml -f compose.local.yaml up --build
-#   curl localhost:8081/health
-#   open http://localhost:8080/
-#
-# The build context for both is this directory (where Cargo.toml lives). See the
-# Dockerfile for the API's image targets and crates/frontend/Dockerfile for the
-# frontend's.
-#
-# Behind Traefik
-# --------------
-# Both services carry labels for an existing Traefik network called
-# `apps-internal` and are routed by host name:
-#
-#   https://recibase.shed.gay/       -> the website  (port 8080)
-#   https://api.recibase.shed.gay/   -> the API      (port 8081)
-#
-# Two host names, not one, because of how the site works: the frontend serves the
-# pages, but it tells the browser the API's URL in /manifest.json and the browser
-# calls that URL directly for the recipe search. A single host name would leave
-# the search box silently broken. Set RECIBASE_HOST, RECIBASE_API_HOST and, if
-# your resolver is not called `myresolver`, TRAEFIK_CERTRESOLVER in .env; and set
-# BACKEND_URL to the public API host so the browser is given the right address:
-#
-#   RECIBASE_HOST=recibase.shed.gay
-#   RECIBASE_API_HOST=api.recibase.shed.gay
-#   BACKEND_URL=https://api.recibase.shed.gay/
-#
-# Delete the labels and the `apps-internal` network to run this standalone.
 services:
   recibase:
     build:
       context: .
-      # `runtime` is the glibc slim image and carries the image HEALTHCHECK, so
-      # `docker compose up --wait` reports healthy. Swap to `distroless` for the
-      # smallest image (~51 MB); it has no shell, so it has no HEALTHCHECK.
       target: runtime
     image: recibase-rust:slim
-    # Nothing is published to the host: Traefik reaches this container over
-    # `apps-internal` and forwards to the port in the label below, which is the
-    # port the image listens on (PORT, 8081 by default). To reach it from the
-    # host while developing, add the port back with compose.local.yaml.
-    # Optional; every variable in it is documented in .env.example. A missing
-    # file is fine (the server then runs with an empty meal log and the
-    # submission route answering 503, like the unconfigured Scala).
     env_file:
       - path: .env
         required: false
-    # To serve a local meal log, mount it and set MEAL_LOG_CSV_URL in .env:
-    # volumes:
-    #   - ./meal-log.csv:/data/meal-log.csv:ro
     networks:
       - default
       - apps-internal
     labels:
       - "traefik.enable=true"
-      # This container is on two networks, so say which one Traefik should use to
-      # reach it. Without this Traefik picks one and it may pick the wrong one.
       - "traefik.docker.network=apps-internal"
-      # The API. The browser calls it directly for the recipe search, which is
-      # why it answers CORS preflights.
       - "traefik.http.routers.recibase-api.rule=Host(`${RECIBASE_API_HOST:-api.recibase.shed.gay}`)"
       - "traefik.http.routers.recibase-api.entrypoints=websecure"
       - "traefik.http.routers.recibase-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-myresolver}"
       - "traefik.http.services.recibase-api.loadbalancer.server.port=8081"
     restart: unless-stopped
 
-  # The website: the frontend ported from Flask.
-  #
-  #   docker compose up --build        # the API and the website
-  #   docker compose up frontend       # the same, and it waits for the API
-  #
-  # It renders the pages itself and proxies the API for the rest, so these two
-  # services are everything reciba.se needs. To serve the website against an API
-  # somewhere else, leave this project alone and run the image on its own:
-  #
-  #   docker build -f crates/frontend/Dockerfile -t recibase-frontend:slim .
-  #   docker run --rm -p 8080:8080 -e BACKEND_URL=https://api.reciba.se/ \
-  #       recibase-frontend:slim
   frontend:
     build:
       context: .
       dockerfile: crates/frontend/Dockerfile
-      # `runtime` is the glibc slim image and carries the image HEALTHCHECK, so
-      # `docker compose up --wait` reports healthy. Swap to `distroless` for the
-      # smallest image; it has no shell, so it has no HEALTHCHECK.
       target: runtime
     image: recibase-frontend:slim
-    # Nothing is published to the host: Traefik reaches this container over
-    # `apps-internal` and forwards to port 8080, which is the port the image
-    # listens on. Add the port back with compose.local.yaml to open the site
-    # directly.
     environment:
-      # Two jobs: the frontend proxies the API through it, and the browser is
-      # told it in /manifest.json and calls it directly for the search. So it must
-      # be an address the browser can reach - the public API host, not the
-      # compose service name, which only resolves inside this network.
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}
-    # Wait for the API to answer /health rather than just for the container to
-    # exist, or the first page a visitor asks for is the 503 one.
     depends_on:
       recibase:
         condition: service_healthy
@@ -115,7 +36,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=apps-internal"
-      # The website.
       - "traefik.http.routers.recibase.rule=Host(`${RECIBASE_HOST:-recibase.shed.gay}`)"
       - "traefik.http.routers.recibase.entrypoints=websecure"
       - "traefik.http.routers.recibase.tls.certresolver=${TRAEFIK_CERTRESOLVER:-myresolver}"
@@ -123,9 +43,6 @@ services:
     restart: unless-stopped
 
 networks:
-  # The project's own network: the frontend reaches the API here by service name,
-  # whatever BACKEND_URL says.
   default:
-  # The Traefik network. It must already exist - this file does not create it.
   apps-internal:
     external: true

@@ -37,6 +37,21 @@ BACKEND_URL=http://localhost:8081/ PORT=8080 ./target/release/recibase-frontend
 Then open <http://localhost:8080/>. `tools/harness/frontend/serve-stack.sh` runs
 this frontend together with the Rust API and starts both for you.
 
+Or in containers, from the repository root - `compose.yaml` carries no comments,
+so this is where its settings are explained:
+
+```
+docker compose -f compose.yaml -f compose.local.yaml up --build   # on a laptop
+docker compose up --build                                        # behind Traefik
+```
+
+`compose.yaml` defines the website on port 8080 and the API on 8081, with Traefik
+labels for the network `apps-internal` and no published ports - Traefik forwards
+to the ports in the labels over that network. `compose.local.yaml` is an override
+that adds both ports to the host and points the website at the local API, for a
+machine with no Traefik. The Traefik labels stay in place and do nothing when
+nothing is watching that network.
+
 The stylesheets and scripts are served from disk. `STATIC_DIR` overrides where
 they are looked for; without it the binary tries `static/` beside itself (the
 shape of a deployment that copies the assets next to the binary, as the
