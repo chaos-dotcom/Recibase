@@ -39,6 +39,7 @@ pub fn recipes() -> &'static [RecipeDef] {
             super::courgette_spinach_pasties::recipe(),
             super::cranberry_relish::recipe(),
             super::creamy_cauliflower_cheese_walnuts::recipe(),
+            super::creamy_leek_croustade::recipe(),
             super::creamy_mushroom_stroganoff::recipe(),
             super::crunch_chocolate_chip_coffee_cake::recipe(),
             super::dahl::recipe(),
@@ -130,6 +131,7 @@ pub fn chaos_recipes() -> &'static [&'static str] {
     &[
         "CheddarLeekOrzotto",
         "CoconutPotatoCurry",
+        "CreamyLeekCroustade",
         "EasyPancakes",
         "FishFingerKatsu",
         "KimchiNoodles",

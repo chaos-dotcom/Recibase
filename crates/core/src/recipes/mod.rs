@@ -36,6 +36,7 @@ pub mod courgette_broccoli_pasta;
 pub mod courgette_spinach_pasties;
 pub mod cranberry_relish;
 pub mod creamy_cauliflower_cheese_walnuts;
+pub mod creamy_leek_croustade;
 pub mod creamy_mushroom_stroganoff;
 pub mod crunch_chocolate_chip_coffee_cake;
 pub mod dahl;
