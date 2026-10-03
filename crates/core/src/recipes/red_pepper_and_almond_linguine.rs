@@ -16,6 +16,8 @@ pub fn recipe() -> RecipeDef {
         tagline: None,
         notes: vec![
             "Serves 2".to_string(),
+            "Prepare 15 minutes; cook 20 minutes.".to_string(),
+            "Good Health: low in sat fat / source of protein.".to_string(),
             "Cook's tip: keep basil fresh for longer by treating it like a bunch of flowers. For best results, trim the ends of the stalks and keep in a glass of water at room temperature.".to_string(),
             "Per serving: 2178kJ/519kcals, 17.8g fat (4.8g saturated), 67.1g carbs (13.2g sugars), 9.9g fibre, 17.5g protein, 0.9g salt - 2 of your 5 a day.".to_string(),
         ],
