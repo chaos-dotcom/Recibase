@@ -16,6 +16,12 @@
 # glibc the binary links against must not outrun the runtime image's.
 FROM rust:1-slim-bookworm AS build
 WORKDIR /src
+# The commit `build.rs` bakes into the binary (and the footer). `.git/` is not
+# in the build context, so a CI passes these instead; unset means `latest`.
+ARG SOURCE_COMMIT
+ARG GIT_COMMIT
+ARG GITHUB_SHA
+ENV SOURCE_COMMIT=${SOURCE_COMMIT} GIT_COMMIT=${GIT_COMMIT} GITHUB_SHA=${GITHUB_SHA}
 COPY Cargo.toml Cargo.lock ./
 COPY crates/ crates/
 RUN cargo build --release --locked -p recibase-frontend \

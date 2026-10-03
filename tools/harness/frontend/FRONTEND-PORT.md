@@ -70,6 +70,12 @@ same defaults:
 | `SOURCE_COMMIT`, `GIT_COMMIT`, `GITHUB_SHA` | - | the deployed commit, shown in the footer |
 | `GIT_COMMIT` (file) | - | read beside the executable, then in the working directory, when none of the variables holds a commit |
 
+When none of these is set the footer still names a commit: `crates/frontend/build.rs`
+bakes the checkout's `HEAD` - or a `SOURCE_COMMIT` / `GIT_COMMIT` / `GITHUB_SHA` build
+argument - into the binary, so the `frontend` service in `compose.yaml`, which runs
+without the commit environment, shows `v<hash>`. The order is environment, then file,
+then the baked commit, then `latest`.
+
 The templates are compiled into the binary; only `static/` is read from disk, so
 a deployment is the binary plus that directory.
 

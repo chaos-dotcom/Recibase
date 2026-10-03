@@ -24,6 +24,13 @@ services:
       context: .
       dockerfile: crates/frontend/Dockerfile
       target: runtime
+      # Baked into the binary by crates/frontend/build.rs, so the footer reads
+      # `v<hash>`. `docker compose build` takes these from the environment (and
+      # `.env`); unset means the footer shows `latest`.
+      args:
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-}
+        GIT_COMMIT: ${GIT_COMMIT:-}
+        GITHUB_SHA: ${GITHUB_SHA:-}
     image: recibase-frontend:slim
     environment:
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}

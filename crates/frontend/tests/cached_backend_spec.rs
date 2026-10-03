@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
 use recibase_frontend::cached_backend::{BackendUnavailable, CachedBackendCall, TTL_SECONDS};
-use recibase_frontend::version::resolve_version;
+use recibase_frontend::version::{resolve_version, resolve_version_with_build};
 
 // -- `cached_backend.py` -----------------------------------------------
 
@@ -93,7 +93,10 @@ fn environ<'a>(pairs: &'a [(&'a str, &'a str)]) -> impl Fn(&str) -> Option<Strin
 /// `test_resolve_deployed_version_prefers_source_commit`.
 #[test]
 fn resolve_deployed_version_prefers_source_commit() {
-    let vars = environ(&[("SOURCE_COMMIT", "abcdef1234567890"), ("GIT_COMMIT", "deadbeef")]);
+    let vars = environ(&[
+        ("SOURCE_COMMIT", "abcdef1234567890"),
+        ("GIT_COMMIT", "deadbeef"),
+    ]);
     assert_eq!(resolve_version(&vars, None), "abcdef1234567890");
 }
 
@@ -140,14 +143,42 @@ fn resolve_deployed_version_prefers_the_environment_over_the_file() {
     assert_eq!(resolve_version(&vars, Some(file.as_path())), "abcdef1");
 }
 
+/// The commit `build.rs` baked in is the last resort before `latest`: it is
+/// used only when neither the environment nor the `GIT_COMMIT` file names one,
+/// and a value that is not a commit is no better than none.
+#[test]
+fn resolve_deployed_version_falls_back_to_the_build_commit() {
+    let empty = environ(&[]);
+    assert_eq!(
+        resolve_version_with_build(&empty, None, Some("cafebabe")),
+        "cafebabe"
+    );
+    assert_eq!(
+        resolve_version_with_build(&empty, None, Some("latest")),
+        "latest"
+    );
+    assert_eq!(resolve_version_with_build(&empty, None, Some("")), "latest");
+}
+
+/// The environment and the file still win over the build-time commit.
+#[test]
+fn resolve_deployed_version_prefers_the_environment_and_file_over_the_build_commit() {
+    let vars = environ(&[("GIT_COMMIT", "abcdef1")]);
+    let file = temp_file("resolve-version-build-file", "0123456\n");
+    assert_eq!(
+        resolve_version_with_build(&vars, None, Some("cafebabe")),
+        "abcdef1"
+    );
+    assert_eq!(
+        resolve_version_with_build(&environ(&[]), Some(file.as_path()), Some("cafebabe")),
+        "0123456"
+    );
+}
+
 /// A file of `contents` in the temporary directory, cleaned up by the caller
 /// via the returned path's parent (the file itself is left to the OS).
 fn temp_file(name: &str, contents: &str) -> PathBuf {
-    let path = std::env::temp_dir().join(format!(
-        "recibase-{}-{}",
-        name,
-        std::process::id()
-    ));
+    let path = std::env::temp_dir().join(format!("recibase-{}-{}", name, std::process::id()));
     std::fs::write(&path, contents).expect("write the temporary file");
     path
 }
