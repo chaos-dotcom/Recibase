@@ -32,22 +32,39 @@ services:
     #   - ./meal-log.csv:/data/meal-log.csv:ro
     restart: unless-stopped
 
-  # The website. It proxies the API above, and tells the browser that API's URL
-  # in /manifest.json, so `BACKEND_URL` must be reachable from the browser and
-  # not just from inside the compose network.
+  # The website: the frontend ported from Flask.
+  #
+  #   docker compose up --build        # the API and the website
+  #   docker compose up frontend       # the same, and it waits for the API
+  #
+  # It renders the pages itself and proxies the API for the rest, so these two
+  # services are everything reciba.se needs. To serve the website against an API
+  # somewhere else, leave this project alone and run the image on its own:
+  #
+  #   docker build -f crates/frontend/Dockerfile -t recibase-frontend:slim .
+  #   docker run --rm -p 8080:8080 -e BACKEND_URL=https://api.reciba.se/ \
+  #       recibase-frontend:slim
   frontend:
     build:
       context: .
       dockerfile: crates/frontend/Dockerfile
-      # `runtime` is the glibc slim image and carries the image HEALTHCHECK.
-      # Swap to `distroless` for the smallest image; it has no shell, so it has
-      # no HEALTHCHECK.
+      # `runtime` is the glibc slim image and carries the image HEALTHCHECK, so
+      # `docker compose up --wait` reports healthy. Swap to `distroless` for the
+      # smallest image; it has no shell, so it has no HEALTHCHECK.
       target: runtime
     image: recibase-frontend:slim
+    # The container listens on PORT, which the image defaults to 8080.
     ports:
       - "8080:8080"
     environment:
+      # Handed to the browser in /manifest.json, so it must be an address the
+      # browser can reach - not the compose service name, which only resolves
+      # inside this network. Set it in .env, or in the environment, to point the
+      # website at an API that is not in this project.
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}
+    # Wait for the API to answer /health rather than just for the container to
+    # exist, or the first page a visitor asks for is the 503 one.
     depends_on:
-      - recibase
+      recibase:
+        condition: service_healthy
     restart: unless-stopped
