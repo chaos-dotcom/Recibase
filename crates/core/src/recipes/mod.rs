@@ -57,6 +57,7 @@ pub mod macaroni;
 pub mod marmalade_ice_cream;
 pub mod mascarpone_ice_cream;
 pub mod mead;
+pub mod med_style_gnocchi;
 pub mod melty_mushroom_wellingtons;
 pub mod mexican_polenta_pie;
 pub mod mushroom_quiche;
