@@ -6,11 +6,37 @@ use serde_json::Value;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Manifest {
     pub version: String,
+    pub name: String,
+    pub source_url: String,
+    pub base_commit_url: String,
 }
 
 impl Manifest {
+    /// The fixed service name, reported in the manifest.
+    pub const NAME: &'static str = "Recibase";
+    /// The upstream repository, reported in the manifest.
+    pub const SOURCE_URL: &'static str = "https://github.com/The-Silverwood-Institute/Recibase";
+    /// The prefix of a URL to a specific upstream commit.
+    pub const BASE_COMMIT_URL: &'static str =
+        "https://github.com/The-Silverwood-Institute/Recibase/commit/";
+
+    /// `Manifest(version)`: fills in the fixed multi-tenancy fields.
+    pub fn new(version: String) -> Self {
+        Manifest {
+            version,
+            name: Self::NAME.to_string(),
+            source_url: Self::SOURCE_URL.to_string(),
+            base_commit_url: Self::BASE_COMMIT_URL.to_string(),
+        }
+    }
+
     pub fn to_json(&self) -> Value {
-        obj(vec![("version", Value::String(self.version.clone()))])
+        obj(vec![
+            ("version", Value::String(self.version.clone())),
+            ("name", Value::String(self.name.clone())),
+            ("source_url", Value::String(self.source_url.clone())),
+            ("base_commit_url", Value::String(self.base_commit_url.clone())),
+        ])
     }
 
     /// `Manifest.deployedVersion(env)`.

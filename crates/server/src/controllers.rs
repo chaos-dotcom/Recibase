@@ -137,10 +137,7 @@ pub fn meal_names() -> String {
 }
 
 pub fn manifest_json(env: &dyn Fn(&str) -> Option<String>) -> Value {
-    Manifest {
-        version: Manifest::deployed_version(env),
-    }
-    .to_json()
+    Manifest::new(Manifest::deployed_version(env)).to_json()
 }
 
 pub fn docs() -> Value {

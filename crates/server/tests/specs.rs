@@ -81,6 +81,28 @@ fn permalink_removes_adjectives() {
 // ----------------------------------------------------------------- ManifestSpec
 
 #[test]
+fn manifest_json_has_the_multi_tenancy_fields() {
+    let json = Manifest::new("cafeba6".to_string()).to_json();
+    assert_eq!(json["name"], Manifest::NAME);
+    assert_eq!(json["source_url"], Manifest::SOURCE_URL);
+    assert_eq!(json["base_commit_url"], Manifest::BASE_COMMIT_URL);
+    assert_eq!(json["version"], "cafeba6");
+}
+
+#[test]
+fn manifest_json_matches_the_scala_field_order() {
+    let json = to_string(&Manifest::new("cafeba6".to_string()).to_json());
+    assert_eq!(
+        json,
+        concat!(
+            "{\"version\":\"cafeba6\",\"name\":\"Recibase\",",
+            "\"source_url\":\"https://github.com/The-Silverwood-Institute/Recibase\",",
+            "\"base_commit_url\":\"https://github.com/The-Silverwood-Institute/Recibase/commit/\"}"
+        )
+    );
+}
+
+#[test]
 fn deployed_version_prefers_git_commit() {
     let env = |key: &str| match key {
         "GIT_COMMIT" => Some("abcdef1234567890".to_string()),

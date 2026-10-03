@@ -13,7 +13,12 @@
 # glibc on purpose: musl's allocator takes a process-wide lock, and this server
 # allocates a fresh JSON tree per request, so a musl build serialises under
 # concurrency (measured: throughput falls as connections rise).
-FROM rust:1-slim AS build
+#
+# Pinned to bookworm (Debian 12) so the glibc the binary links against matches
+# the `distroless/cc-debian12` runtime; the floating `rust:1-slim` tracks the
+# newest Debian and would outrun it, producing a binary that needs a newer
+# glibc than the runtime ships.
+FROM rust:1-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY crates/ crates/

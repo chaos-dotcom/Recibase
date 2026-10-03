@@ -116,7 +116,7 @@
   "name": "get_manifest_origin",
   "path": "/manifest",
   "status": "HTTP/1.1 200 OK",
-  "bytes": 179
+  "bytes": 347
  },
  {
   "i": 17,

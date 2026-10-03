@@ -2,6 +2,6 @@ HTTP/1.1 200 OK
 Date: <normalised>
 Connection: close
 Content-Type: application/json
-Content-Length: 20
+Content-Length: 187
 
-{"version":"latest"}
+{"version":"latest","name":"Recibase","source_url":"https://github.com/The-Silverwood-Institute/Recibase","base_commit_url":"https://github.com/The-Silverwood-Institute/Recibase/commit/"}
