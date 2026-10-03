@@ -22,4 +22,4 @@ ureq = { version = "3", default-features = false, features = ["json"] }
 debug = false
 lto = true
 opt-level = 3
-strip = false
+strip = true
