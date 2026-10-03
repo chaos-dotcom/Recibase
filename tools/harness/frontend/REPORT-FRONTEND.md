@@ -17,7 +17,7 @@ second row, with `--workers 4`. The Rust side is
 `target/release/recibase-frontend`.
 
 The headline, read against the Rust binary rather than against a configuration:
-one Rust process of 8 MiB serves **43,525 requests a second** on the busiest
+one Rust process of 5.6 MiB serves **43,525 requests a second** on the busiest
 endpoint, and matching it would take **about 22 gunicorn workers if Python held
 its single-worker efficiency, or about 45 at the efficiency it really shows once
 ten are running** - 1 to 2 GiB of memory, 23 to 46 processes, and more cores than
@@ -139,9 +139,9 @@ environment. A deployment of the Rust frontend is one 3.10 MiB binary plus the
 
 | | gunicorn, 1 worker | gunicorn, 4 workers | Rust | Rust vs 1 worker |
 |---|---:|---:|---:|---:|
-| RSS at rest, 15 s after the first request | 55.0 MiB | 161.0 MiB | **5.6 MiB** | **9.8x smaller** |
-| Peak RSS during a 4,000-request burst | 62.6 MiB | 194.0 MiB | **13.7 MiB** | **4.6x smaller** |
-| RSS 15 s after the load ends | 62.6 MiB | 73.5 MiB | 12.7 MiB | 4.9x smaller |
+| RSS at rest, once the first request has settled | 55.0 MiB | 161.0 MiB | **5.6 MiB** | **9.8x smaller** |
+| Peak RSS during a 4,000-request burst | 62.6 MiB | 194.0 MiB | **11.8 - 13.7 MiB** | 4.6x smaller |
+| RSS 45 s after the load ends | 62.6 MiB | 73.5 MiB | **5.6 MiB** | 11x smaller |
 | Processes at rest | 2 | 5 | **1** | |
 
 The Python figures are the whole process tree, which is what the service costs
@@ -150,6 +150,13 @@ one thread per open connection while a request is in flight, so its peak follows
 the largest body it holds at once - a 17 KB recipe page. The clients of this
 workload keep their connections alive, but only the Rust server accepts that:
 see the note in section 6 and section 7.
+
+The Rust "at rest" figure moves with *when* it is sampled: macOS returns the
+pages of the first full-page render lazily, so a reading taken seconds after `/`
+is first served is about 8.3 MiB and the resting 5.6 MiB appears between 15 and
+60 seconds later. Section 7 has the samples. Every "at rest" number here is a
+settled one; the earlier 13.7 MiB "after the load" figure in this table was the
+same effect on the way down, and 45 seconds is enough for it to reach 5.6 MiB.
 
 ## 6. CPU
 
@@ -233,9 +240,28 @@ Rust:      Keep-Alive requests: 2,000
 
 Every row is the same measurement - start the server, let it settle, run
 `ab -k -c 32 -n 30000` against `/`, read the server's own process tree before and
-after.
+after. Only gunicorn appears in it; the Rust binary is the target the rest of
+this section is measured against, at 43,525 req/s, 4.9 cores, 5.6 MiB at rest and
+13.7 MiB at peak from one process.
 
-| gunicorn workers | req/s | CPU per request | cores busy | RSS at rest | processes | p95 |
+The Rust row of the "at rest" column needs one caveat, because it is easy to
+measure it wrong and I did: **the same binary reads 5.6 MiB or 8.3 MiB
+depending on when you look.** macOS returns the pages of the first full-page
+render to the system lazily, so a sample taken seconds after `/` is first served
+reads about 8.3 MiB, and the resting figure of 5.6 MiB appears between 15 and 60
+seconds later - at a moment that varies from run to run:
+
+| sample after the first `/` | +3 s | +15 s | +30 s | +60 s |
+|---|---:|---:|---:|---:|
+| run 1 | 8,288 KiB | 8,288 KiB | 8,288 KiB | **5,664 KiB** |
+| run 2 | 8,272 KiB | 7,824 KiB | **5,664 KiB** | 5,664 KiB |
+| run 3 | 8,352 KiB | **5,728 KiB** | 5,728 KiB | 5,728 KiB |
+
+Every reading in this report that says "at rest" comes from a settle long enough
+to reach the resting figure; the ones taken from the worker sweep, which settles
+for three seconds, read high and have been corrected here.
+
+| gunicorn workers | req/s | CPU per request | cores busy | RSS, 3 s settle | processes | p95 |
 |---:|---:|---:|---:|---:|---:|---:|
 | 1 | 2,111 | 0.472 ms | 1.00 | 74.7 MiB | 2 | 16 ms |
 | 2 | 3,901 | 0.505 ms | 1.97 | 111.6 MiB | 3 | 9 ms |
@@ -250,7 +276,13 @@ after.
 
 Python stops climbing at about six workers: from there to 24 workers it serves
 between 7,083 and 7,608 requests a second while the memory it holds grows from
-274 MiB to 1,000 MiB and the process count from 7 to 25. **Twenty-four gunicorn
+274 MiB to 1,000 MiB and the process count from 7 to 25.
+
+The RSS column is sampled 3 s after the readiness probe, which overstates it -
+the Python's allocator returns freed pages too, just not immediately. With a
+45 s settle the same two configurations read **57.4 MiB** for one worker (against
+74.7 here) and **346.0 MiB** for ten (against 434.5 here), 20 to 30 % lower. The
+answer table below uses the settled values. **Twenty-four gunicorn
 workers, a gigabyte of memory and 25 processes serve one sixth of what one Rust
 process serves.**
 
@@ -261,14 +293,14 @@ workers are added. Cores are:
 
 | | cores needed | workers it would take | RSS | processes |
 |---|---:|---:|---:|---:|
-| at a single worker's cost per request (0.47-0.50 ms) | **22** | 22 | ~0.9 GiB | 23 |
-| at the cost measured at ten workers (1.02 ms) | **45** | 45 | ~1.9 GiB | 46 |
-| the Rust binary | **4.9** | 1 process | 8.3 MiB at rest, 13.7 MiB peak | 1 |
+| at a single worker's cost per request (0.47-0.50 ms) | **22** | 22 | ~0.75 GiB | 23 |
+| at the cost measured at ten workers (1.02 ms) | **45** | 45 | ~1.5 GiB | 46 |
+| the Rust binary | **4.9** | 1 process | 5.6 MiB at rest, 13.7 MiB peak | 1 |
 
 So: **about 22 gunicorn workers to match one Rust process, if Python could hold
 its single-worker efficiency; about 45 at the efficiency it actually shows once
-ten of them are running.** Either way it is 23 to 46 processes and 1 to 2 GiB of
-resident memory against 1 process and 8 MiB.
+ten of them are running.** Either way it is 23 to 46 processes and 0.75 to 1.5 GiB
+of resident memory against 1 process and 5.6 MiB.
 
 And the second number is the real one, because on this machine the Python cannot
 be pushed to 43,525 req/s at all: it plateaus near 7,500 req/s and the box has 10
@@ -298,9 +330,9 @@ this machine has, and still 14 to 25 processes.
 * **Equal CPU** - the Rust binary's 4.9 cores buy 43,525 req/s; ten gunicorn
   workers, which also take about 6 cores, serve 7,565 req/s. The Rust is **5.8x**
   the throughput for the same CPU.
-* **Equal memory** - the Rust binary peaks at 13.7 MiB. Python cannot run in
-  that: gunicorn's smallest configuration is a master and one worker, 2 processes
-  and 74.7 MiB at rest.
+* **Equal memory** - the Rust binary rests at 5.6 MiB. Python cannot run in that:
+  gunicorn's smallest configuration is a master and one worker, 2 processes and
+  55 MiB at rest.
 * **Equal processes** - one Rust process against gunicorn's master plus 24
   workers, which together serve 15 % of what that one process serves.
 

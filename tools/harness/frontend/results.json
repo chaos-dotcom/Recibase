@@ -1172,5 +1172,107 @@
   "ab_p95_ms": 2,
   "failed_requests": 0,
   "label": "rust-rep"
+ },
+ {
+  "label": "rust-longsettle",
+  "command": "/Users/chaos/projects/recibase-work/recibase-rs/target/release/recibase-frontend",
+  "port": 19081,
+  "mode": "keepalive",
+  "requests": 4000,
+  "concurrency": 16,
+  "paths": [
+   "/",
+   "/chicken-curry",
+   "/static/styles.css",
+   "/manifest.json",
+   "/does-not-exist"
+  ],
+  "startup_seconds": 0.01825690269470215,
+  "spawn_to_ready_seconds": 0.02125406265258789,
+  "idle": {
+   "rss_kb": 5632,
+   "cpu_seconds": 0.01,
+   "processes": 1,
+   "settle_seconds": 45.0,
+   "cpu_seconds_in_window": 0.0,
+   "cpu_percent_of_one_core": 0.0
+  },
+  "warmup": {
+   "requests": 992,
+   "wall_seconds": 0.08150791702792048,
+   "requests_per_second": 12170.596871714819,
+   "latency_p50_ms": 0.9746249997988343,
+   "latency_p95_ms": 3.18733393214643,
+   "latency_p99_ms": 4.811582970432937,
+   "latency_max_ms": 6.701792008243501,
+   "statuses": {
+    "200": 800,
+    "404": 192
+   }
+  },
+  "after_warmup": {
+   "rss_kb": 9760,
+   "cpu_seconds": 0.17,
+   "processes": 1
+  },
+  "load": {
+   "requests": 4000,
+   "wall_seconds": 1.9905280419625342,
+   "requests_per_second": 2009.5170304942071,
+   "latency_p50_ms": 3.1117090256884694,
+   "latency_p95_ms": 29.27133289631456,
+   "latency_p99_ms": 72.70291598979384,
+   "latency_max_ms": 283.5165000287816,
+   "statuses": {
+    "200": 3200,
+    "404": 800
+   },
+   "server_cpu_seconds": 1.4300000000000002,
+   "server_cpu_ms_per_request": 0.35750000000000004,
+   "peak_rss_kb": 12112,
+   "processes_during_load": 1
+  },
+  "after_load": {
+   "rss_kb": 5728,
+   "cpu_seconds": 1.6,
+   "processes": 1,
+   "settle_seconds": 45.0
+  }
+ },
+ {
+  "workers": 1,
+  "command": "/Users/chaos/projects/recibase-work/frontend-stuff/Frontend/.venv/bin/gunicorn app:app --bind 0.0.0.0:19080 --workers 1",
+  "url": "/",
+  "requests": 20000,
+  "concurrency": 32,
+  "idle_rss_kb": 58800,
+  "processes": 2,
+  "requests_per_second": 2176.45,
+  "server_cpu_seconds": 9.129999999999999,
+  "server_cpu_ms_per_request": 0.4564999999999999,
+  "cpu_cores_busy": 0.9935494249999998,
+  "peak_rss_kb": 67264,
+  "ab_p50_ms": 15,
+  "ab_p95_ms": 16,
+  "failed_requests": 0,
+  "label": "python-settled"
+ },
+ {
+  "workers": 10,
+  "command": "/Users/chaos/projects/recibase-work/frontend-stuff/Frontend/.venv/bin/gunicorn app:app --bind 0.0.0.0:19080 --workers 10",
+  "url": "/",
+  "requests": 20000,
+  "concurrency": 32,
+  "idle_rss_kb": 354272,
+  "processes": 11,
+  "requests_per_second": 7682.81,
+  "server_cpu_seconds": 18.759999999999998,
+  "server_cpu_ms_per_request": 0.9379999999999998,
+  "cpu_cores_busy": 7.20647578,
+  "peak_rss_kb": 441984,
+  "ab_p50_ms": 4,
+  "ab_p95_ms": 6,
+  "failed_requests": 0,
+  "label": "python-settled"
  }
 ]
