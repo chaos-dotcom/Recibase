@@ -29,7 +29,8 @@ Two byte-exact captures of the *running Scala server* are the ground truth:
 | `capture-scala-cors3/` | 6 | header-list normalisation and non-preflight requests that carry the preflight headers |
 | `capture-scala-keepalive/` | 13 | kept-alive connections: the `Connection` header, HTTP/1.0 vs 1.1, and a preflight on a kept-alive connection |
 
-All 287 responses are byte-identical; only the volatile `Date` header differs.
+All 287 responses are byte-identical; only the volatile `Date` header and the
+manifest's deploy `version` differ (both normalised, see below).
 
 ```
 B=recibase-rs/target/release/recibase-server
@@ -45,7 +46,7 @@ python3 verify_port.py --reference capture-scala-cors3  --out capture-rust-cors3
 ```
 
 Each run reports every response as byte-identical after normalising the `Date`
-header.
+header and the manifest's deploy `version`.
 
 `capture.py` sends one request per fresh connection with `Connection: close` and
 stores the raw bytes; `diff_captures.py` compares two capture directories.
@@ -62,7 +63,7 @@ python3 capture_scala.py \
 ```
 
 The captures here were regenerated from `c02106f`; every response is
-byte-identical after normalising `Date`.
+byte-identical after normalising `Date` and the manifest `version`.
 
 ## What "byte-for-byte" needed
 
@@ -108,7 +109,11 @@ byte-identical after normalising `Date`.
    `version`, `name` (`Recibase`), `source_url` and `base_commit_url`, in that
    order (circe's `Encoder.forProduct4`). `version` is the first of
    `GIT_COMMIT` / `SOURCE_COMMIT` / `GITHUB_SHA` whose trimmed value matches
-   `[0-9a-fA-F]{7,40}`, otherwise `latest` (`crates/core/src/misc.rs`).
+   `[0-9a-fA-F]{7,40}`, otherwise `latest` (`crates/core/src/misc.rs`). The API
+   image has none of those set, so `crates/server/build.rs` bakes the build's
+   commit in as a last resort before `latest`; the harness normalises the field
+   (and the `Content-Length` counting it) like `Date`, since it names the deploy
+   and not the application.
 
 ## Deliberate differences
 

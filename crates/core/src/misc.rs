@@ -17,8 +17,7 @@ impl Manifest {
     /// The upstream repository, reported in the manifest.
     pub const SOURCE_URL: &'static str = "https://github.com/chaos-dotcom/Recibase";
     /// The prefix of a URL to a specific upstream commit.
-    pub const BASE_COMMIT_URL: &'static str =
-        "https://github.com/chaos-dotcom/Recibase/commit/";
+    pub const BASE_COMMIT_URL: &'static str = "https://github.com/chaos-dotcom/Recibase/commit/";
 
     /// `Manifest(version)`: fills in the fixed multi-tenancy fields.
     pub fn new(version: String) -> Self {
@@ -35,7 +34,10 @@ impl Manifest {
             ("version", Value::String(self.version.clone())),
             ("name", Value::String(self.name.clone())),
             ("source_url", Value::String(self.source_url.clone())),
-            ("base_commit_url", Value::String(self.base_commit_url.clone())),
+            (
+                "base_commit_url",
+                Value::String(self.base_commit_url.clone()),
+            ),
         ])
     }
 
@@ -44,12 +46,28 @@ impl Manifest {
     /// GIT_COMMIT, then SOURCE_COMMIT, then GITHUB_SHA; the first value that
     /// trimmed matches `[0-9a-fA-F]{7,40}` wins, otherwise "latest".
     pub fn deployed_version(env: &dyn Fn(&str) -> Option<String>) -> String {
+        Self::deployed_version_with_build(env, None)
+    }
+
+    /// [`deployed_version`](Self::deployed_version), with the commit baked in
+    /// at build time as the last resort before `latest`: the environment, then
+    /// the build, then `latest`.
+    pub fn deployed_version_with_build(
+        env: &dyn Fn(&str) -> Option<String>,
+        build_commit: Option<&str>,
+    ) -> String {
         for key in ["GIT_COMMIT", "SOURCE_COMMIT", "GITHUB_SHA"] {
             if let Some(value) = env(key) {
                 let trimmed = value.trim().to_string();
                 if is_commit(&trimmed) {
                     return trimmed;
                 }
+            }
+        }
+        if let Some(commit) = build_commit {
+            let commit = commit.trim();
+            if is_commit(commit) {
+                return commit.to_string();
             }
         }
         "latest".to_string()
@@ -72,7 +90,11 @@ pub struct MenuEntry {
 
 impl MenuEntry {
     pub fn new(name: &str, permalink: &str) -> Self {
-        MenuEntry { name: name.to_string(), permalink: permalink.to_string(), ours: false }
+        MenuEntry {
+            name: name.to_string(),
+            permalink: permalink.to_string(),
+            ours: false,
+        }
     }
 
     pub fn to_json(&self) -> Value {

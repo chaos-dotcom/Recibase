@@ -34,9 +34,11 @@ server; the Rust server is then captured with the same request list and diffed:
 | `capture-scala-cors3/` | 6 | requested-header normalisation | 6/6 identical |
 
 **274/274 responses are byte-identical.** Every raw response differs from its
-Scala counterpart in the `Date` header only — that header is a timestamp and
-cannot match by construction; `diff_captures.py` normalises exactly that one
-line and compares everything else, headers and body, byte for byte.
+Scala counterpart in the `Date` header, and the manifest body additionally names
+the deploy commit: the `Date` is a timestamp and cannot match by construction,
+and the commit belongs to the deployment rather than the application.
+`diff_captures.py` normalises those two and compares everything else, headers and
+body, byte for byte.
 
 ### What that required
 

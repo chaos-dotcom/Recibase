@@ -2,8 +2,11 @@
 """Byte-exact HTTP capture harness for the Recibase API.
 
 Sends one request per fresh TCP connection with `Connection: close` and stores
-the *raw* response bytes. Also stores a normalised copy with the volatile
-Date header replaced, so two captures taken at different times can be diffed.
+the *raw* response bytes. Also stores a normalised copy with the two things that
+belong to the deployment rather than to the application - the volatile `Date`
+header and the manifest's deploy `version` (and the `Content-Length` counting
+it) - replaced, so two captures taken from different builds or at different
+times can be diffed.
 """
 import json, os, socket, sys, re, argparse
 
@@ -57,9 +60,19 @@ def raw_request(host, port, path, method="GET", headers=None, body=None, timeout
     return b"".join(chunks)
 
 DATE_RE = re.compile(rb"^[Dd]ate:\s*[^\r\n]*\r\n", re.M)
+# The manifest's `version` is the commit the server was deployed from, so it
+# belongs to the deployment rather than to the application - like `Date`, it is
+# normalised so captures taken from different builds can be diffed. Its length
+# varies with the commit, so the `Content-Length` that counts it goes too.
+VERSION_RE = re.compile(rb'"version":"[^"]*"')
+MANIFEST_LENGTH_RE = re.compile(rb"Content-Length:[ \t]*\d+")
 
 def normalise(raw):
-    return DATE_RE.sub(b"Date: <normalised>\r\n", raw)
+    raw = DATE_RE.sub(b"Date: <normalised>\r\n", raw)
+    if b'"base_commit_url"' in raw:
+        raw = VERSION_RE.sub(b'"version":"<normalised>"', raw)
+        raw = MANIFEST_LENGTH_RE.sub(b"Content-Length: <normalised>", raw)
+    return raw
 
 def main():
     ap = argparse.ArgumentParser()

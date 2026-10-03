@@ -3,6 +3,13 @@ services:
     build:
       context: .
       target: runtime
+      # Baked into the binary by crates/server/build.rs, so /manifest reports the
+      # commit. `docker compose build` takes these from the environment (and
+      # `.env`); unset means the manifest shows `latest`.
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-}
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-}
+        GITHUB_SHA: ${GITHUB_SHA:-}
     image: recibase-rust:slim
     env_file:
       - path: .env

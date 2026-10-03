@@ -5,7 +5,7 @@ use recibase_core::json::to_string;
 use recibase_core::misc::Manifest;
 use recibase_core::permalink::from_raw_string;
 use recibase_server::http::Request;
-use recibase_server::routes::{route, Context};
+use recibase_server::routes::{Context, route};
 
 fn context() -> Context {
     Context::new(Box::new(|_| None))
@@ -128,6 +128,38 @@ fn deployed_version_falls_back_to_latest() {
     assert_eq!(Manifest::deployed_version(&|_| None), "latest");
 }
 
+/// The commit `build.rs` baked in is the last resort before `latest`: it is
+/// used only when the environment names no commit, and a value that is not a
+/// commit is no better than none.
+#[test]
+fn deployed_version_falls_back_to_the_build_commit() {
+    assert_eq!(
+        Manifest::deployed_version_with_build(&|_| None, Some("cafebabe")),
+        "cafebabe"
+    );
+    assert_eq!(
+        Manifest::deployed_version_with_build(&|_| None, Some("latest")),
+        "latest"
+    );
+    assert_eq!(
+        Manifest::deployed_version_with_build(&|_| None, Some("")),
+        "latest"
+    );
+}
+
+/// The environment still wins over the build-time commit.
+#[test]
+fn deployed_version_prefers_the_environment_over_the_build_commit() {
+    let env = |key: &str| match key {
+        "GIT_COMMIT" => Some("abcdef1".to_string()),
+        _ => None,
+    };
+    assert_eq!(
+        Manifest::deployed_version_with_build(&env, Some("cafebabe")),
+        "abcdef1"
+    );
+}
+
 // ------------------------------------------------------------------- RecipesSpec
 
 #[test]
@@ -139,8 +171,10 @@ fn recipes_list_returns_200() {
 #[test]
 fn recipes_list_links_to_each_recipe() {
     let response = route(&request("GET", "/recipes/"), &context());
-    assert!(body(&response)
-        .contains("{\"name\":\"Vegetable Primavera\",\"permalink\":\"vegetable-primavera\"}"));
+    assert!(
+        body(&response)
+            .contains("{\"name\":\"Vegetable Primavera\",\"permalink\":\"vegetable-primavera\"}")
+    );
 }
 
 #[test]
@@ -162,7 +196,10 @@ fn recipes_list_marks_our_recipes_with_ours() {
         .iter()
         .find(|entry| entry["permalink"] == "vegetable-primavera")
         .expect("Vegetable Primavera is in the list");
-    assert!(theirs.get("ours").is_none(), "their entry must not carry ours");
+    assert!(
+        theirs.get("ours").is_none(),
+        "their entry must not carry ours"
+    );
 }
 
 #[test]
@@ -233,8 +270,12 @@ fn unconfigured_submission_returns_503() {
 #[test]
 fn config_requires_both_secrets() {
     use recibase_submit::config::RecipeSubmissionConfig;
-    assert!(RecipeSubmissionConfig::from(None, Some("token".into()), None, None, None, None).is_none());
-    assert!(RecipeSubmissionConfig::from(Some("secret".into()), None, None, None, None, None).is_none());
+    assert!(
+        RecipeSubmissionConfig::from(None, Some("token".into()), None, None, None, None).is_none()
+    );
+    assert!(
+        RecipeSubmissionConfig::from(Some("secret".into()), None, None, None, None, None).is_none()
+    );
 }
 
 #[test]
@@ -259,38 +300,44 @@ fn config_defaults_repository_and_branch() {
 #[test]
 fn config_rejects_a_repository_that_is_not_owner_name() {
     use recibase_submit::config::RecipeSubmissionConfig;
-    assert!(RecipeSubmissionConfig::from(
-        Some("secret".into()),
-        Some("token".into()),
-        Some("not a repo".into()),
-        None,
-        Some("turnstile-secret".into()),
-        Some("recipes.example".into()),
-    )
-    .is_none());
+    assert!(
+        RecipeSubmissionConfig::from(
+            Some("secret".into()),
+            Some("token".into()),
+            Some("not a repo".into()),
+            None,
+            Some("turnstile-secret".into()),
+            Some("recipes.example".into()),
+        )
+        .is_none()
+    );
 }
 
 #[test]
 fn config_requires_a_turnstile_secret_and_hostname() {
     use recibase_submit::config::RecipeSubmissionConfig;
-    assert!(RecipeSubmissionConfig::from(
-        Some("secret".into()),
-        Some("token".into()),
-        None,
-        None,
-        None,
-        Some("recipes.example".into()),
-    )
-    .is_none());
-    assert!(RecipeSubmissionConfig::from(
-        Some("secret".into()),
-        Some("token".into()),
-        None,
-        None,
-        Some("turnstile-secret".into()),
-        Some("  ".into()),
-    )
-    .is_none());
+    assert!(
+        RecipeSubmissionConfig::from(
+            Some("secret".into()),
+            Some("token".into()),
+            None,
+            None,
+            None,
+            Some("recipes.example".into()),
+        )
+        .is_none()
+    );
+    assert!(
+        RecipeSubmissionConfig::from(
+            Some("secret".into()),
+            Some("token".into()),
+            None,
+            None,
+            Some("turnstile-secret".into()),
+            Some("  ".into()),
+        )
+        .is_none()
+    );
 }
 
 #[test]
@@ -300,7 +347,10 @@ fn turnstile_rejects_a_missing_token() {
         ["recipes.example".to_string()].into_iter().collect();
     assert!(!Turnstile::token_accepted("", &hostnames));
     assert!(!Turnstile::token_accepted(&"x".repeat(2049), &hostnames));
-    assert!(!Turnstile::token_accepted("token", &std::collections::HashSet::new()));
+    assert!(!Turnstile::token_accepted(
+        "token",
+        &std::collections::HashSet::new()
+    ));
     assert!(Turnstile::token_accepted("token", &hostnames));
 }
 
@@ -315,7 +365,13 @@ fn docs_map_lists_every_endpoint() {
 
 #[test]
 fn unknown_paths_are_not_found() {
-    for target in ["/nope", "/recipes/a/b", "/meals", "/recipes", "/recipe-submissions"] {
+    for target in [
+        "/nope",
+        "/recipes/a/b",
+        "/meals",
+        "/recipes",
+        "/recipe-submissions",
+    ] {
         let response = route(&request("GET", target), &context());
         assert_eq!(response.status, 404, "{}", target);
         assert_eq!(body(&response), "Not found", "{}", target);

@@ -20,6 +20,12 @@
 # glibc than the runtime ships.
 FROM rust:1-slim-bookworm AS build
 WORKDIR /src
+# The commit `build.rs` bakes into the manifest's `version`. `.git/` is not in
+# the build context, so a CI passes these instead; unset means `latest`.
+ARG GIT_COMMIT
+ARG SOURCE_COMMIT
+ARG GITHUB_SHA
+ENV GIT_COMMIT=${GIT_COMMIT} SOURCE_COMMIT=${SOURCE_COMMIT} GITHUB_SHA=${GITHUB_SHA}
 COPY Cargo.toml Cargo.lock ./
 COPY crates/ crates/
 RUN cargo build --release --locked -p recibase-server \

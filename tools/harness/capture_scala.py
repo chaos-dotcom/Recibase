@@ -18,9 +18,10 @@ then, from this directory:
         --requests requests.json --out capture-scala
 
 The manifest's `version` field comes from the *deploy* environment
-(`GIT_COMMIT` / `SOURCE_COMMIT` / `GITHUB_SHA`), so an unset environment yields
-`{"version":"latest",...}`, matching the committed captures. Add
-`--env MEAL_LOG_CSV_URL=file:///.../meal-log.csv` for the csv set, or the
+(`GIT_COMMIT` / `SOURCE_COMMIT` / `GITHUB_SHA`); an unset environment yields
+`{"version":"latest",...}`. The harness normalises that field like `Date`
+(see `capture.py`), so it need not be pinned to match the committed captures.
+Add `--env MEAL_LOG_CSV_URL=file:///.../meal-log.csv` for the csv set, or the
 `RECIPE_SUBMIT_PASSCODE` / `GITHUB_TOKEN` / `TURNSTILE_SECRET` /
 `TURNSTILE_HOSTNAMES` quartet for the submit set.
 

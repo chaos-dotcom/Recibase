@@ -142,7 +142,11 @@ pub fn meal_names() -> String {
 }
 
 pub fn manifest_json(env: &dyn Fn(&str) -> Option<String>) -> Value {
-    Manifest::new(Manifest::deployed_version(env)).to_json()
+    Manifest::new(Manifest::deployed_version_with_build(
+        env,
+        option_env!("RECIBASE_BUILD_COMMIT"),
+    ))
+    .to_json()
 }
 
 pub fn docs() -> Value {
