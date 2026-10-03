@@ -20,3 +20,6 @@ ureq = { version = "3", default-features = false, features = ["json"] }
 
 [profile.release]
 debug = false
+lto = true
+opt-level = 0
+

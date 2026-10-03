@@ -1,0 +1,38 @@
+# Compose file for the Recibase Rust backend.
+#
+#   docker compose up --build     # start
+#   curl localhost:8081/health    # -> ok
+#
+# The build context is this directory (where Cargo.toml lives). See the
+# Dockerfile for the image targets.
+services:
+  recibase:
+    build:
+      context: .
+      # `runtime` is the glibc slim image and carries the image HEALTHCHECK, so
+      # `docker compose up --wait` reports healthy. Swap to `distroless` for the
+      # smallest image (~51 MB); it has no shell, so it has no HEALTHCHECK.
+      target: runtime
+    image: recibase-rust:slim
+    ports:
+      - "8081:8081"
+    environment:
+      PORT: "8081"
+      # Usage data (timesEaten, lastEaten, notes, featured). Point at a file: or
+      # http(s): URL to load the meal log; leave unset for an empty log.
+      # MEAL_LOG_CSV_URL: file:///data/meal-log.csv
+      #
+      # Recipe submission (POST /recipe-submissions). All four are required, or
+      # the route answers 503.
+      # RECIPE_SUBMIT_PASSCODE: ...
+      # GITHUB_TOKEN: ...
+      # TURNSTILE_SECRET: ...
+      # TURNSTILE_HOSTNAMES: example.com,www.example.com
+      #
+      # Optional overrides (these are the defaults):
+      # GITHUB_REPOSITORY: The-Silverwood-Institute/Recibase
+      # GITHUB_BASE_BRANCH: master
+    # To serve a local meal log, mount it and set MEAL_LOG_CSV_URL above:
+    # volumes:
+    #   - ./meal-log.csv:/data/meal-log.csv:ro
+    restart: unless-stopped
