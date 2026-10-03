@@ -21,7 +21,7 @@ pub fn recipe() -> RecipeDef {
         ],
         tags: vec![Tag::Vegetarian, Tag::Scales, Tag::Quick, Tag::LowEffort],
         image: None,
-        ingredients_blocks: crate::recipe::simple(vec![
+        ingredients_blocks: crate::recipe::IngredientsBlock::simple(vec![
             crate::recipe::Ingredient::q("Orzo pasta", "150g"),
             crate::recipe::Ingredient::opt("Stock", Some("400-500ml"), None, Some("Chicken or vegetable")),
             crate::recipe::Ingredient::q("Essential Frozen Petits Pois", "100g"),
