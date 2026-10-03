@@ -44,6 +44,7 @@ pub fn recipes() -> &'static [RecipeDef] {
             super::dahl::recipe(),
             super::drop_pancakes::recipe(),
             super::dukaten_cookies::recipe(),
+            super::easy_pancakes::recipe(),
             super::egg_tapas::recipe(),
             super::fish_finger_katsu::recipe(),
             super::goan_king_prawn_balchao::recipe(),
@@ -52,6 +53,7 @@ pub fn recipes() -> &'static [RecipeDef] {
             super::hoisin_duck_wraps::recipe(),
             super::indian_patties::recipe(),
             super::kashtouri::recipe(),
+            super::kimchi_noodles::recipe(),
             super::lamb_aubergine_daube::recipe(),
             super::lemon_feta_pasta::recipe(),
             super::lentil_shepards_pie::recipe(),
@@ -97,6 +99,7 @@ pub fn recipes() -> &'static [RecipeDef] {
             super::spiced_apple_winter_soup::recipe(),
             super::spicy_smoked_paprika_chorizo::recipe(),
             super::squash_gnocchi_gratin::recipe(),
+            super::squash_sweet_potato_lentil_stew::recipe(),
             super::strawberry_basil_ice_cream::recipe(),
             super::summertime_mac_n_cheese::recipe(),
             super::sweet_chilli_feta_pasta::recipe(),
@@ -121,11 +124,14 @@ pub fn chaos_recipes() -> &'static [&'static str] {
     &[
         "CheddarLeekOrzotto",
         "CoconutPotatoCurry",
+        "EasyPancakes",
         "FishFingerKatsu",
+        "KimchiNoodles",
         "MedStyleGnocchi",
         "OlivePestoCasarecce",
         "PolentaWithBalsamicSausagesMushrooms",
         "ProsciuttoCabbageBeanStew",
+        "SquashSweetPotatoLentilStew",
         "SummertimeMacNCheese",
     ]
 }
