@@ -12,15 +12,15 @@
 //!    both `capture-scala/` (no usage data) and `capture-scala-csv/`.
 //!
 //! The test needs the workspace around this worktree. It locates it from
-//! `CARGO_MANIFEST_DIR` (../../) or from `RECIBASE_WORK`.
+//! `CARGO_MANIFEST_DIR` (../../../) or from `RECIBASE_WORK`.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use recibase_core::meal::{DatedNote, MealStubWithUsageData, Source};
 use recibase_core::scala_hash::{
-    case_object_hash, java_string_hash, product_hash, scala_set_flat_map, seq_hash, set_hash,
-    set_order, set_order_distinct, Slot, ScalaHash,
+    ScalaHash, Slot, case_object_hash, java_string_hash, product_hash, scala_set_flat_map,
+    seq_hash, set_hash, set_order, set_order_distinct,
 };
 use recibase_core::tag::Tag;
 use serde_json::Value;
@@ -36,7 +36,8 @@ fn work_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .and_then(Path::parent)
-        .expect("core/ lives two levels below the workspace")
+        .and_then(Path::parent)
+        .expect("crates/core/ lives three levels below the work directory")
         .to_path_buf()
 }
 
@@ -78,16 +79,6 @@ fn read_capture(dir: &Path, needle: &str) -> Vec<(String, Value)> {
     out.sort_by(|a, b| a.0.cmp(&b.0));
     assert!(!out.is_empty(), "no {needle} captures in {}", dir.display());
     out
-}
-
-fn string_at(value: &Value, index: usize) -> String {
-    value
-        .as_array()
-        .unwrap_or_else(|| panic!("expected an array, got {value}"))
-        .iter()
-        .map(|v| v.as_str().expect("string element").to_string())
-        .nth(index)
-        .unwrap()
 }
 
 fn field_array(value: &Value, field: &str) -> Vec<String> {
@@ -149,10 +140,7 @@ const SYNTHETIC_SETS: &[(&[i32], &[usize])] = &[
     (&[0, 1, 2, 3, 4], &[0, 1, 2, 3, 4]),
     (&[0, 1, 2, 3, 4, 5], &[0, 5, 1, 2, 3, 4]),
     (&[0, 1, 2, 3, 4, 5, 6], &[0, 5, 1, 6, 2, 3, 4]),
-    (
-        &[0, 1, 2, 3, 4, 5, 6, 7],
-        &[0, 5, 1, 6, 2, 7, 3, 4],
-    ),
+    (&[0, 1, 2, 3, 4, 5, 6, 7], &[0, 5, 1, 6, 2, 7, 3, 4]),
     (
         &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
         &[0, 5, 10, 14, 1, 6, 9, 13, 2, 12, 7, 3, 11, 8, 4, 15],
@@ -197,7 +185,10 @@ const SYNTHETIC_SETS: &[(&[i32], &[usize])] = &[
     (&[1411, 2094, 5365, 83, 90], &[1, 0, 2, 4, 3]),
     (&[83, 2094, 1411], &[0, 1, 2]),
     (&[1, 1, 2, 3, 4], &[2, 3, 4, 0, 1]),
-    (&[1024, 1469, 2612, 4094, 1411, 2094, 3944, 5365], &[5, 6, 4, 7, 2, 3, 0, 1]),
+    (
+        &[1024, 1469, 2612, 4094, 1411, 2094, 3944, 5365],
+        &[5, 6, 4, 7, 2, 3, 0, 1],
+    ),
 ];
 
 /// `hashCode` of a few real Scala values, measured in the same probe run.
@@ -268,7 +259,10 @@ fn order_ids(items: &[Hashed]) -> Vec<usize> {
     let slots: Vec<Slot> = items
         .iter()
         .enumerate()
-        .map(|(idx, item)| Slot { idx, hash: item.hash })
+        .map(|(idx, item)| Slot {
+            idx,
+            hash: item.hash,
+        })
         .collect();
     set_order_distinct(&slots)
         .iter()
@@ -399,8 +393,7 @@ fn tag_hashes_match_the_scala_probe() {
     }
     // all 31 tag hashes are distinct, so a trie never holds two tags with the
     // same improved hash and the set order is a pure function of them
-    let unique: std::collections::BTreeSet<i32> =
-        TAG_HASHES.iter().map(|(_, h)| *h).collect();
+    let unique: std::collections::BTreeSet<i32> = TAG_HASHES.iter().map(|(_, h)| *h).collect();
     assert_eq!(unique.len(), TAG_HASHES.len());
 }
 
@@ -418,7 +411,8 @@ fn synthetic_sets_match_the_scala_trie_order() {
 
 #[test]
 fn composite_hashes_match_the_scala_probe() {
-    let list = |values: &[i32]| seq_hash(&values.iter().map(|v| v.scala_hash()).collect::<Vec<_>>());
+    let list =
+        |values: &[i32]| seq_hash(&values.iter().map(|v| v.scala_hash()).collect::<Vec<_>>());
     let set = |values: &[i32]| set_hash(&values.iter().map(|v| v.scala_hash()).collect::<Vec<_>>());
     assert_eq!(list(&[]), 473519988);
     assert_eq!(list(&[1]), 1945410391);
@@ -434,7 +428,10 @@ fn composite_hashes_match_the_scala_probe() {
     );
     // a case object, a case class with one String field, a case class of two
     assert_eq!(case_object_hash("None"), 2433880);
-    assert_eq!(product_hash("Recibase", &[java_string_hash("baked-rigatoni-aubergine")]), -1277414717);
+    assert_eq!(
+        product_hash("Recibase", &[java_string_hash("baked-rigatoni-aubergine")]),
+        -1277414717
+    );
     // DatedNote(LocalDate.of(2020, 1, 1), "note")
     assert_eq!(
         product_hash("DatedNote", &[4137025, java_string_hash("note")]),
@@ -460,8 +457,10 @@ fn recipes_match_both_capture_dirs() {
                 .get(&name)
                 .unwrap_or_else(|| panic!("{file}: no Scala source for recipe {name}"));
 
-            let expected_tags: Vec<&str> =
-                recibase_core::scala_hash::scala_set(tags).iter().map(|t| t.entry_name()).collect();
+            let expected_tags: Vec<&str> = recibase_core::scala_hash::scala_set(tags)
+                .iter()
+                .map(|t| t.entry_name())
+                .collect();
             assert_eq!(
                 expected_tags,
                 field_array(&value, "tags"),
@@ -548,7 +547,11 @@ fn measured_meal_hashes_match_the_scala_probe() {
             .iter()
             .find(|m| m.name == *name)
             .unwrap_or_else(|| panic!("no meal named {name}"));
-        assert_eq!(meal.scala_hash(), *hash, "MealStubWithUsageData({name}).hashCode");
+        assert_eq!(
+            meal.scala_hash(),
+            *hash,
+            "MealStubWithUsageData({name}).hashCode"
+        );
     }
 }
 

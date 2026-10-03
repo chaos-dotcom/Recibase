@@ -1,10 +1,22 @@
 [workspace]
 resolver = "2"
-members = ["core", "submit", "server"]
+members = ["crates/core", "crates/submit", "crates/server"]
 
 [workspace.package]
-edition = "2021"
+edition = "2024"
 version = "0.1.0"
+
+[workspace.dependencies]
+# Internal crates.
+recibase-core = { path = "crates/core" }
+recibase-submit = { path = "crates/submit" }
+
+# External crates.
+chrono = "0.4"
+csv = "1"
+serde_json = { version = "1", features = ["preserve_order"] }
+unicode-normalization = "0.1"
+ureq = { version = "3", default-features = false, features = ["json"] }
 
 [profile.release]
 debug = false

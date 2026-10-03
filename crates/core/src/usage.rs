@@ -93,7 +93,7 @@ fn number_field(token: &str, max_width: usize) -> Option<u32> {
 fn month_number(name: &str) -> Option<u32> {
     let lower = name.to_lowercase();
     for (index, full) in MONTHS.iter().enumerate() {
-        if lower == *full || lower == full[..3].to_string() {
+        if lower == *full || lower == full[..3] {
             return Some(index as u32 + 1);
         }
     }
@@ -330,14 +330,14 @@ pub fn parse_csv<R: Read>(reader: R) -> Result<Vec<MealLogEntry>, CsvError> {
                     return Err(CsvError::MissingHeader {
                         name: name.to_string(),
                         headers: headers.iter().map(|h| h.to_string()).collect(),
-                    })
+                    });
                 }
                 Some(index) if index >= record.len() => {
                     return Err(CsvError::ShortRow {
                         name: name.to_string(),
                         index,
                         values: record.len(),
-                    })
+                    });
                 }
                 Some(_) => {}
             }
@@ -566,11 +566,7 @@ fn resolve_redirect(current: &str, location: &str) -> Result<String, String> {
         Some(index) => &base_path[..index + 1],
         None => "",
     };
-    Ok(format!(
-        "http://{}/{}",
-        authority,
-        format!("{}{}", directory, location)
-    ))
+    Ok(format!("http://{}/{}{}", authority, directory, location))
 }
 
 fn dechunk(body: &[u8]) -> Result<Vec<u8>, String> {
@@ -656,7 +652,7 @@ impl UsageData {
     }
 
     pub fn with_fetcher(url: Option<String>, fetcher: Fetcher) -> UsageData {
-        UsageData::with_clock(url, fetcher, Box::new(|| Utc::now()))
+        UsageData::with_clock(url, fetcher, Box::new(Utc::now))
     }
 
     pub fn with_clock(url: Option<String>, fetcher: Fetcher, clock: Clock) -> UsageData {

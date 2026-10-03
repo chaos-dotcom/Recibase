@@ -115,7 +115,9 @@ const PRODUCT_SEED: i32 = 0xcafebabeu32 as i32;
 
 fn mix(hash: i32, data: i32) -> i32 {
     let h = mix_last(hash, data);
-    h.rotate_left(13).wrapping_mul(5).wrapping_add(0xe6546b64u32 as i32)
+    h.rotate_left(13)
+        .wrapping_mul(5)
+        .wrapping_add(0xe6546b64u32 as i32)
 }
 
 fn mix_last(hash: i32, data: i32) -> i32 {
@@ -232,10 +234,8 @@ pub fn list_hash(element_hashes: &[i32], seed: i32) -> i32 {
                 range_diff = hash.wrapping_sub(prev);
                 range_state = 2;
             }
-            2 => {
-                if range_diff != hash.wrapping_sub(prev) || range_diff == 0 {
-                    range_state = 3;
-                }
+            2 if range_diff != hash.wrapping_sub(prev) || range_diff == 0 => {
+                range_state = 3;
             }
             _ => {}
         }
@@ -412,10 +412,7 @@ pub fn scala_set<T: ScalaHash + Clone>(items: &[T]) -> Vec<T> {
 /// parent`, i.e. **outermost ancestor first**, while `Tag::all_parent_tags`
 /// (tag.rs) walks the chain upwards and returns them innermost first: callers
 /// must reverse it, or `tag.rs` must return the Scala order.
-pub fn scala_set_flat_map<T, U>(
-    items: &[T],
-    f: impl Fn(&T) -> Vec<U>,
-) -> Vec<U>
+pub fn scala_set_flat_map<T, U>(items: &[T], f: impl Fn(&T) -> Vec<U>) -> Vec<U>
 where
     T: ScalaHash + Clone,
     U: ScalaHash + Clone,
@@ -533,11 +530,7 @@ impl ScalaHash for MealStubWithUsageData {
             &[
                 self.name.scala_hash(),
                 crate::scala_hash::set_hash(
-                    &self
-                        .tags
-                        .iter()
-                        .map(|t| t.scala_hash())
-                        .collect::<Vec<_>>(),
+                    &self.tags.iter().map(|t| t.scala_hash()).collect::<Vec<_>>(),
                 ),
                 self.source.scala_hash(),
                 crate::scala_hash::seq_hash(

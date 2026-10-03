@@ -3,7 +3,6 @@
 //! The Scala reads `MEAL_LOG_CSV_URL` with `scala.io.Source.fromURL`, so both
 //! `file:` and `http(s):` URLs work here.
 
-use recibase_core::meal::DatedNote;
 use recibase_core::usage::{self, MealLogEntry};
 use std::collections::HashMap;
 
@@ -46,7 +45,9 @@ pub fn read_rows(text: &str) -> Vec<HashMap<String, String>> {
 
     let mut out = Vec::new();
     let mut iter = records.into_iter();
-    let Some(header) = iter.next() else { return out };
+    let Some(header) = iter.next() else {
+        return out;
+    };
     let header: Vec<String> = header
         .into_iter()
         .map(|h| h.trim_start_matches('\u{feff}').to_string())
@@ -89,8 +90,4 @@ pub fn load_from_env(env: &dyn Fn(&str) -> Option<String>) -> Vec<MealLogEntry> 
             }
         },
     }
-}
-
-pub fn dated_notes(entry: Option<&Vec<DatedNote>>) -> Vec<DatedNote> {
-    entry.cloned().unwrap_or_default()
 }

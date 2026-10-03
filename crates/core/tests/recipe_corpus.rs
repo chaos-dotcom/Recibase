@@ -18,7 +18,11 @@ fn capture_dir() -> PathBuf {
     }
     let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let candidates = [
-        manifest.join("..").join("..").join("capture-scala"),
+        manifest
+            .join("..")
+            .join("..")
+            .join("..")
+            .join("capture-scala"),
         PathBuf::from("/Users/chaos/recibase-work/capture-scala"),
     ];
     candidates

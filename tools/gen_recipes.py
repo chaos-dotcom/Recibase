@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Regenerate core/src/recipes/mod.rs and core/src/recipes/all.rs.
+"""Regenerate crates/core/src/recipes/mod.rs and crates/core/src/recipes/all.rs.
 
-Scans core/src/recipes/*.rs (one file per recipe, named after the Scala case
-object) and writes the module list plus the registry. Recipe order does not
-affect byte compatibility: every consumer treats the corpus as a Set or sorts
-it, and the Scala side's reflection order is itself unstable.
+Scans crates/core/src/recipes/*.rs (one file per recipe, named after the Scala
+case object) and writes the module list plus the registry. Recipe order does
+not affect byte compatibility: every consumer treats the corpus as a Set or
+sorts it, and the Scala side's reflection order is itself unstable.
 """
 import os, re, sys
 
 here = os.path.dirname(os.path.abspath(__file__))
-recipes_dir = os.path.join(here, os.pardir, "core", "src", "recipes")
+recipes_dir = os.path.join(here, os.pardir, "crates", "core", "src", "recipes")
 recipes_dir = os.path.normpath(recipes_dir)
 
 def snake(name):

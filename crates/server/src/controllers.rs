@@ -1,9 +1,8 @@
 //! `RecipeController`, `MealsController` and `MetaController`.
 
-use chrono::{Datelike, Duration, Local, Months, NaiveDate};
-use recibase_core::json::to_string;
+use chrono::{Duration, Local, Months, NaiveDate};
 use recibase_core::meal::{MealStub, MealStubWithUsageData};
-use recibase_core::misc::{docs_json, Manifest, MenuEntry};
+use recibase_core::misc::{Manifest, MenuEntry, docs_json};
 use recibase_core::recipe::RecipeDef;
 use recibase_core::scala_hash;
 use recibase_core::tag::Tag;
@@ -45,7 +44,12 @@ pub fn list_recipes(has_ingredient: Option<&str>) -> Vec<MenuEntry> {
 }
 
 pub fn recipes_json(has_ingredient: Option<&str>) -> Value {
-    Value::Array(list_recipes(has_ingredient).iter().map(|e| e.to_json()).collect())
+    Value::Array(
+        list_recipes(has_ingredient)
+            .iter()
+            .map(|e| e.to_json())
+            .collect(),
+    )
 }
 
 /// `RecipeController.routing`: permalink -> recipe, built once at start-up as
@@ -133,7 +137,10 @@ pub fn meal_names() -> String {
 }
 
 pub fn manifest_json(env: &dyn Fn(&str) -> Option<String>) -> Value {
-    Manifest { version: Manifest::deployed_version(env) }.to_json()
+    Manifest {
+        version: Manifest::deployed_version(env),
+    }
+    .to_json()
 }
 
 pub fn docs() -> Value {
@@ -144,20 +151,16 @@ pub fn docs() -> Value {
 /// can pin it. Defaults to the local date, exactly like the Scala.
 pub fn today(env: &dyn Fn(&str) -> Option<String>) -> NaiveDate {
     match env("RECIBASE_TODAY") {
-        Some(value) => NaiveDate::parse_from_str(&value, "%Y-%m-%d").unwrap_or_else(|_| Local::now().date_naive()),
+        Some(value) => NaiveDate::parse_from_str(&value, "%Y-%m-%d")
+            .unwrap_or_else(|_| Local::now().date_naive()),
         None => Local::now().date_naive(),
     }
 }
 
 /// `LocalDate.now(ZoneId.of("Europe/London"))` for the submission route.
 pub fn london_today() -> NaiveDate {
+    // The Scala reads the zone-aware London date; the port approximates it with
+    // UTC shifted by the maximum (BST) offset.
     use chrono::Utc;
-    let london = chrono::FixedOffset::east_opt(0).unwrap();
-    let _ = london;
-    let now = Utc::now() + Duration::hours(1);
-    NaiveDate::from_ymd_opt(now.year(), now.month(), now.day()).unwrap_or_else(|| Local::now().date_naive())
-}
-
-pub fn _unused(value: &Value) -> String {
-    to_string(value)
+    (Utc::now() + Duration::hours(1)).date_naive()
 }

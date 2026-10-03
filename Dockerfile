@@ -16,9 +16,7 @@
 FROM rust:1-slim AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
-COPY core/ core/
-COPY submit/ submit/
-COPY server/ server/
+COPY crates/ crates/
 RUN cargo build --release --locked -p recibase-server \
     && strip target/release/recibase-server
 
@@ -27,9 +25,7 @@ FROM rust:1-alpine AS build-musl
 RUN apk add --no-cache musl-dev
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
-COPY core/ core/
-COPY submit/ submit/
-COPY server/ server/
+COPY crates/ crates/
 RUN cargo build --release --locked -p recibase-server \
     && strip target/release/recibase-server
 
