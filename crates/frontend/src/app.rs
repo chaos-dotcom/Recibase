@@ -22,6 +22,7 @@ use serde_json::{Map, Value, json};
 use crate::backend::BackendClient;
 use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
 use crate::http::{Request, Response};
+use crate::peer::Peer;
 use crate::statics::{Outcome, StaticFiles};
 use crate::templates::{Templates, is_backend_unavailable};
 use crate::{contribute, pages, scaler};
@@ -85,11 +86,28 @@ pub struct App {
     pub statics: StaticFiles,
     pub recipe_list: Arc<CachedBackendCall<serde_json::Value>>,
     pub api_version: Arc<CachedBackendCall<String>>,
+    /// Other deployments whose recipes we list alongside ours.
+    pub peers: Vec<Peer>,
     pub fallback_host: String,
 }
 
 impl App {
     pub fn new(backend_url: String, frontend_version: String, port: u16) -> App {
+        // `PEER_BACKENDS`, e.g.
+        // `Kit & Alex|https://api.reciba.se/|https://reciba.se`.
+        let peers =
+            crate::peer::parse_peer_backends(&std::env::var("PEER_BACKENDS").unwrap_or_default());
+        App::with_peers(backend_url, frontend_version, port, peers)
+    }
+
+    /// [`App::new`], with the peers supplied rather than read from the
+    /// environment (the tests use this).
+    pub fn with_peers(
+        backend_url: String,
+        frontend_version: String,
+        port: u16,
+        peers: Vec<Peer>,
+    ) -> App {
         let backend = Arc::new(BackendClient::new(backend_url.clone()));
         let recipe_list = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
@@ -106,10 +124,11 @@ impl App {
                     .ok_or(BackendUnavailable)
             }
         }));
-        let templates = Templates::new(
+        let templates = Templates::with_peers(
             Arc::clone(&recipe_list),
             Arc::clone(&api_version),
             &frontend_version,
+            peers.clone(),
         );
         App {
             backend,
@@ -119,6 +138,7 @@ impl App {
             statics: StaticFiles::from_env(),
             recipe_list,
             api_version,
+            peers,
             fallback_host: format!("localhost:{}", port),
         }
     }
@@ -367,13 +387,44 @@ impl App {
         let blocks = recipe.get("ingredients_blocks").unwrap_or(&empty);
         let copy_ingredients = scaler::ingredients_copy_text(blocks);
 
+        let also = self.peer_matches(recipe.get("name").and_then(Value::as_str));
         let context = TemplateValue::from_serialize(json!({
             "recipe": recipe,
             "scale_factor": scale_factor,
             "combined_notes": combined_notes,
             "copy_ingredients": copy_ingredients,
+            "also": also,
         }));
         self.render("recipe.html", context)
+    }
+
+    /// The peers that list a recipe with this name, as `{label, url}` for the
+    /// "also on" hint on the recipe page. A peer that cannot be reached is
+    /// skipped.
+    fn peer_matches(&self, name: Option<&str>) -> Vec<Value> {
+        let Some(name) = name else {
+            return Vec::new();
+        };
+        let mut matches = Vec::new();
+        for peer in &self.peers {
+            let Ok(list) = peer.recipes.fetch_data() else {
+                continue;
+            };
+            let Some(entries) = list.as_array() else {
+                continue;
+            };
+            if let Some(entry) = entries
+                .iter()
+                .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))
+            {
+                let permalink = entry
+                    .get("permalink")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default();
+                matches.push(json!({ "label": peer.label, "url": peer.recipe_url(permalink) }));
+            }
+        }
+        matches
     }
 }
 

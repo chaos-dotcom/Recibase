@@ -14,6 +14,9 @@ mod support;
 use serde_json::json;
 use support::*;
 
+use recibase_frontend::app::App;
+use recibase_frontend::peer::Peer;
+
 // -- the ported `test_routes.py` cases --------------------------------
 
 /// `test_homepage`.
@@ -85,6 +88,43 @@ fn random_recipe_redirects_respects_only_ours() {
         assert_eq!(response.status, 302);
         assert!(header_or(&response, "Location").ends_with("our-recipe"));
     }
+}
+
+/// A peer's recipes appear in the drawer, labelled with their name and linked
+/// to their site; a recipe of ours with the same name wins and gains the
+/// "also on" hint.
+#[test]
+fn peer_recipes_appear_in_the_drawer() {
+    let stub = StubApi::start();
+    let peer = StubApi::start();
+    peer.on(
+        "GET",
+        "/recipes/",
+        Answer::json(
+            r#"[{"name": "Their Recipe", "permalink": "their-recipe"},
+                 {"name": "Test Recipe", "permalink": "test-recipe"}]"#,
+        ),
+    );
+    let app = App::with_peers(
+        stub.base_url().to_string(),
+        "latest".to_string(),
+        8080,
+        vec![Peer::new(
+            "Kit & Alex".to_string(),
+            peer.base_url().to_string(),
+            "https://reciba.se".to_string(),
+        )],
+    );
+
+    let body = body_of(&app.handle(&get("/")));
+    assert!(body.contains("Their Recipe"), "{body}");
+    assert!(body.contains("recipe-source\">Kit &amp; Alex"), "{body}");
+    assert!(
+        body.contains("href=\"https://reciba.se/their-recipe\""),
+        "{body}"
+    );
+    // Our same-named recipe wins, with the hint pointing at theirs.
+    assert!(body.contains("title=\"Also on Kit &amp; Alex\""), "{body}");
 }
 
 /// `test_recipe_page`.

@@ -288,3 +288,25 @@ footer a:not(:hover) {
   cursor: pointer;
   user-select: none;
 }
+
+/* Peers: a recipe that comes from another deployment (see peer.rs). */
+.recipe-source {
+  margin-left: 0.5rem;
+  padding: 0 0.4rem;
+  border-radius: 0.6rem;
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+/* The "also on" hint: a marker in the drawer, a line on the recipe page. */
+.mdl-navigation__link .recipe-also {
+  margin-left: 0.4rem;
+  color: rgb(124, 77, 255);
+}
+
+p.recipe-also {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.875rem;
+}

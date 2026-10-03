@@ -70,6 +70,14 @@ same defaults:
 | `SOURCE_COMMIT`, `GIT_COMMIT`, `GITHUB_SHA` | - | the deployed commit, shown in the footer |
 | `GIT_COMMIT` (file) | - | read beside the executable, then in the working directory, when none of the variables holds a commit |
 
+`PEER_BACKENDS` is a port addition, not in the Python: other Recibase
+deployments whose recipes the drawer lists alongside ours. Entries are
+`label|api|site`, separated by `;`, e.g.
+`Kit & Alex|https://api.reciba.se/|https://reciba.se`. A peer's recipe is
+labelled with their name and links out to `site/<permalink>`; a recipe we also
+have wins by name and shows an "also on" hint. An unreachable peer is skipped
+rather than failing the page.
+
 When none of these is set the footer still names a commit: `crates/frontend/build.rs`
 bakes the checkout's `HEAD` - or a `SOURCE_COMMIT` / `GIT_COMMIT` / `GITHUB_SHA` build
 argument - into the binary, so the `frontend` service in `compose.yaml`, which runs

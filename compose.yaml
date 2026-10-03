@@ -41,6 +41,8 @@ services:
     image: recibase-frontend:slim
     environment:
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}
+      # Other deployments to list alongside ours: `label|api|site`, `;`-separated.
+      PEER_BACKENDS: ${PEER_BACKENDS:-}
     depends_on:
       recibase:
         condition: service_healthy

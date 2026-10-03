@@ -1,4 +1,3 @@
-
 //! The Jinja2 templates, rendered with MiniJinja.
 //!
 //! `templates/` is a byte-identical copy of the Flask application's
@@ -14,16 +13,26 @@ use minijinja::value::Value;
 use minijinja::{AutoEscape, Environment};
 
 use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
+use crate::peer::{Peer, PeerList, merge_recipe_lists};
 
 /// The eight templates, compiled in.
 pub const TEMPLATES: &[(&str, &str)] = &[
     ("layout.html", include_str!("../templates/layout.html")),
     ("home.html", include_str!("../templates/home.html")),
     ("recipe.html", include_str!("../templates/recipe.html")),
-    ("contribute.html", include_str!("../templates/contribute.html")),
+    (
+        "contribute.html",
+        include_str!("../templates/contribute.html"),
+    ),
     ("notfound.html", include_str!("../templates/notfound.html")),
-    ("internalerror.html", include_str!("../templates/internalerror.html")),
-    ("backendunavailable.html", include_str!("../templates/backendunavailable.html")),
+    (
+        "internalerror.html",
+        include_str!("../templates/internalerror.html"),
+    ),
+    (
+        "backendunavailable.html",
+        include_str!("../templates/backendunavailable.html"),
+    ),
     ("sitemap.xml", include_str!("../templates/sitemap.xml")),
 ];
 
@@ -71,6 +80,16 @@ impl Templates {
         api_version: Arc<CachedBackendCall<String>>,
         frontend_version: &str,
     ) -> Templates {
+        Self::with_peers(recipe_list, api_version, frontend_version, Vec::new())
+    }
+
+    /// As [`Templates::new`], plus peer deployments to list alongside ours.
+    pub fn with_peers(
+        recipe_list: Arc<CachedBackendCall<serde_json::Value>>,
+        api_version: Arc<CachedBackendCall<String>>,
+        frontend_version: &str,
+        peers: Vec<Peer>,
+    ) -> Templates {
         let mut env = Environment::new();
         for (name, source) in TEMPLATES {
             env.add_template_owned(name.to_string(), prepare_source(source))
@@ -87,11 +106,27 @@ impl Templates {
         env.add_global(
             "fetchRecipeList",
             Value::from_function(move || -> Result<Value, minijinja::Error> {
-                Ok(Value::from_serialize(
-                    recipe_list.fetch_data().map_err(|_: BackendUnavailable| {
-                        backend_unavailable()
-                    })?,
-                ))
+                let own = recipe_list
+                    .fetch_data()
+                    .map_err(|_: BackendUnavailable| backend_unavailable())?;
+                let own_entries = own.as_array().cloned().unwrap_or_default();
+                // A peer that cannot be reached is skipped, not fatal: the
+                // drawer still shows our recipes (and any peer that answered).
+                let lists: Vec<PeerList> = peers
+                    .iter()
+                    .filter_map(|peer| {
+                        let value = peer.recipes.fetch_data().ok()?;
+                        Some(PeerList {
+                            label: peer.label.clone(),
+                            site_url: peer.site_url.clone(),
+                            recipes: value.as_array().cloned()?,
+                        })
+                    })
+                    .collect();
+                Ok(Value::from_serialize(merge_recipe_lists(
+                    &own_entries,
+                    &lists,
+                )))
             }),
         );
         env.add_global(
@@ -110,11 +145,7 @@ impl Templates {
     /// `render_template`. The result is put through
     /// [`crate::markupsafe::markupsafe_compat`] so that the escaping matches
     /// Jinja2's.
-    pub fn render(
-        &self,
-        name: &str,
-        context: Value,
-    ) -> Result<String, minijinja::Error> {
+    pub fn render(&self, name: &str, context: Value) -> Result<String, minijinja::Error> {
         let template = self.env.get_template(name)?;
         let rendered = template.render(context)?;
         Ok(crate::markupsafe::markupsafe_compat(&rendered))

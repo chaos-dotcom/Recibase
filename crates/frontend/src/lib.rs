@@ -1,4 +1,3 @@
-
 //! The Recibase web frontend, ported from the Flask application in
 //! `The-Silverwood-Institute/Frontend`.
 //!
@@ -21,6 +20,7 @@ pub mod form;
 pub mod http;
 pub mod markupsafe;
 pub mod pages;
+pub mod peer;
 pub mod scaler;
 pub mod statics;
 pub mod templates;
