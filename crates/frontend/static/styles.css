@@ -311,6 +311,18 @@ p.recipe-also {
   font-size: 0.875rem;
 }
 
+/* The "reci-verse" note: a quiet caption naming the server network a recipe
+   belongs to. */
+.reci-verse {
+  margin: 0.5rem 0 0;
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.8125rem;
+}
+
+.reci-verse__term {
+  font-weight: 500;
+}
+
 /* Feature chips: the tag filters in the drawer and the tag row on a recipe.
    Quiet outlines by default, indigo fill when active; no shadows, no fills on
    the idle state (Operate restraint). */

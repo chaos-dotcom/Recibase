@@ -17,6 +17,7 @@
 {% if recipe['description'] %}
   <p class="description">{{ recipe['description'] }}</p>
 {% endif %}
+<p class="reci-verse">Found on this server across the <span class="reci-verse__term">reci-verse</span>.</p>
 {% if also %}
   <p class="recipe-also">Also on
     {% for link in also %}<a href="{{ link['url'] }}" rel="nofollow">{{ link['label'] }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
