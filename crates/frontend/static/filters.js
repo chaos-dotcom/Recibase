@@ -1,11 +1,11 @@
 // The drawer's filters, in one place so they cannot fight over a row's
-// visibility: the "only ours" switch, the ingredient search, and the tag chips
-// (which a recipe page links to as `/?tag=<tag>`). Replaces search.js and
-// onlyours.js. Several tags can be active at once: a row shows if it carries
+// visibility: the "show the reci-verse" toggle, the ingredient search, and the
+// tag chips (which a recipe page links to as `/?tag=<tag>`). Replaces search.js
+// and onlyours.js. Several tags can be active at once: a row shows if it carries
 // any of them.
 (function () {
-  var STORAGE_KEY = 'recibase-only-ours';
-  var box = document.getElementById('onlyOurs');
+  var STORAGE_KEY = 'recibase-reci-verse';
+  var box = document.getElementById('reciVerse');
   var searchElement = document.getElementById('search');
   var searchForm = document.getElementById('searchForm');
   var filtersBar = document.getElementById('tagFilters');
@@ -48,7 +48,8 @@
   }
 
   function rowVisible(row) {
-    if (box && box.checked && row.getAttribute('data-ours') !== 'true') return false;
+    // Own recipes always show; a peer's only when the reci-verse box is ticked.
+    if (box && !box.checked && row.getAttribute('data-ours') !== 'true') return false;
     if (activeTags.length) {
       var tags = tagsOf(row);
       var carriesOne = activeTags.some(function (tag) {
@@ -72,7 +73,8 @@
       if (show) visible += 1;
     });
     if (randomLink) {
-      randomLink.href = box && box.checked ? '/random?onlyOurs=true' : '/random';
+      // Own-only when the reci-verse box is unticked, matching the drawer.
+      randomLink.href = box && !box.checked ? '/random?onlyOurs=true' : '/random';
     }
     renderChips();
     renderStatus(visible);

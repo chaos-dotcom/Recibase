@@ -48,20 +48,20 @@ fn merge_keeps_ours_on_a_name_collision_and_links_the_peer() {
     let merged = merge_recipe_lists(&own, &peers);
 
     assert_eq!(merged.len(), 2);
-    // Sorted by name, so Curry (theirs, added) comes before Pasta (ours).
-    let curry = &merged[0];
-    assert_eq!(curry["name"], "Curry");
-    assert_eq!(curry["source"], "Kit & Alex");
-    assert_eq!(curry["href"], "curry");
-    // `ours` is relative to the server that sent the list, not ours.
-    assert!(curry.get("ours").is_none());
-
-    let pasta = &merged[1];
+    // Our own recipe comes first; a peer's is added after ours.
+    let pasta = &merged[0];
     assert_eq!(pasta["name"], "Pasta");
     assert_eq!(pasta["href"], "pasta");
     assert_eq!(pasta["ours"], true);
     assert_eq!(pasta["also"][0]["label"], "Kit & Alex");
     assert_eq!(pasta["also"][0]["url"], "https://reciba.se/pasta");
+
+    let curry = &merged[1];
+    assert_eq!(curry["name"], "Curry");
+    assert_eq!(curry["source"], "Kit & Alex");
+    assert_eq!(curry["href"], "curry");
+    // `ours` is relative to the server that sent the list, not ours.
+    assert!(curry.get("ours").is_none());
 }
 
 /// An equal digest means the same recipe, so there is nothing to hint at; a

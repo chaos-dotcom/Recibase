@@ -277,8 +277,9 @@ footer a:not(:hover) {
   }
 }
 
-/* The "only ours" toggle is one of the drawer filters (see filters.js). */
-.only-ours {
+/* The "show the reci-verse" toggle is one of the drawer filters (see
+   filters.js): unticked, the drawer keeps to our own recipes. */
+.reci-verse-toggle {
   display: flex;
   align-items: center;
   gap: 0.5rem;

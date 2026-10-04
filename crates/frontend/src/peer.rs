@@ -6,7 +6,8 @@
 //! is rendered from the peer's API, so a reader never leaves for the peer's
 //! site. Our own entry gains an `also` link when a peer lists the same name with
 //! a different content digest, the hint that they have a different version, and
-//! that link does go to their site.
+//! that link does go to their site. Our own recipes are listed first, ahead of
+//! the peers'.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -169,7 +170,9 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
         }
     }
 
-    let mut merged: Vec<Value> = own
+    // Our own recipes first, then the peers': our server is prioritised, and
+    // each group is sorted by name.
+    let mut ours: Vec<Value> = own
         .iter()
         .map(|entry| {
             let mut copy = entry.clone();
@@ -189,9 +192,10 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
             copy
         })
         .collect();
-    merged.extend(extras);
-    merged.sort_by(|a, b| name_of(a).cmp(name_of(b)));
-    merged
+    ours.sort_by(|a, b| name_of(a).cmp(name_of(b)));
+    extras.sort_by(|a, b| name_of(a).cmp(name_of(b)));
+    ours.extend(extras);
+    ours
 }
 
 /// Two digests agree only when both are present: a missing digest means the

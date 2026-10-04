@@ -252,7 +252,8 @@ impl App {
     /// target carries no leading slash, so the `Location` header is relative.
     ///
     /// `?onlyOurs=true` restricts the draw to the recipes the API marks
-    /// `ours`, which is what the drawer's "only ours" toggle asks for.
+    /// `ours`, which is what the drawer asks for while its reci-verse toggle is
+    /// unticked.
     fn random(&self, request: &Request) -> Result<Response, RouteError> {
         let recipes = self
             .recipe_list

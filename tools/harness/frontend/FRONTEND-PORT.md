@@ -85,6 +85,12 @@ is unchanged): an equal digest means the same recipe, a missing one means we
 cannot tell, so we hint. An unreachable peer is skipped rather than failing the
 page, and its recipes simply do not appear.
 
+The drawer lists our own recipes first, then the peers'. It keeps to our own by
+default: a peer's recipes appear only when the reader ticks **Show recipes from
+across the reci-verse**, an unticked-by-default box in the drawer (its state is
+remembered in `localStorage`). While it is unticked the random link draws from
+our own recipes only, matching the list.
+
 `SERVER_IDENTITY` is the same idea for this deployment itself: `label|site`, so
 the recipe page can say `Found on <label> across the reci-verse.` and link the
 label to that site, instead of the generic `this server`. Because it lives on

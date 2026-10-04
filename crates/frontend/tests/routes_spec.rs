@@ -69,8 +69,8 @@ fn random_recipe_redirects() {
     assert!(header_or(&response, "Location").ends_with("test-recipe"));
 }
 
-/// The drawer's "only ours" toggle sends `?onlyOurs=true`, which must keep
-/// the draw to the recipes the API marks `ours`.
+/// The drawer's reci-verse toggle, unticked, keeps to our own recipes and sends
+/// `?onlyOurs=true`; the draw must stay within the recipes the API marks `ours`.
 #[test]
 fn random_recipe_redirects_respects_only_ours() {
     let stub = StubApi::start();
