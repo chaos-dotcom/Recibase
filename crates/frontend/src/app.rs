@@ -470,24 +470,34 @@ impl App {
         }
     }
 
-    /// The peers that list a recipe with this name *and a different content
-    /// digest*, as `{label, url}` for the "found on" hint on the recipe page. A
-    /// peer the digest says is identical is skipped; a peer that cannot be
+    /// The peers that list a recipe with this name, as `{label, url}` for the
+    /// "found on" hint on the recipe page. A recipe that is not ours came from
+    /// the other server first, so its peer is credited whatever the digest; one
+    /// of ours is credited only when the digest differs. A peer that cannot be
     /// reached is skipped.
     fn peer_matches(&self, name: Option<&str>) -> Vec<Value> {
         let Some(name) = name else {
             return Vec::new();
         };
-        let our_revision = self.recipe_list.fetch_data().ok().and_then(|list| {
-            let entry = list
-                .as_array()?
-                .iter()
-                .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))?;
-            entry
-                .get("revision")
-                .and_then(Value::as_str)
-                .map(str::to_string)
-        });
+        // Our digest for the recipe, and whether it is ours (chaos-tagged).
+        let (our_revision, our_ours) = self
+            .recipe_list
+            .fetch_data()
+            .ok()
+            .and_then(|list| {
+                let entry = list
+                    .as_array()?
+                    .iter()
+                    .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))?;
+                Some((
+                    entry
+                        .get("revision")
+                        .and_then(Value::as_str)
+                        .map(str::to_string),
+                    entry.get("ours").and_then(Value::as_bool).unwrap_or(false),
+                ))
+            })
+            .unwrap_or((None, false));
         let mut matches = Vec::new();
         for peer in &self.peers {
             let Ok(list) = peer.recipes.fetch_data() else {
@@ -502,10 +512,12 @@ impl App {
             else {
                 continue;
             };
-            if crate::peer::same_revision(
-                our_revision.as_deref(),
-                entry.get("revision").and_then(Value::as_str),
-            ) {
+            if our_ours
+                && crate::peer::same_revision(
+                    our_revision.as_deref(),
+                    entry.get("revision").and_then(Value::as_str),
+                )
+            {
                 continue;
             }
             let permalink = entry

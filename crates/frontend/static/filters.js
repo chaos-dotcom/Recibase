@@ -10,9 +10,8 @@
   var searchForm = document.getElementById('searchForm');
   var filtersBar = document.getElementById('tagFilters');
   var statusBar = document.getElementById('filterStatus');
-  var randomLink = document.querySelector('.random-recipe a');
   var rows = Array.prototype.slice.call(
-    document.querySelectorAll('.mdl-navigation__link[data-ours]')
+    document.querySelectorAll('.mdl-navigation__link[data-peer]')
   );
 
   // The facets the bar offers, grouped so the chips read as categories with a
@@ -48,8 +47,9 @@
   }
 
   function rowVisible(row) {
-    // Own recipes always show; a peer's only when the reci-verse box is ticked.
-    if (box && !box.checked && row.getAttribute('data-ours') !== 'true') return false;
+    // Recipes we host always show; a peer-only one only when the reci-verse box
+    // is ticked.
+    if (box && !box.checked && row.getAttribute('data-peer') === 'true') return false;
     if (activeTags.length) {
       var tags = tagsOf(row);
       var carriesOne = activeTags.some(function (tag) {
@@ -72,10 +72,6 @@
       row.hidden = !show;
       if (show) visible += 1;
     });
-    if (randomLink) {
-      // Own-only when the reci-verse box is unticked, matching the drawer.
-      randomLink.href = box && !box.checked ? '/random?onlyOurs=true' : '/random';
-    }
     renderChips();
     renderStatus(visible);
   }

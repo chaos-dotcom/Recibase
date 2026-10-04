@@ -4,9 +4,10 @@
 //! entry; a peer-only recipe is added, labelled with their name, and served by
 //! *this* frontend - its drawer link is the local permalink and the recipe page
 //! is rendered from the peer's API, so a reader never leaves for the peer's
-//! site. Our own entry gains a peer hint when a peer lists the same name with a
-//! different content digest - `Found on <peer> too.` - a link that does go to
-//! their site. Our own recipes are listed first, ahead of the peers'.
+//! site. A recipe that is not ours (no chaos tag) came from the other server
+//! first, so a peer that lists it is credited with a `Found on <peer> too.` hint
+//! that does go to their site; one of ours gets that hint only when the peer's
+//! digest differs. Our own recipes are listed first, ahead of the peers'.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -121,11 +122,19 @@ pub struct PeerList {
 /// `href`; both ours and a peer's are the relative permalink, because this
 /// frontend serves a peer's recipe from the peer's API rather than linking out.
 pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
-    // The names we have, and our content digest for each when we have one.
-    let mut known: HashMap<&str, Option<&str>> = HashMap::new();
+    // The names we have, with our content digest and whether the recipe is ours
+    // (chaos-tagged). A peer's same-named recipe is not a reci-verse entry; it
+    // is an attribution hint on ours.
+    let mut known: HashMap<&str, (Option<&str>, bool)> = HashMap::new();
     for entry in own {
         if let Some(name) = entry.get("name").and_then(Value::as_str) {
-            known.insert(name, entry.get("revision").and_then(Value::as_str));
+            known.insert(
+                name,
+                (
+                    entry.get("revision").and_then(Value::as_str),
+                    entry.get("ours").and_then(Value::as_bool).unwrap_or(false),
+                ),
+            );
         }
     }
 
@@ -143,10 +152,16 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
             let link =
                 json!({ "label": peer.label, "url": format!("{}/{}", peer.site_url, permalink) });
             match known.get(name).copied() {
-                // Same name. An equal digest is the same recipe, so there is
-                // nothing to point at; anything else is a difference to hint.
-                Some(our_revision) => {
-                    if !same_revision(our_revision, entry.get("revision").and_then(Value::as_str)) {
+                // A recipe we already host. One that is not ours (no chaos tag)
+                // came from the other server first, so a peer listing it is
+                // always worth a hint; ours only when the digests differ.
+                Some((our_revision, our_ours)) => {
+                    if !our_ours
+                        || !same_revision(
+                            our_revision,
+                            entry.get("revision").and_then(Value::as_str),
+                        )
+                    {
                         also.entry(name).or_default().push(link);
                     }
                 }
@@ -161,8 +176,11 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
                         // recipe from their API instead of linking out.
                         map.insert("href".to_string(), Value::String(permalink.to_string()));
                         map.insert("source".to_string(), Value::String(peer.label.clone()));
+                        // A peer-only recipe, kept back for the reci-verse
+                        // toggle rather than shown by default.
+                        map.insert("peer".to_string(), Value::Bool(true));
                     }
-                    known.insert(name, None);
+                    known.insert(name, (None, false));
                     extras.push(copy);
                 }
             }
