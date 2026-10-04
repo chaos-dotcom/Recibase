@@ -150,6 +150,22 @@ fn the_drawer_marks_our_recipes_for_the_only_ours_toggle() {
     assert!(home.contains("href=\"/random\""), "{home}");
 }
 
+/// The drawer exposes each recipe's tags so `filters.js` can filter the menu.
+#[test]
+fn the_drawer_exposes_tags_for_filtering() {
+    let home = templates_with_list(json!([
+        {"name": "Curry", "permalink": "curry", "tags": ["Vegan", "Quick"]},
+        {"name": "Plain", "permalink": "plain"},
+    ]))
+    .render("home.html", TemplateValue::from_serialize(json!({})))
+    .expect("home.html renders");
+
+    assert!(home.contains("data-tags=\"Vegan|Quick\""), "{home}");
+    // A recipe with no tags still renders, with an empty filter key.
+    assert!(home.contains("data-tags=\"\""), "{home}");
+    assert!(home.contains("id=\"tagFilters\""), "{home}");
+}
+
 /// A recipe's tags render as filter chips that link back to the filtered menu.
 #[test]
 fn recipe_tags_render_as_filter_chips() {

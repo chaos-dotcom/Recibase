@@ -107,6 +107,7 @@ pub mod smoky_fish_squash_curry;
 pub mod spanakopita;
 pub mod spiced_apple_winter_soup;
 pub mod spicy_smoked_paprika_chorizo;
+pub mod spinach_tomato_chickpea_curry;
 pub mod squash_and_sage_puff_tart;
 pub mod squash_gnocchi_gratin;
 pub mod squash_sweet_potato_lentil_stew;
