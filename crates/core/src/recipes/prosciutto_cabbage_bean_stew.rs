@@ -18,7 +18,6 @@ pub fn recipe() -> RecipeDef {
             "Savoy cabbage is particularly effective at soaking up the flavour in stews and stir fries. You can also shred it finely, then cook with lardons for a simple side dish, or stir it into mashed potato with salad onions to make colcannon.".to_string(),
         ],
         tags: vec![
-            Tag::ItsMadeOfMeat,
             Tag::VegetarianIsh,
             Tag::Stodge,
             Tag::Quick,

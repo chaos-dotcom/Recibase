@@ -19,7 +19,6 @@ pub fn recipe() -> RecipeDef {
             "Sausage dinners call for a smooth, mellow red like this gorgeous Chianti, which has flavours of plum, cherry and dried rosemary. No1 Piccini Organic Chianti Classico Riserva, Italy.".to_string(),
         ],
         tags: vec![
-            Tag::ItsMadeOfMeat,
             Tag::VegetarianIsh,
             Tag::Scales,
             Tag::Stodge,

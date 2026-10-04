@@ -21,7 +21,7 @@ pub fn recipe() -> RecipeDef {
             "Per serving: 1728kJ/415kcals/25g fat/11g saturated fat/20g carbs/16g sugars/8.8g fibre/22g protein/1.3g salt.".to_string(),
         ],
         tags: vec![
-            Tag::ItsMadeOfMeat,
+            Tag::VegetarianIsh,
             Tag::Stodge,
             Tag::ColdWeather,
             Tag::Scales,

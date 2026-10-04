@@ -38,7 +38,7 @@ pub fn recipe() -> RecipeDef {
             crate::recipe::Ingredient::q("Ground Turmeric", "1/3 teaspoon"),
             crate::recipe::Ingredient::q("Ground Coriander", "1 teaspoon"),
             crate::recipe::Ingredient::q("Ground Cumin", "1 teaspoon"),
-            crate::recipe::Ingredient::opt("Charcoal", None, None, Some("A piece, around 2cm x 2cm")),
+            crate::recipe::Ingredient::opt("Charcoal", None, None, Some("A piece, around 2cm x 2cm. Chaos Note, I used Liquid Smoke")),
         ]),
         method: vec![
             "Put the 4 tablespoons of oil into a large lidded frying pan over a medium heat. When hot, add the onions and fry for around 10 minutes, until soft and beginning to brown. Add the garlic and ginger and fry for 2 to 3 minutes, until the raw smell of the garlic disappears.".to_string(),
