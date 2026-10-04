@@ -34,7 +34,7 @@ pub fn recipe() -> RecipeDef {
             crate::recipe::Ingredient::opt("Yellow squash", Some("1"), Some("sliced into thin half-moons"), Some("Use just squash or courgette if you can't find both")),
             crate::recipe::Ingredient::qp("Courgette", "1", "sliced into thin half-moons"),
             crate::recipe::Ingredient::qp("Asparagus", "1 bunch", "chopped into 2.5cm pieces"),
-            crate::recipe::Ingredient::opt("Carrots",Some( "4"), Some("sliced jullien"),Some("this is a chaos addition 👀 (optional)")),
+            crate::recipe::Ingredient::opt("Carrots",Some( "2"), Some("sliced jullien"),Some("this is a chaos optional addition 👀 (I actually didnt have the squash and all the squashes in lidl where tiny)")),
             crate::recipe::Ingredient::qp("Cherry tomatoes", "150g", "halved"),
             crate::recipe::Ingredient::qp("Red onion", "1", "thinly sliced"),
             crate::recipe::Ingredient::q("Sea salt", "1 tsp"),
