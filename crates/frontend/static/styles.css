@@ -301,6 +301,17 @@ footer a:not(:hover) {
   vertical-align: middle;
 }
 
+/* The "also on" hint: a marker in the drawer, a line on the recipe page. */
+.mdl-navigation__link .recipe-also {
+  margin-left: 0.4rem;
+  color: rgb(124, 77, 255);
+}
+
+p.recipe-also {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.875rem;
+}
+
 /* The "reci-verse" note: a quiet caption naming the server network a recipe
    belongs to. */
 .reci-verse {

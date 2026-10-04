@@ -18,6 +18,11 @@
   <p class="description">{{ recipe['description'] }}</p>
 {% endif %}
 <p class="reci-verse">Found on {% if server %}<a href="{{ server['url'] }}">{{ server['label'] }}</a>{% else %}this server{% endif %} across the <span class="reci-verse__term">reci-verse</span>.</p>
+{% if also %}
+  <p class="recipe-also">Also on
+    {% for link in also %}<a href="{{ link['url'] }}" rel="nofollow">{{ link['label'] }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+  </p>
+{% endif %}
 {% if recipe['tags']|length > 0 %}
   <ul class="chips" aria-label="Recipe tags">
     {% for tag in recipe['tags'] %}

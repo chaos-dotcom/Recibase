@@ -30,32 +30,31 @@ fn parse_peer_backends_skips_malformed_entries() {
     assert_eq!(peers[1].recipe_url("x"), "http://b/x");
 }
 
-/// The name is the key: ours wins a collision, so a peer's same-named recipe is
-/// skipped entirely; a peer-only recipe is added with its `source` and a local
-/// `href`, so this frontend serves it rather than linking out.
+/// The name is the key: ours wins a collision and gains an `also` link; a
+/// peer-only recipe is added with its `source` and a local `href`, so this
+/// frontend serves it rather than linking out.
 #[test]
-fn merge_keeps_ours_and_adds_only_the_recipes_we_lack() {
+fn merge_keeps_ours_on_a_name_collision_and_links_the_peer() {
     let own = vec![json!({"name": "Pasta", "permalink": "pasta", "ours": true})];
     let peers = vec![PeerList {
         label: "Kit & Alex".to_string(),
         site_url: "https://reciba.se".to_string(),
         recipes: vec![
-            json!({"name": "Pasta", "permalink": "pasta", "revision": "bbbb"}),
+            json!({"name": "Pasta", "permalink": "pasta", "ours": true}),
             json!({"name": "Curry", "permalink": "curry"}),
         ],
     }];
 
     let merged = merge_recipe_lists(&own, &peers);
 
-    // Only the peer-only recipe is added, and it comes after our own.
     assert_eq!(merged.len(), 2);
+    // Our own recipe comes first; a peer's is added after ours.
     let pasta = &merged[0];
     assert_eq!(pasta["name"], "Pasta");
     assert_eq!(pasta["href"], "pasta");
     assert_eq!(pasta["ours"], true);
-    // A name we already hold gets no cross-reference, whatever the digest.
-    assert!(pasta.get("also").is_none());
-    assert!(pasta.get("revision").is_none());
+    assert_eq!(pasta["also"][0]["label"], "Kit & Alex");
+    assert_eq!(pasta["also"][0]["url"], "https://reciba.se/pasta");
 
     let curry = &merged[1];
     assert_eq!(curry["name"], "Curry");
@@ -65,22 +64,27 @@ fn merge_keeps_ours_and_adds_only_the_recipes_we_lack() {
     assert!(curry.get("ours").is_none());
 }
 
-/// A peer recipe whose name we already hold is dropped whether or not its
-/// digest matches ours: the digest is not used to decide anything.
+/// An equal digest means the same recipe, so there is nothing to hint at; a
+/// different digest (or a missing one) is a difference worth linking.
 #[test]
-fn merge_skips_a_peer_recipe_we_already_have() {
+fn merge_hints_only_when_the_digest_differs() {
     let own = vec![json!({"name": "Pasta", "permalink": "pasta", "revision": "aaaa"})];
-    for revision in ["aaaa", "bbbb"] {
-        let peers = vec![PeerList {
+    let peer = |revision: &str| {
+        vec![PeerList {
             label: "Kit & Alex".to_string(),
             site_url: "https://reciba.se".to_string(),
             recipes: vec![json!({"name": "Pasta", "permalink": "pasta", "revision": revision})],
-        }];
-        let merged = merge_recipe_lists(&own, &peers);
-        assert_eq!(merged.len(), 1, "revision {revision}");
-        assert_eq!(merged[0]["name"], "Pasta");
-        assert!(merged[0].get("also").is_none());
-    }
+        }]
+    };
+
+    let identical = merge_recipe_lists(&own, &peer("aaaa"));
+    assert_eq!(identical.len(), 1);
+    assert!(identical[0].get("also").is_none());
+    // The digest is the sender's, not ours: it is stripped from the drawer.
+    assert!(identical[0].get("revision").is_none());
+
+    let differing = merge_recipe_lists(&own, &peer("bbbb"));
+    assert_eq!(differing[0]["also"][0]["url"], "https://reciba.se/pasta");
 }
 
 /// `SERVER_IDENTITY` is `label|site`, and a trailing slash is trimmed so the
