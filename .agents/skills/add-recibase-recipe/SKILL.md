@@ -193,9 +193,17 @@ Pick from existing tags only (`crates/core/src/tag.rs`). The whole vocabulary:
 | Effort | `Slow`, `Quick`, `Scales`, `HighEffort`, `LowEffort` |
 | Storage | `Freezes`, `BetterNextDay` |
 | Marker | `AI` — renders the "carefully review this, AI was used" warning on the page |
+| Meat | `ItsMadeOfMeat` — our fork's marker for a dish that contains meat |
+| Personal | `Stephani`, `StephaniIsh`, `StephaniUnhealthy` |
 
 Do **not** add `NeverEaten`, `Popular`, `Infrequent`, or `New` — those are
 applied automatically from usage data.
+
+`ItsMadeOfMeat` is a fork tag, not in the upstream Scala, so set it **only on
+chaos recipes** (ours). The upstream corpus says `VegetarianIsh` for meat dishes,
+but that tag is parity-locked — it is also the inherited parent of
+`Vegetarian`, so it appears on vegetarian recipes throughout the Scala captures.
+Change it there and the byte-for-byte corpus breaks.
 
 Dietary tags are a chain and the parents are inherited: set only the most
 specific one. `Tag::Vegan` alone yields `VeganIsh`, `Vegetarian`,
@@ -204,8 +212,7 @@ specific one. `Tag::Vegan` alone yields `VeganIsh`, `Vegetarian`,
 `Vegan` → `VeganIsh` → `Vegetarian` → `VegetarianIsh` → `Pescatarian`, and
 `GlutenFree` and `Pescatarian` are standalone (no parent).
 
-Meat dishes often use `VegetarianIsh` (not `Vegetarian`). Baking/puddings use
-`Pudding` + `Baking` + `Vegetarian` when egg/dairy only.
+Baking/puddings use `Pudding` + `Baking` + `Vegetarian` when egg/dairy only.
 
 ## Conventions
 
