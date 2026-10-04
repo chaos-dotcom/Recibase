@@ -68,7 +68,7 @@ impl StaticFiles {
             .iter()
             .find(|dir| dir.is_dir())
             .cloned()
-            .map(|root| StaticFiles::at(root))
+            .map(StaticFiles::at)
             .unwrap_or_else(|| StaticFiles::at("static"))
     }
 
