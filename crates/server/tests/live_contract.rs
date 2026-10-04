@@ -64,14 +64,17 @@ fn live_recipe_list_entries_are_name_then_permalink() {
         .as_array()
         .and_then(|entries| entries.first())
         .expect("our list has an entry");
-    // `ours` is a port addition to the entry, so strip it before comparing.
-    let ours_keys: Vec<String> = keys(ours_first)
-        .into_iter()
-        .filter(|key| key != "ours")
-        .collect();
+    // `ours` is a port addition to the entry and is not part of the base
+    // declaration, so strip it from both sides before comparing.
+    let base_keys = |entry: &Value| -> Vec<String> {
+        keys(entry)
+            .into_iter()
+            .filter(|key| key != "ours")
+            .collect()
+    };
     assert_eq!(
-        ours_keys,
-        keys(theirs_first),
+        base_keys(ours_first),
+        base_keys(theirs_first),
         "the base entry declares the same fields in the same order"
     );
 }
