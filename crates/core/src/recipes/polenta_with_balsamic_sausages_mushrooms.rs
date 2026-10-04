@@ -20,6 +20,7 @@ pub fn recipe() -> RecipeDef {
         ],
         tags: vec![
             Tag::ItsMadeOfMeat,
+            Tag::VegetarianIsh,
             Tag::Scales,
             Tag::Stodge,
         ],

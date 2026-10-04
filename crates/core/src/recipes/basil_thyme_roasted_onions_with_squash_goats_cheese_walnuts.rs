@@ -27,7 +27,7 @@ pub fn recipe() -> RecipeDef {
         ],
         image: None,
         ingredients_blocks: vec![
-            crate::recipe::IngredientsBlock::simple(vec![
+            crate::recipe::IngredientsBlock::new(None, vec![
                 crate::recipe::Ingredient::qp("Butternut squash", "600g", "peeled and cut into 1cm chunks"),
                 crate::recipe::Ingredient::qp("Onions", "4 medium", "halved"),
                 crate::recipe::Ingredient::q("Olive oil", "1 tablespoon"),
