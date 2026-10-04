@@ -337,12 +337,37 @@ p.recipe-also {
   list-style: none;
 }
 
-/* The drawer's filter bar: category rows stacked, dashed rule between them. */
+/* The chips header: the tag filters moved out of the drawer into a sticky bar
+   along the top of the page. */
+.chip-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 1rem;
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Clear the floating drawer button MDL puts at the top left on small screens. */
+@media screen and (max-width: 1024px) {
+  .chip-header {
+    padding-left: 3.5rem;
+  }
+}
+
+/* The filter bar: category groups flow along the header, a dashed rule between
+   them. */
 .tag-filters {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0 1rem 0.5rem;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
 }
 
 .tag-group {
@@ -352,8 +377,10 @@ p.recipe-also {
 }
 
 .tag-divider {
-  height: 0;
-  border-top: 1px dashed rgba(0, 0, 0, 0.25);
+  width: 0;
+  align-self: stretch;
+  min-height: 1.2em;
+  border-left: 1px dashed rgba(0, 0, 0, 0.25);
 }
 
 .chip,
@@ -408,4 +435,9 @@ p.recipe-also {
   font: inherit;
   font-weight: 500;
   cursor: pointer;
+}
+
+.chip-header .filter-status {
+  flex: 0 0 auto;
+  padding: 0;
 }

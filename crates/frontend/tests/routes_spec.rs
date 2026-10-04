@@ -385,7 +385,6 @@ fn contribute_page() {
         "Drafts saved for 7 days using a cookie, or until submitted.",
         "Save Draft",
         "Delete Draft",
-        "mdl-navigation__link add-recipe is-current",
     ] {
         assert!(body.contains(expected), "missing {expected} in {body}");
     }
@@ -397,17 +396,16 @@ fn contribute_page() {
     }
 }
 
-/// `test_contribute_link_in_drawer`: the drawer carries the link everywhere,
-/// and only marks it current on the contribute page.
+/// The drawer no longer carries the contribute link; the route still exists but
+/// nothing on the home page points at it.
 #[test]
-fn contribute_link_in_drawer() {
+fn the_drawer_has_no_contribute_link() {
     let stub = StubApi::start();
     let app = app_on(&stub);
     let response = app.handle(&get("/"));
     assert_eq!(response.status, 200);
     let body = body_of(&response);
-    assert!(body.contains("href=\"/contribute\""), "{body}");
-    assert!(!body.contains("add-recipe is-current"), "{body}");
+    assert!(!body.contains("href=\"/contribute\""), "{body}");
 }
 
 /// `test_contribute_submits_recipe`: the route posts the module's payload and
