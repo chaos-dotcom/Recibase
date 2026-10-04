@@ -46,7 +46,7 @@ pub fn recipe() -> RecipeDef {
             "Meanwhile, put 2 tablespoons of oil into a large lidded frying pan over a medium heat and, when hot, add the mustard seeds. When they pop, add the slit green chillies and the onion. Cook for 12 minutes, or until the onion is soft and golden, then add the garlic. Cook for another couple of minutes, then add the drained beans and stir to mix together. Add the tomatoes and cook for a few more minutes until soft and jammy around the edges.".to_string(),
             "Next, add the turmeric, 1/3 teaspoon of black pepper, 1/2 teaspoon of salt and the coconut milk. Tip the roasted pumpkin into the pan and stir to mix. Cover with the lid and leave to heat through for 5 minutes. Check for salt and chilli, adjusting if you wish, then transfer to a serving dish.".to_string(),
             "If you like, you can finish off the dish with a quick curry leaf tarka: put 2 tablespoons of oil into a small frying pan over a medium to high heat. When hot, throw in the curry leaves and let them crackle and turn translucent in the oil. Pour over the pumpkin, then serve.".to_string(),
-            "This dish goes well with elephant ear naan (see page 220), tamarind and caramelized red onion rice (page 192) and some cucumber and mint raita (page 247).".to_string(),
+            "This dish goes well with elephant ear naan (see page 220), tamarind and caramelised red onion rice (page 192) and some cucumber and mint raita (page 247).".to_string(),
         ],
     }
 }
