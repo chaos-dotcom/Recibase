@@ -8,3 +8,9 @@ chrono.workspace = true
 csv.workspace = true
 serde_json.workspace = true
 unicode-normalization.workspace = true
+
+# Native micro-benchmarks for the hashing. `harness = false`: a plain `main`,
+# stable Rust, no benchmark framework. Run with `cargo bench -p recibase-core`.
+[[bench]]
+name = "hash"
+harness = false
