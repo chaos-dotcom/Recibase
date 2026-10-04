@@ -9,10 +9,6 @@ description: Add or edit Recibase recipes in the Rust port. Use when the user as
 
 Recipes are Rust modules in `crates/core/src/recipes/`, one file per Scala
 `case object ... extends Recipe`, each exposing `pub fn recipe() -> RecipeDef`.
-There is no reflection: `crates/core/src/recipes/mod.rs` (the module list) and
-`crates/core/src/recipes/all.rs` (the registry) are **GENERATED** by
-`tools/gen_recipes.py`. After adding a file, run `python3 tools/gen_recipes.py`;
-never hand-edit those two files.
 
 This repo is a byte-for-byte port of the Scala Recibase: every ported recipe's
 JSON must equal the Scala capture (`crates/core/tests/recipe_corpus.rs`).
@@ -30,8 +26,7 @@ corpus — see below.
 4. Set `created_at` with `NaiveDate::from_ymd_opt(year, month, day).unwrap()`;
    when converting a `MealStub`, use `(2020, 4, 24)`.
 5. Pick tags from `Tag` in `crates/core/src/tag.rs`.
-6. Run `python3 tools/gen_recipes.py` to add the module + registry entry.
-7. Verify: `cargo build -p recibase-core` and `cargo test --workspace`.
+6. Verify: `cargo build -p recibase-core` and `cargo test --workspace`.
 
 ## Chaos tag
 

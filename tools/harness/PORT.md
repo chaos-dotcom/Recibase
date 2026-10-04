@@ -8,11 +8,12 @@ HTTP API**.
 recibase-rs/
   crates/
     core/   model (Recipe, Tag, Meal, Permalink), the 95-recipe corpus, meal
-            definitions, usage data, and the Scala collection-order emulation
+            definitions, usage data, and the Scala collection-order emulation.
+            Its build.rs derives the recipe registry from src/recipes/
     submit/ recipe submission: validation, Scala source generation, GitHub
             client, Turnstile, config
     server/ the controllers, the routes and the HTTP/1.1 server
-  tools/    gen_recipes.py (registry generator)
+  tools/    the capture and verification harness
 ```
 
 ## Verification

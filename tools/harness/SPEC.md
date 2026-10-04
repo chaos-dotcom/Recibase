@@ -28,7 +28,7 @@ recibase-rs/
     core/src/utils.rs         StringUtils, IntUtils.TemperatureUtils (W1)
     core/src/usage.rs         UsageData + meal log CSV (W6)
     core/src/ice_cream.rs     the IceCream mixin (W1)
-    core/src/recipes/<Object>.rs + recipes/mod.rs + recipes/all.rs (W4)
+    core/src/recipes/<Object>.rs + recipes/mod.rs (registry via build.rs) (W4)
     core/src/meal_definitions.rs (W5)
     submit/src/*.rs           submission, Scala literal, RecipeSource, GitHub,
                               Turnstile, config (W3)
