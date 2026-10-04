@@ -31,7 +31,8 @@ fn parse_peer_backends_skips_malformed_entries() {
 }
 
 /// The name is the key: ours wins a collision and gains an `also` link; a
-/// peer-only recipe is added with its `source` and an absolute `href`.
+/// peer-only recipe is added with its `source` and a local `href`, so this
+/// frontend serves it rather than linking out.
 #[test]
 fn merge_keeps_ours_on_a_name_collision_and_links_the_peer() {
     let own = vec![json!({"name": "Pasta", "permalink": "pasta", "ours": true})];
@@ -51,7 +52,7 @@ fn merge_keeps_ours_on_a_name_collision_and_links_the_peer() {
     let curry = &merged[0];
     assert_eq!(curry["name"], "Curry");
     assert_eq!(curry["source"], "Kit & Alex");
-    assert_eq!(curry["href"], "https://reciba.se/curry");
+    assert_eq!(curry["href"], "curry");
     // `ours` is relative to the server that sent the list, not ours.
     assert!(curry.get("ours").is_none());
 

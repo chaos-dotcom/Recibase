@@ -91,8 +91,8 @@ fn random_recipe_redirects_respects_only_ours() {
 }
 
 /// A peer's recipes appear in the drawer, labelled with their name and linked
-/// to their site; a recipe of ours with the same name wins and gains the
-/// "also on" hint.
+/// to *our* page for them; a recipe of ours with the same name wins and gains
+/// the "also on" hint.
 #[test]
 fn peer_recipes_appear_in_the_drawer() {
     let stub = StubApi::start();
@@ -119,12 +119,79 @@ fn peer_recipes_appear_in_the_drawer() {
     let body = body_of(&app.handle(&get("/")));
     assert!(body.contains("Their Recipe"), "{body}");
     assert!(body.contains("recipe-source\">Kit &amp; Alex"), "{body}");
-    assert!(
-        body.contains("href=\"https://reciba.se/their-recipe\""),
-        "{body}"
-    );
+    // The link stays on this frontend: a local permalink, not their site.
+    assert!(body.contains("href=\"their-recipe\""), "{body}");
+    assert!(!body.contains("https://reciba.se/their-recipe"), "{body}");
     // Our same-named recipe wins, with the hint pointing at theirs.
     assert!(body.contains("title=\"Also on Kit &amp; Alex\""), "{body}");
+}
+
+/// Clicking a peer's recipe keeps you here: the page is rendered from the
+/// peer's API, credited to them in the caption, and carries no "also on" hint
+/// (the peer *is* the other place).
+#[test]
+fn a_peer_recipe_is_served_by_this_frontend() {
+    let stub = StubApi::start();
+    let peer = StubApi::start();
+    peer.on(
+        "GET",
+        "/recipes/",
+        Answer::json(r#"[{"name": "Their Recipe", "permalink": "their-recipe"}]"#),
+    );
+    let mut recipe = sample_recipe();
+    recipe["name"] = json!("Their Recipe");
+    recipe["permalink"] = json!("their-recipe");
+    peer.on(
+        "GET",
+        "/recipes/their-recipe",
+        Answer::json(recipe.to_string()),
+    );
+    let app = App::with_peers(
+        stub.base_url().to_string(),
+        "latest".to_string(),
+        8080,
+        vec![Peer::new(
+            "Kit & Alex".to_string(),
+            peer.base_url().to_string(),
+            "https://reciba.se".to_string(),
+        )],
+    );
+
+    let response = app.handle(&get("/their-recipe"));
+    assert_eq!(response.status, 200);
+    let body = body_of(&response);
+    assert!(body.contains("Their Recipe"), "{body}");
+    assert!(
+        body.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the"),
+        "{body}"
+    );
+    assert!(!body.contains("class=\"recipe-also\""), "{body}");
+}
+
+/// A permalink no one holds is still the 404 page.
+#[test]
+fn an_unknown_recipe_is_not_found_even_with_peers() {
+    let stub = StubApi::start();
+    let peer = StubApi::start();
+    peer.on(
+        "GET",
+        "/recipes/",
+        Answer::json(r#"[{"name": "Their Recipe", "permalink": "their-recipe"}]"#),
+    );
+    let app = App::with_peers(
+        stub.base_url().to_string(),
+        "latest".to_string(),
+        8080,
+        vec![Peer::new(
+            "Kit & Alex".to_string(),
+            peer.base_url().to_string(),
+            "https://reciba.se".to_string(),
+        )],
+    );
+
+    let response = app.handle(&get("/nobody-has-this"));
+    assert_eq!(response.status, 404);
+    assert!(body_of(&response).contains("404"), "{}", body_of(&response));
 }
 
 /// The recipe page names and links this deployment's own server when

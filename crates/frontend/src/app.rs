@@ -361,18 +361,9 @@ impl App {
             return Ok(pages::redirect(301, &format!("/{}", name.to_lowercase())));
         }
 
-        let response = self
-            .backend
-            .get(&format!("recipes/{}", name))
-            .map_err(|_| RouteError::BackendUnavailable)?;
-        if response.status == 404 {
+        let Some((mut recipe, server, from_peer)) = self.fetch_recipe(name)? else {
             return self.not_found();
-        }
-        if !(200..300).contains(&response.status) {
-            return Err(RouteError::BackendUnavailable);
-        }
-        let mut recipe: serde_json::Value =
-            serde_json::from_str(&response.text).map_err(|_| RouteError::BackendUnavailable)?;
+        };
 
         let scale_factor = match scaler::get_scale_factor(request.query_param("scale").as_deref()) {
             Some(factor) => {
@@ -405,11 +396,13 @@ impl App {
         let blocks = recipe.get("ingredients_blocks").unwrap_or(&empty);
         let copy_ingredients = scaler::ingredients_copy_text(blocks);
 
-        let also = self.peer_matches(recipe.get("name").and_then(Value::as_str));
-        let server = self
-            .server
-            .as_ref()
-            .map(|server| json!({ "label": server.label, "url": server.site_url }));
+        // A recipe served from a peer is already the "also on" place; there is
+        // nothing local to point back at, so the hint is only for our own.
+        let also = if from_peer {
+            Vec::new()
+        } else {
+            self.peer_matches(recipe.get("name").and_then(Value::as_str))
+        };
         let context = TemplateValue::from_serialize(json!({
             "recipe": recipe,
             "scale_factor": scale_factor,
@@ -419,6 +412,61 @@ impl App {
             "server": server,
         }));
         self.render("recipe.html", context)
+    }
+
+    /// The recipe for `/<permalink>`: ours if we hold it, else a peer's - fetched
+    /// from that peer's API and rendered here, so the reader stays on this
+    /// frontend. `Ok(None)` is the 404 page. The `server` is the `{label, url}`
+    /// the caption credits, and the flag says the recipe came from a peer.
+    fn fetch_recipe(&self, permalink: &str) -> Result<Option<(Value, Value, bool)>, RouteError> {
+        let response = self
+            .backend
+            .get(&format!("recipes/{permalink}"))
+            .map_err(|_| RouteError::BackendUnavailable)?;
+        if (200..300).contains(&response.status) {
+            let recipe = parse_recipe(&response.text)?;
+            return Ok(Some((recipe, self.server_json(), false)));
+        }
+        if response.status != 404 {
+            return Err(RouteError::BackendUnavailable);
+        }
+
+        // Not ours: the first peer whose list holds this permalink serves it.
+        for peer in &self.peers {
+            let Ok(list) = peer.recipes.fetch_data() else {
+                continue;
+            };
+            let Some(entries) = list.as_array() else {
+                continue;
+            };
+            let lists_it = entries
+                .iter()
+                .any(|entry| entry.get("permalink").and_then(Value::as_str) == Some(permalink));
+            if !lists_it {
+                continue;
+            }
+            let response = peer
+                .recipe(permalink)
+                .map_err(|_| RouteError::BackendUnavailable)?;
+            if (200..300).contains(&response.status) {
+                let recipe = parse_recipe(&response.text)?;
+                let server = json!({ "label": peer.label, "url": peer.site_url });
+                return Ok(Some((recipe, server, true)));
+            }
+            if response.status != 404 {
+                return Err(RouteError::BackendUnavailable);
+            }
+        }
+        Ok(None)
+    }
+
+    /// This deployment's own server as `{label, url}` for the caption, or
+    /// `null` when `SERVER_IDENTITY` left it unset.
+    fn server_json(&self) -> Value {
+        match &self.server {
+            Some(server) => json!({ "label": server.label, "url": server.site_url }),
+            None => Value::Null,
+        }
     }
 
     /// The peers that list a recipe with this name *and a different content
@@ -467,6 +515,12 @@ impl App {
         }
         matches
     }
+}
+
+/// A recipe the API returned, parsed, or a 503 when it is not the JSON the
+/// template needs.
+fn parse_recipe(text: &str) -> Result<Value, RouteError> {
+    serde_json::from_str(text).map_err(|_| RouteError::BackendUnavailable)
 }
 
 /// `list(map(lambda b: dict(name=b['name'], ingredients=list(map(...))), ...))`:
