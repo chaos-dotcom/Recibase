@@ -277,7 +277,7 @@ footer a:not(:hover) {
   }
 }
 
-/* Temporary: the "only ours" recipe filter (see onlyours.js). */
+/* The "only ours" toggle is one of the drawer filters (see filters.js). */
 .only-ours {
   display: flex;
   align-items: center;
@@ -309,4 +309,78 @@ footer a:not(:hover) {
 p.recipe-also {
   color: rgba(0, 0, 0, 0.54);
   font-size: 0.875rem;
+}
+
+/* Feature chips: the tag filters in the drawer and the tag row on a recipe.
+   Quiet outlines by default, indigo fill when active; no shadows, no fills on
+   the idle state (Operate restraint). */
+.chips,
+.tag-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chips {
+  margin: 0.75rem 0 0.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-filters {
+  padding: 0 1rem 0.5rem;
+}
+
+.chip,
+.tag-chip {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 1rem;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.chip:hover,
+.tag-chip:hover {
+  border-color: rgba(0, 0, 0, 0.38);
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.chip:focus-visible,
+.tag-chip:focus-visible,
+.filter-clear:focus-visible {
+  outline: 2px solid #7c4dff;
+  outline-offset: 1px;
+}
+
+.tag-chip.is-active {
+  background: #3f51b5;
+  border-color: #3f51b5;
+  color: white;
+}
+
+.filter-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 1rem 0.25rem;
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.75rem;
+}
+
+.filter-clear {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #3f51b5;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
 }

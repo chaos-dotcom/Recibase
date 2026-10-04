@@ -145,8 +145,8 @@ fn the_drawer_marks_our_recipes_for_the_only_ours_toggle() {
     assert!(home.contains("data-ours=\"true\""), "{home}");
     assert!(home.contains("data-ours=\"false\""), "{home}");
     assert!(home.contains("id=\"onlyOurs\""), "{home}");
-    assert!(home.contains("/static/onlyours.js"), "{home}");
-    // The random link is rewritten by onlyours.js to carry the toggle state.
+    assert!(home.contains("/static/filters.js"), "{home}");
+    // The random link is rewritten by filters.js to carry the toggle state.
     assert!(home.contains("href=\"/random\""), "{home}");
 }
 

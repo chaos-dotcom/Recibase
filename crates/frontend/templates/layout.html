@@ -71,8 +71,8 @@
       <input type="checkbox" id="onlyOurs">
       Only Show Recipe's From Chaos 🥰
     </label>
-    <div class="tag-filters" id="tagFilters" hidden></div>
-    <div class="filter-status" id="filterStatus" hidden></div>
+    <div class="tag-filters" id="tagFilters" role="group" aria-label="Filter recipes by tag" hidden></div>
+    <div class="filter-status" id="filterStatus" role="status" hidden></div>
     <nav class="mdl-navigation">
       {% set current_recipe_url = recipeUrl|default('') %}
       <a class="mdl-navigation__link add-recipe{{ ' is-current' if current_recipe_url == 'contribute' else '' }}" href="/contribute">Add a recipe</a>
