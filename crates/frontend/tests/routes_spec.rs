@@ -118,7 +118,7 @@ fn peer_recipes_appear_in_the_drawer() {
 
     let body = body_of(&app.handle(&get("/")));
     assert!(body.contains("Their Recipe"), "{body}");
-    assert!(body.contains("recipe-source\">Kit &amp; Alex"), "{body}");
+    assert!(body.contains("recipe-source\">reciba.se"), "{body}");
     // The link stays on this frontend: a local permalink, not their site.
     assert!(body.contains("href=\"their-recipe\""), "{body}");
     assert!(!body.contains("https://reciba.se/their-recipe"), "{body}");
@@ -126,16 +126,13 @@ fn peer_recipes_appear_in_the_drawer() {
     assert!(body.contains("data-peer=\"true\""), "{body}");
     assert!(body.contains("hidden href=\"their-recipe\""), "{body}");
     // Our same-named recipe wins, with the hint pointing at theirs.
-    assert!(
-        body.contains("title=\"Found on Kit &amp; Alex too\""),
-        "{body}"
-    );
+    assert!(body.contains("title=\"Found on reciba.se too\""), "{body}");
 
     // The recipe page credits the origin server in the caption: the recipe is
     // not ours, so it came from Kit & Alex, and there is no separate hint.
     let page = body_of(&app.handle(&get("/test-recipe")));
     assert!(
-        page.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the"),
+        page.contains("Found on <a href=\"https://reciba.se\">reciba.se</a> across the"),
         "{page}"
     );
     // No separate "Found on ... too." line: the caption carries the credit.
@@ -178,7 +175,7 @@ fn a_peer_recipe_is_served_by_this_frontend() {
     let body = body_of(&response);
     assert!(body.contains("Their Recipe"), "{body}");
     assert!(
-        body.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the"),
+        body.contains("Found on <a href=\"https://reciba.se\">reciba.se</a> across the"),
         "{body}"
     );
     assert!(!body.contains("class=\"recipe-also\""), "{body}");
@@ -271,7 +268,7 @@ fn the_recipe_page_keeps_our_own_recipes_on_our_server() {
         "{page}"
     );
     assert!(
-        !page.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the"),
+        !page.contains("Found on <a href=\"https://reciba.se\">reciba.se</a> across the"),
         "{page}"
     );
 }

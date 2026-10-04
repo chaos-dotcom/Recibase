@@ -461,8 +461,8 @@ impl App {
                 .map_err(|_| RouteError::BackendUnavailable)?;
             if (200..300).contains(&response.status) {
                 let recipe = parse_recipe(&response.text)?;
-                let server = json!({ "label": peer.label, "url": peer.site_url });
-                return Ok(Some((recipe, server, true)));
+                let server = json!({ "label": peer.display_name(), "url": peer.site_url });
+                return Ok(Some((recipe, server)));
             }
             if response.status != 404 {
                 return Err(RouteError::BackendUnavailable);
@@ -516,7 +516,7 @@ impl App {
                 .iter()
                 .any(|entry| entry.get("name").and_then(Value::as_str) == Some(name))
             {
-                return Some(json!({ "label": peer.label, "url": peer.site_url }));
+                return Some(json!({ "label": peer.display_name(), "url": peer.site_url }));
             }
         }
         None

@@ -1,13 +1,14 @@
 //! Peers: other Recibase deployments whose recipes we list alongside our own.
 //!
 //! Ours wins a name collision, so a copy we hold never shadows the peer's
-//! entry; a peer-only recipe is added, labelled with their name, and served by
-//! *this* frontend - its drawer link is the local permalink and the recipe page
-//! is rendered from the peer's API, so a reader never leaves for the peer's
-//! site. A recipe that is not ours (no chaos tag) came from the other server
-//! first, so a peer that lists it is credited with a `Found on <peer> too.` hint
-//! that does go to their site; one of ours gets that hint only when the peer's
-//! digest differs. Our own recipes are listed first, ahead of the peers'.
+//! entry; a peer-only recipe is added, labelled with the host of their site
+//! (`reciba.se`), and served by *this* frontend - its drawer link is the local
+//! permalink and the recipe page is rendered from the peer's API, so a reader
+//! never leaves for the peer's site. A recipe that is not ours (no chaos tag)
+//! came from the other server first, so a peer that lists it is credited with a
+//! `Found on <peer> too.` hint that does go to their site; one of ours gets that
+//! hint only when the peer's digest differs. Our own recipes are listed first,
+//! ahead of the peers'.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -17,13 +18,22 @@ use serde_json::{Value, json};
 use crate::backend::{BackendClient, BackendResponse};
 use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
 
+/// The host shown for a peer: `https://reciba.se` -> `reciba.se`. A peer is
+/// named by its site, not the label in `PEER_BACKENDS`.
+pub fn site_host(site_url: &str) -> &str {
+    let without_scheme = site_url
+        .split_once("://")
+        .map_or(site_url, |(_, rest)| rest);
+    without_scheme.split('/').next().unwrap_or(without_scheme)
+}
+
 /// One extra backend, e.g. Kit & Alex's `api.reciba.se`.
 #[derive(Clone)]
 pub struct Peer {
-    /// The owners' name, shown next to their recipes ("Kit & Alex").
+    /// The owners' name from `PEER_BACKENDS`, kept for configuration; the UI
+    /// names the peer by its site host ([`Peer::display_name`]) instead.
     pub label: String,
-    /// The peer's website, with no trailing slash, so the hint can point at
-    /// their copy as `<site_url>/<permalink>`.
+    /// The peer's website, with no trailing slash.
     pub site_url: String,
     /// The peer's `/recipes/` list, cached on the same 15-minute TTL as ours.
     pub recipes: Arc<CachedBackendCall<Value>>,
@@ -45,6 +55,11 @@ impl Peer {
             recipes,
             backend,
         }
+    }
+
+    /// The name shown for this peer: the host of its site, e.g. `reciba.se`.
+    pub fn display_name(&self) -> &str {
+        site_host(&self.site_url)
     }
 
     /// One of the peer's recipes, as their API returns it, so this frontend can
@@ -111,10 +126,19 @@ pub fn parse_server_identity(value: &str) -> Option<ServerIdentity> {
 
 /// One peer's recipe list, already fetched and ready to merge.
 pub struct PeerList {
+    /// The owners' name from `PEER_BACKENDS`, kept for configuration; the UI
+    /// names the peer by [`PeerList::display_name`] instead.
     pub label: String,
     /// The peer's site URL, with no trailing slash.
     pub site_url: String,
     pub recipes: Vec<Value>,
+}
+
+impl PeerList {
+    /// The name shown for this peer: the host of its site, e.g. `reciba.se`.
+    pub fn display_name(&self) -> &str {
+        site_host(&self.site_url)
+    }
 }
 
 /// Merge our list with the peers' into the drawer list, keyed on the recipe
@@ -149,8 +173,7 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
                 .get("permalink")
                 .and_then(Value::as_str)
                 .unwrap_or_default();
-            let link =
-                json!({ "label": peer.label, "url": format!("{}/{}", peer.site_url, permalink) });
+            let link = json!({ "label": peer.display_name(), "url": format!("{}/{}", peer.site_url, permalink) });
             match known.get(name).copied() {
                 // A recipe we already host. One that is not ours (no chaos tag)
                 // came from the other server first, so a peer listing it is
@@ -175,7 +198,10 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
                         // The local permalink, so this frontend renders their
                         // recipe from their API instead of linking out.
                         map.insert("href".to_string(), Value::String(permalink.to_string()));
-                        map.insert("source".to_string(), Value::String(peer.label.clone()));
+                        map.insert(
+                            "source".to_string(),
+                            Value::String(peer.display_name().to_string()),
+                        );
                         // A peer-only recipe, kept back for the reci-verse
                         // toggle rather than shown by default.
                         map.insert("peer".to_string(), Value::Bool(true));

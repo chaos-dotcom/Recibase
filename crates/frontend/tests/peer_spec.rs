@@ -13,6 +13,8 @@ fn parse_peer_backends_reads_pipe_separated_peers() {
     let peers = parse_peer_backends("Kit & Alex|https://api.reciba.se/|https://reciba.se");
     assert_eq!(peers.len(), 1);
     assert_eq!(peers[0].label, "Kit & Alex");
+    // The UI names a peer by its site host, not the configured label.
+    assert_eq!(peers[0].display_name(), "reciba.se");
     assert_eq!(peers[0].recipe_url("pasta"), "https://reciba.se/pasta");
 }
 
@@ -53,12 +55,12 @@ fn merge_keeps_ours_on_a_name_collision_and_links_the_peer() {
     assert_eq!(pasta["name"], "Pasta");
     assert_eq!(pasta["href"], "pasta");
     assert_eq!(pasta["ours"], true);
-    assert_eq!(pasta["also"][0]["label"], "Kit & Alex");
+    assert_eq!(pasta["also"][0]["label"], "reciba.se");
     assert_eq!(pasta["also"][0]["url"], "https://reciba.se/pasta");
 
     let curry = &merged[1];
     assert_eq!(curry["name"], "Curry");
-    assert_eq!(curry["source"], "Kit & Alex");
+    assert_eq!(curry["source"], "reciba.se");
     assert_eq!(curry["href"], "curry");
     // Peer-only, so the drawer keeps it back for the reci-verse toggle.
     assert_eq!(curry["peer"], true);
