@@ -194,7 +194,6 @@ Pick from existing tags only (`crates/core/src/tag.rs`). The whole vocabulary:
 | Storage | `Freezes`, `BetterNextDay` |
 | Marker | `AI` — renders the "carefully review this, AI was used" warning on the page |
 | Meat | `ItsMadeOfMeat` — our fork's marker for a dish that contains meat |
-| Personal | `Stephani`, `StephaniIsh`, `StephaniUnhealthy` |
 
 Do **not** add `NeverEaten`, `Popular`, `Infrequent`, or `New` — those are
 applied automatically from usage data.

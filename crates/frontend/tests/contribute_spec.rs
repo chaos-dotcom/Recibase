@@ -23,10 +23,13 @@ const FAILURE_CASES: usize = 16;
 /// `pull_request_urls.json`.
 const URL_CASES: usize = 14;
 /// `(value, label)` pairs in `TAG_GROUPS`.
-const TAG_COUNT: usize = 25;
+const TAG_COUNT: usize = 22;
 
 fn golden_path(name: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("golden").join(name)
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("golden")
+        .join(name)
 }
 
 /// Reads a golden file, or fails loudly: a missing file is a broken build,
@@ -34,11 +37,13 @@ fn golden_path(name: &str) -> PathBuf {
 fn load_golden(name: &str) -> Value {
     let path = golden_path(name);
     let text = std::fs::read_to_string(&path).unwrap_or_else(|error| {
-        panic!("golden file {} is missing or unreadable: {error}", path.display())
+        panic!(
+            "golden file {} is missing or unreadable: {error}",
+            path.display()
+        )
     });
-    serde_json::from_str(&text).unwrap_or_else(|error| {
-        panic!("golden file {} is not valid JSON: {error}", path.display())
-    })
+    serde_json::from_str(&text)
+        .unwrap_or_else(|error| panic!("golden file {} is not valid JSON: {error}", path.display()))
 }
 
 /// The cases of a golden array, checked against the count in the brief.
@@ -94,8 +99,16 @@ fn golden_forms_match_page_state_payload_and_header() {
     let cases = golden_cases("contribute_forms.json", FORM_CASES);
     for (index, case) in cases.iter().enumerate() {
         let form = form_from_pairs(&case["form"]);
-        assert_eq!(page_state(Some(&form)), case["page_state"], "case {index}: page_state");
-        assert_eq!(submission_payload(&form), case["payload"], "case {index}: payload");
+        assert_eq!(
+            page_state(Some(&form)),
+            case["page_state"],
+            "case {index}: page_state"
+        );
+        assert_eq!(
+            submission_payload(&form),
+            case["payload"],
+            "case {index}: payload"
+        );
         assert_eq!(
             authorization_header(&form),
             case["auth"].as_str().expect("auth"),
@@ -108,7 +121,11 @@ fn golden_forms_match_page_state_payload_and_header() {
 fn golden_empty_form_is_the_page_default() {
     let cases = golden_cases("contribute_forms.json", FORM_CASES);
     let blank = &cases[0]["page_state"];
-    assert_eq!(page_state(None), *blank, "an unposted page and an empty form agree");
+    assert_eq!(
+        page_state(None),
+        *blank,
+        "an unposted page and an empty form agree"
+    );
     assert_eq!(page_state(Some(&Form::new())), *blank);
 }
 
@@ -130,8 +147,14 @@ fn golden_tags_match_the_template_data() {
     }
     assert_eq!(tags, TAG_COUNT, "total tags");
 
-    let checkboxes = golden["diet_checkboxes"].as_array().expect("diet_checkboxes");
-    assert_eq!(checkboxes.len(), DIET_CHECKBOXES.len(), "diet checkbox count");
+    let checkboxes = golden["diet_checkboxes"]
+        .as_array()
+        .expect("diet_checkboxes");
+    assert_eq!(
+        checkboxes.len(),
+        DIET_CHECKBOXES.len(),
+        "diet checkbox count"
+    );
     for (checkbox, expected) in DIET_CHECKBOXES.iter().zip(checkboxes) {
         assert_eq!(expected[0].as_str(), Some(checkbox.0), "diet value");
         assert_eq!(expected[1].as_str(), Some(checkbox.1), "diet label");
@@ -173,32 +196,34 @@ fn golden_pull_request_urls() {
 /// Chilli con Carne form, and the header it posts it with.
 #[test]
 fn contribute_submits_recipe() {
-    let form = Form::from_pairs(vec![
-        ("passcode", " secret "),
-        ("name", " Chilli con Carne "),
-        ("source", "Kit's Dad"),
-        ("description", " Weeknight "),
-        ("notes", "Rest overnight\n\n"),
-        ("tags", "Spicy"),
-        ("tags", "Scales"),
-        ("ingredient_name", "Mince"),
-        ("ingredient_name", "  "),
-        ("ingredient_name", "Garlic"),
-        ("ingredient_quantity", "500g"),
-        ("ingredient_quantity", ""),
-        ("ingredient_quantity", ""),
-        ("ingredient_prep", ""),
-        ("ingredient_prep", ""),
-        ("ingredient_prep", "crushed"),
-        ("ingredient_notes", ""),
-        ("ingredient_notes", ""),
-        ("ingredient_notes", ""),
-        ("method", "Brown the mince.\n\nServe."),
-        ("cf-turnstile-response", "token"),
-    ]
-    .into_iter()
-    .map(|(key, value)| (key.to_string(), value.to_string()))
-    .collect());
+    let form = Form::from_pairs(
+        vec![
+            ("passcode", " secret "),
+            ("name", " Chilli con Carne "),
+            ("source", "Kit's Dad"),
+            ("description", " Weeknight "),
+            ("notes", "Rest overnight\n\n"),
+            ("tags", "Spicy"),
+            ("tags", "Scales"),
+            ("ingredient_name", "Mince"),
+            ("ingredient_name", "  "),
+            ("ingredient_name", "Garlic"),
+            ("ingredient_quantity", "500g"),
+            ("ingredient_quantity", ""),
+            ("ingredient_quantity", ""),
+            ("ingredient_prep", ""),
+            ("ingredient_prep", ""),
+            ("ingredient_prep", "crushed"),
+            ("ingredient_notes", ""),
+            ("ingredient_notes", ""),
+            ("ingredient_notes", ""),
+            ("method", "Brown the mince.\n\nServe."),
+            ("cf-turnstile-response", "token"),
+        ]
+        .into_iter()
+        .map(|(key, value)| (key.to_string(), value.to_string()))
+        .collect(),
+    );
 
     assert_eq!(authorization_header(&form), "Bearer secret");
     assert_eq!(
@@ -250,7 +275,10 @@ fn contribute_keeps_form_on_api_error() {
         .collect(),
     );
 
-    assert_eq!(failure_message(401, "text/plain", "invalid passcode"), "invalid passcode");
+    assert_eq!(
+        failure_message(401, "text/plain", "invalid passcode"),
+        "invalid passcode"
+    );
 
     let state = page_state(Some(&form));
     assert_eq!(state["name"], "Soup");
@@ -325,7 +353,10 @@ fn contribute_escapes_redisplayed_values() {
         .collect(),
     );
     assert_eq!(page_state(Some(&form))["name"], "<script>alert(1)</script>");
-    assert_eq!(failure_message(502, "text/plain", "upstream failed"), "upstream failed");
+    assert_eq!(
+        failure_message(502, "text/plain", "upstream failed"),
+        "upstream failed"
+    );
 }
 
 /// `test_contribute_reports_unreachable_api`: the route has no response to
@@ -334,10 +365,14 @@ fn contribute_escapes_redisplayed_values() {
 #[test]
 fn contribute_reports_unreachable_api() {
     let form = Form::from_pairs(
-        [("passcode", "secret"), ("name", "Soup"), ("method", "Simmer.")]
-            .into_iter()
-            .map(|(key, value)| (key.to_string(), value.to_string()))
-            .collect(),
+        [
+            ("passcode", "secret"),
+            ("name", "Soup"),
+            ("method", "Simmer."),
+        ]
+        .into_iter()
+        .map(|(key, value)| (key.to_string(), value.to_string()))
+        .collect(),
     );
     let state = page_state(Some(&form));
     assert_eq!(state["name"], "Soup");
@@ -352,19 +387,29 @@ fn contribute_reports_unreachable_api() {
 #[test]
 fn ingredient_rows_follow_the_longest_list() {
     let form = Form::from_pairs(
-        [("ingredient_notes", "a"), ("ingredient_notes", "b"), ("ingredient_notes", "c")]
-            .into_iter()
-            .map(|(key, value)| (key.to_string(), value.to_string()))
-            .collect(),
+        [
+            ("ingredient_notes", "a"),
+            ("ingredient_notes", "b"),
+            ("ingredient_notes", "c"),
+        ]
+        .into_iter()
+        .map(|(key, value)| (key.to_string(), value.to_string()))
+        .collect(),
     );
     let rows = &page_state(Some(&form))["ingredients"];
     assert_eq!(rows.as_array().map(Vec::len), Some(3));
-    assert_eq!(rows[0], json!({"name": "", "quantity": "", "prep": "", "notes": "a"}));
+    assert_eq!(
+        rows[0],
+        json!({"name": "", "quantity": "", "prep": "", "notes": "a"})
+    );
     assert_eq!(rows[2]["notes"], "c");
 
     let blank = &page_state(None)["ingredients"];
     assert_eq!(blank.as_array().map(Vec::len), Some(1));
-    assert_eq!(blank[0], json!({"name": "", "quantity": "", "prep": "", "notes": ""}));
+    assert_eq!(
+        blank[0],
+        json!({"name": "", "quantity": "", "prep": "", "notes": ""})
+    );
 
     // A row of four empty values is dropped from the payload.
     let empty_row = Form::from_pairs(vec![
@@ -395,10 +440,18 @@ fn lines_split_on_every_python_line_boundary() {
     ];
     for (value, expected) in cases {
         let form = Form::from_pairs(vec![("method".to_string(), value.to_string())]);
-        assert_eq!(submission_payload(&form)["method"], json!(expected), "method {value:?}");
+        assert_eq!(
+            submission_payload(&form)["method"],
+            json!(expected),
+            "method {value:?}"
+        );
 
         let form = Form::from_pairs(vec![("notes".to_string(), value.to_string())]);
-        assert_eq!(submission_payload(&form)["notes"], json!(expected), "notes {value:?}");
+        assert_eq!(
+            submission_payload(&form)["notes"],
+            json!(expected),
+            "notes {value:?}"
+        );
     }
 }
 
@@ -428,29 +481,57 @@ fn clean_strips_python_whitespace() {
 #[test]
 fn failure_message_branches() {
     // A JSON body is parsed even without a JSON content type.
-    assert_eq!(failure_message(400, "text/plain", r#"{"error": "oops"}"#), "oops");
+    assert_eq!(
+        failure_message(400, "text/plain", r#"{"error": "oops"}"#),
+        "oops"
+    );
     // `error` is preferred; a blank or non-string one falls through to `message`.
     assert_eq!(
-        failure_message(400, "application/json", r#"{"error": "   ", "message": "second"}"#),
+        failure_message(
+            400,
+            "application/json",
+            r#"{"error": "   ", "message": "second"}"#
+        ),
         "second"
     );
-    assert_eq!(failure_message(400, "application/json", r#"{"error": 5}"#),
-        "Could not submit the recipe.");
+    assert_eq!(
+        failure_message(400, "application/json", r#"{"error": 5}"#),
+        "Could not submit the recipe."
+    );
     // An unparseable body is treated as unparsed.
-    assert_eq!(failure_message(400, "text/plain", "{not json}"), "Could not submit the recipe.");
+    assert_eq!(
+        failure_message(400, "text/plain", "{not json}"),
+        "Could not submit the recipe."
+    );
     // A non-object JSON body is not a parsed response.
     assert_eq!(failure_message(400, "text/plain", "[1]"), "[1]");
     // HTML is never shown to the user.
-    assert_eq!(failure_message(200, "text/html", "<html>nope</html>"),
-        "Could not submit the recipe.");
+    assert_eq!(
+        failure_message(200, "text/html", "<html>nope</html>"),
+        "Could not submit the recipe."
+    );
     // Whitespace-only and empty bodies fall back.
-    assert_eq!(failure_message(400, "text/plain", "   "), "Could not submit the recipe.");
-    assert_eq!(failure_message(409, "", ""), "A recipe with this name already exists.");
+    assert_eq!(
+        failure_message(400, "text/plain", "   "),
+        "Could not submit the recipe."
+    );
+    assert_eq!(
+        failure_message(409, "", ""),
+        "A recipe with this name already exists."
+    );
     // 500 characters, not bytes.
     let long = "é".repeat(600);
-    assert_eq!(failure_message(400, "text/plain", &long).chars().count(), 500);
+    assert_eq!(
+        failure_message(400, "text/plain", &long).chars().count(),
+        500
+    );
     let long_json = format!(r#"{{"error": "{}"}}"#, "x".repeat(600));
-    assert_eq!(failure_message(400, "application/json", &long_json).chars().count(), 500);
+    assert_eq!(
+        failure_message(400, "application/json", &long_json)
+            .chars()
+            .count(),
+        500
+    );
 }
 
 // -- the page, rendered through the real template ----------------------
@@ -463,7 +544,9 @@ fn template_environment() -> minijinja::Environment<'static> {
     environment.set_loader(minijinja::path_loader(
         Path::new(env!("CARGO_MANIFEST_DIR")).join("templates"),
     ));
-    environment.add_function("fetchRecipeList", || minijinja::Value::from(Vec::<minijinja::Value>::new()));
+    environment.add_function("fetchRecipeList", || {
+        minijinja::Value::from(Vec::<minijinja::Value>::new())
+    });
     environment.add_function("fetchApiVersion", || "1234567890abcdef");
     environment
 }
@@ -479,7 +562,9 @@ fn render_page(
         .map(|(name, tags)| {
             (
                 (*name).to_string(),
-                tags.iter().map(|(value, label)| ((*value).to_string(), (*label).to_string())).collect(),
+                tags.iter()
+                    .map(|(value, label)| ((*value).to_string(), (*label).to_string()))
+                    .collect(),
             )
         })
         .collect();
@@ -537,7 +622,9 @@ fn contribute_page_renders_tags_in_order() {
         cursor += at + heading.len();
         for (value, label) in *tags {
             let tag = format!(r#"value="{value}""#);
-            let at = page[cursor..].find(&tag).unwrap_or_else(|| panic!("{value} after {group}"));
+            let at = page[cursor..]
+                .find(&tag)
+                .unwrap_or_else(|| panic!("{value} after {group}"));
             cursor += at + tag.len();
             assert!(page.contains(label), "{label} is rendered");
         }
@@ -567,7 +654,10 @@ fn contribute_page_redisplays_and_escapes() {
     let failed = failure_message(502, "text/plain", "upstream failed");
     let page = render_page(&environment, page_state(Some(&form)), Some(&failed), None);
 
-    assert!(!page.contains("<script>alert(1)</script>"), "the value is escaped");
+    assert!(
+        !page.contains("<script>alert(1)</script>"),
+        "the value is escaped"
+    );
     // MiniJinja escapes `/` as `&#x2f;` where Jinja2 leaves it alone, so the
     // closing tag is checked up to the slash.
     assert!(page.contains("&lt;script&gt;alert(1)&lt;"));
@@ -581,9 +671,17 @@ fn contribute_page_redisplays_and_escapes() {
     // A successful reply replaces the form with the link.
     let url = "https://github.com/chaos-dotcom/Recibase/pull/12";
     let accepted = json!({ "url": url });
-    let opened = render_page(&environment, page_state(None), None, pull_request_url(&accepted).as_deref());
+    let opened = render_page(
+        &environment,
+        page_state(None),
+        None,
+        pull_request_url(&accepted).as_deref(),
+    );
     assert!(opened.contains("Pull request opened"));
-    assert!(!opened.contains(r#"name="passcode""#), "the form is replaced");
+    assert!(
+        !opened.contains(r#"name="passcode""#),
+        "the form is replaced"
+    );
     // The module hands the template the URL unchanged; MiniJinja escapes the
     // slashes in an interpolated value where Jinja2 only escapes `<`, `>`,
     // `&`, `"` and `'`, so the href is checked in MiniJinja's spelling.

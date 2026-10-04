@@ -34,14 +34,6 @@ pub const TAG_GROUPS: &[(&str, &[(&str, &str)])] = &[
         ],
     ),
     (
-        "Stephani",
-        &[
-            ("Stephani", "Stephani"),
-            ("StephaniIsh", "Stephani-ish"),
-            ("StephaniUnhealthy", "StephaniUnhealthy"),
-        ],
-    ),
-    (
         "Vibe",
         &[
             ("ColdWeather", "Cold Weather"),
@@ -109,14 +101,7 @@ fn py_splitlines(value: &str) -> Vec<&str> {
                 }
                 true
             }
-            '\n'
-            | '\u{b}'
-            | '\u{c}'
-            | '\u{1c}'
-            | '\u{1d}'
-            | '\u{1e}'
-            | '\u{85}'
-            | '\u{2028}'
+            '\n' | '\u{b}' | '\u{c}' | '\u{1c}' | '\u{1d}' | '\u{1e}' | '\u{85}' | '\u{2028}'
             | '\u{2029}' => true,
             _ => false,
         };
@@ -135,13 +120,19 @@ fn py_splitlines(value: &str) -> Vec<&str> {
 /// `_clean`: `None` and `None`-like absent values become `""`, anything else
 /// is stripped.
 fn clean(value: Option<&str>) -> String {
-    value.map(|value| py_strip(value).to_string()).unwrap_or_default()
+    value
+        .map(|value| py_strip(value).to_string())
+        .unwrap_or_default()
 }
 
 /// `_or_none`: `_clean(value) or None`.
 fn or_none(value: Option<&str>) -> Option<String> {
     let cleaned = clean(value);
-    if cleaned.is_empty() { None } else { Some(cleaned) }
+    if cleaned.is_empty() {
+        None
+    } else {
+        Some(cleaned)
+    }
 }
 
 /// `_lines`: one entry per non-blank line, stripped.
@@ -183,7 +174,11 @@ fn ingredient_rows(form: &Form) -> Vec<IngredientRow> {
     let quantities = form.get_list("ingredient_quantity");
     let preps = form.get_list("ingredient_prep");
     let notes = form.get_list("ingredient_notes");
-    let count = names.len().max(quantities.len()).max(preps.len()).max(notes.len());
+    let count = names
+        .len()
+        .max(quantities.len())
+        .max(preps.len())
+        .max(notes.len());
     if count == 0 {
         return vec![IngredientRow::default()];
     }
@@ -219,7 +214,10 @@ pub fn page_state(form: Option<&Form>) -> Value {
             form.get_or("description", "").to_string(),
             form.get_or("notes", "").to_string(),
             form.get_or("method", "").to_string(),
-            form.get_list("tags").iter().map(|tag| tag.to_string()).collect(),
+            form.get_list("tags")
+                .iter()
+                .map(|tag| tag.to_string())
+                .collect(),
             ingredient_rows(form),
         ),
     };
@@ -307,12 +305,12 @@ fn fallback_error(status: u16) -> String {
 /// into doing.
 pub fn failure_message(status: u16, content_type: &str, text: &str) -> String {
     let text = py_strip(text);
-    let parsed: Option<Value> = if content_type.to_lowercase().contains("json") || text.starts_with('{')
-    {
-        serde_json::from_str(text).ok()
-    } else {
-        None
-    };
+    let parsed: Option<Value> =
+        if content_type.to_lowercase().contains("json") || text.starts_with('{') {
+            serde_json::from_str(text).ok()
+        } else {
+            None
+        };
     if let Some(Value::Object(object)) = &parsed {
         for key in ["error", "message"] {
             if let Some(Value::String(value)) = object.get(key) {
