@@ -39,6 +39,7 @@ pub mod cranberry_relish;
 pub mod creamy_cauliflower_cheese_walnuts;
 pub mod creamy_leek_croustade;
 pub mod creamy_mushroom_stroganoff;
+pub mod crispy_gnocchi_with_roasted_peppers_chilli_rosemary_and_ricotta;
 pub mod crunch_chocolate_chip_coffee_cake;
 pub mod dahl;
 pub mod drop_pancakes;
