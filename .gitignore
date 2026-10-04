@@ -2,3 +2,4 @@ target/
 .env
 .DS_Store
 __pycache__/
+.tmp-ocr/
