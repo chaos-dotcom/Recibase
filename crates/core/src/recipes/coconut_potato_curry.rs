@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2023, 4, 1).unwrap(),
         permalink_override: None,
         source: Some("Waitrose".to_string()),
-        description: Some("This vegan, gluten-free curry ticks all the right boxes. It's healthy, great value and all cooked in one pot. You can make it up to 48 hours in advance - just cover and chill, then reheat until piping hot.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4".to_string(),

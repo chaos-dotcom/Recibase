@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: Some("Waitrose".to_string()),
-        description: Some("Whether you like to roll or fold, this flexible recipe is fab with sweet or savoury fillings.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 2 (4-6 pancakes)".to_string(),

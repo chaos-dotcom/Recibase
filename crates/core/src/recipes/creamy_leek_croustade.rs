@@ -12,9 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: Some("The Cranks Recipe Book (1982: Dent)".to_string()),
-        description: Some(
-            "A nutty wholemeal crumb base topped with a creamy leek and tomato sauce.".to_string(),
-        ),
+        description: None,
         tagline: None,
         notes: Vec::new(),
         tags: vec![

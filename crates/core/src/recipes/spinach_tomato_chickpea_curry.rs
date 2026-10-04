@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("When I think of this dish, and how the words 'chana saag' are now familiar to so many British people, it makes me thankful for all the Bangladeshis who first came here from Kolkata at the end of the British Raj. Many of them jumped into the restaurant trade, keen to bring Indian dishes, popular with Brits in India, to our high streets. It's thanks to them that chana saag is (almost) as popular here as it is in India. This is my take on the classic. It's a bit perkier than your average curry-house chana saag, and uses just-wilted spinach.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4 as a main course".to_string(),

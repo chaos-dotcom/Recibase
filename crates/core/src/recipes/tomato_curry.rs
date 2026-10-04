@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("There are just a few Indian dishes that truly celebrate the tomato, such as Keralan tomato fry and Gujarati sev tameta nu shaak (a sweet and sour tomato curry), but it's thakkali kuzhambu, from Tamil Nadu, on which this recipe is (very) loosely based. The sweetness and acidity of tomatoes is married to classic pickling spices, then tempered with curry leaves, tamarind and coconut: the ingredients that define South Indian cooking. This dish has a magic moment when all the water in the coconut milk evaporates to render the oil, leaving you with a silky, luxurious heap of deliciousness that's perfect for scooping up with naan bread or mixing into hot rice.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4 as a main".to_string(),

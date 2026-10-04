@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: Some("Waitrose".to_string()),
-        description: Some("This hearty, plant-based stew tastes even better made a day in advance.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4".to_string(),

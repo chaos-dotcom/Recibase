@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2023, 5, 1).unwrap(),
         permalink_override: None,
         source: Some("Waitrose".to_string()),
-        description: Some("This really delicious (and healthy) supper takes just 20 minutes.".to_string()),
+        description: None,
         tagline: Some("Put down that takeaway menu!".to_string()),
         notes: vec![
             "Serves 2".to_string(),

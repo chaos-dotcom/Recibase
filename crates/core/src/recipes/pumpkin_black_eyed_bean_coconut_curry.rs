@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("The smell of roasted pumpkin, and curry leaves sizzling, in coconut oil, is enough to make anyone want to go to Kerala, which is where a variation of this dish, known as 'olan', originates. The sweet pumpkin, earthy beans and creamy coconut come together to create a gentle curry, perfect for eating in England in the autumn, when a variety of pumpkins and squashes abound.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4 as a main course".to_string(),

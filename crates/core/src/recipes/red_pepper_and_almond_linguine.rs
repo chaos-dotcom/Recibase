@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("Sweet Spanish-style romesco sauce is a great twist on classic tomato pasta. Keep the holiday vibe with manchego, almonds and basil on top (although any hard cheese, nuts and herbs will work).".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 2".to_string(),

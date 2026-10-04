@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: Some("Waitrose".to_string()),
-        description: Some("This stunning tart would make a brilliant meat-free main on Christmas Day.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 6".to_string(),

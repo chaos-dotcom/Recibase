@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: Some("https://www.loveandlemons.com/pasta-primavera/".to_string()),
-        description: Some("Packed with seasonal vegetables, this pasta primavera is a simple, fresh spring or summer dinner.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4".to_string(),

@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("These mushrooms are as good as part of a vegetarian feasting menu as they are as antipasti - and of course if you're building a non-vegetarian feast, they go wonderfully alongside the slow-roasted harissa lamb on page 102 or warm flatbreads.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4".to_string(),

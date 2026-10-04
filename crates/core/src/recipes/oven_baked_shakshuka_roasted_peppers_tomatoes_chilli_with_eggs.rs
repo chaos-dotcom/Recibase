@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("I love shakshuka, but I don't love how long it takes to carefully fry large quantities of onions, peppers and tomatoes on the stove. Cue the oven version - roast all the vegetables first, and save yourself 20 minutes of stirring. This is a standard weekend breakfast at home.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4".to_string(),

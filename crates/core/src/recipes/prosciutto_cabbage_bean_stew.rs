@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2023, 11, 1).unwrap(),
         permalink_override: None,
         source: Some("Principe".to_string()),
-        description: Some("A simple one-pan dish packed with veg and topped with crispy prosciutto. It's lovely served with crusty bread, or try stirring in your choice of small pasta shapes as it cooks.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Savoy cabbage is particularly effective at soaking up the flavour in stews and stir fries. You can also shred it finely, then cook with lardons for a simple side dish, or stir it into mashed potato with salad onions to make colcannon.".to_string(),

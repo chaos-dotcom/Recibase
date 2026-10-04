@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2023, 6, 1).unwrap(),
         permalink_override: None,
         source: Some("Waitrose".to_string()),
-        description: Some("The herby, salty tang of olives makes a quick and absolutely delicious sauce for pasta. Casarecce are the ideal shape for holding the sauce, but a similar variety will work just as well.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 3".to_string(),

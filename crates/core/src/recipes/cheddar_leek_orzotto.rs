@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2024, 4, 1).unwrap(),
         permalink_override: None,
         source: Some("Waitrose".to_string()),
-        description: Some("A pleasingly simple twist on risotto that's quicker to make but just as gratifying as the original.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 2".to_string(),

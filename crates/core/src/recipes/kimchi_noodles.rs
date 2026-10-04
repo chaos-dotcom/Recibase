@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("Who says you have to go out for ramen? Here's how to make your own in 20 minutes.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 2".to_string(),

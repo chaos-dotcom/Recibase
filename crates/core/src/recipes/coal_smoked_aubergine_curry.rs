@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("As the summer starts to disappear, and with it any hope of having a barbecue, think of this recipe. It uses the classic and ancient Indian dhungar method of smoking food by placing a smouldering piece of charcoal in the centre of the curry and pouring a little oil over it, then covering for a minute so that the smoky flavours permeate. Close your eyes and you could be in a street market in Delhi, just without the cows.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4 to 6 as a side".to_string(),

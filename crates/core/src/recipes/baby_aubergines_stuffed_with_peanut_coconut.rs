@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("Two years ago I went to Kanora in Gujarat to visit the birthplace of my grandfather. I asked around for the old Lakhani house. A village elder pointed it out. I knocked on the door tentatively and was welcomed in by the new owners. The smell coming from the kitchen was magical: they were making this dish - aubergines cooked in peanut and coconut, a Gujarati classic - and they invited me to stay for lunch. I sat at the kitchen table where my grandfather would have sat with his brother and seven sisters, and imagined what he must have been thinking when he decided to set sail across the Arabian Sea to seek his fortune in Africa. In all the years I knew him, I never thought to ask him about it. But I did on many occasions share this dish with him, and every time I eat it, it reminds me to dream big.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4 as a main course".to_string(),

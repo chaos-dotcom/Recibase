@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("The gnocchi with mozzarella and tomatoes from the first Roasting Tin book was so popular that I decided to revisit it, as there are never too many ways to eat crispy gnocchi. This version, with roasted red peppers and rosemary, is a lovely alternative. Use a very large and ideally metal roasting tin, for maximum crunch on the potatoes.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 2 generously".to_string(),

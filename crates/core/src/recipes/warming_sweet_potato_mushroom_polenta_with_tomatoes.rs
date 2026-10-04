@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: Some("Alice Hart's The New Vegetarian".to_string()),
-        description: Some("I hadn't thought polenta could be baked before reading it in Alice Hart's The New Vegetarian - it's a wonderful, effort-free way to cook the grain. This recipe is an homage to hers, albeit with garlicky mushrooms and soft, quick roasted tomatoes as a topping.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 2".to_string(),

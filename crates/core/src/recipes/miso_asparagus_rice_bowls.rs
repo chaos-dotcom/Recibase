@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("Plant-based and ready in 15 minutes, this dish can be adapted to whatever veg is in season. If you're not vegan, cooked prawns or chicken make good subs for the tofu. Extra veg is always welcome.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 2".to_string(),

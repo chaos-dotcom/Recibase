@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 4).unwrap(),
         permalink_override: None,
         source: Some("Alice Hart".to_string()),
-        description: Some("This is a beautiful dish, and perfect for a lunchbox the next day too. Do as Alice Hart suggests and buy the shorter, fatter bulbs of fennel - they have a better flavour.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 4".to_string(),

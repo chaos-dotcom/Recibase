@@ -12,7 +12,7 @@ pub fn recipe() -> RecipeDef {
         created_at: NaiveDate::from_ymd_opt(2026, 10, 3).unwrap(),
         permalink_override: None,
         source: None,
-        description: Some("Miso, rice wine and vinegar combine with aubergines and tofu for a dish packed full of flavour.".to_string()),
+        description: None,
         tagline: None,
         notes: vec![
             "Serves 3-4".to_string(),
