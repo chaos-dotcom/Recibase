@@ -91,6 +91,9 @@ pub struct MenuEntry {
     /// byte-identical to the Scala's. The frontend uses it to tell "same
     /// recipe" from "same name, different recipe" across deployments.
     pub revision: Option<String>,
+    /// The recipe's tags, as `entry_name`s, serialised only when the caller
+    /// asks (`?withTags=true`). The drawer uses them to filter the menu.
+    pub tags: Vec<String>,
 }
 
 impl MenuEntry {
@@ -100,6 +103,7 @@ impl MenuEntry {
             permalink: permalink.to_string(),
             ours: false,
             revision: None,
+            tags: Vec::new(),
         }
     }
 
@@ -113,6 +117,17 @@ impl MenuEntry {
         }
         if let Some(revision) = &self.revision {
             fields.push(("revision", Value::String(revision.clone())));
+        }
+        if !self.tags.is_empty() {
+            fields.push((
+                "tags",
+                Value::Array(
+                    self.tags
+                        .iter()
+                        .map(|tag| Value::String(tag.clone()))
+                        .collect(),
+                ),
+            ));
         }
         obj(fields)
     }

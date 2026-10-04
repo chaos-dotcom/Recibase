@@ -22,6 +22,13 @@
     {% for link in also %}<a href="{{ link['url'] }}" rel="nofollow">{{ link['label'] }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
   </p>
 {% endif %}
+{% if recipe['tags']|length > 0 %}
+  <ul class="chips" aria-label="Recipe tags">
+    {% for tag in recipe['tags'] %}
+      <li><a class="chip" href="/?tag={{ tag|urlencode }}">{{ tag }}</a></li>
+    {% endfor %}
+  </ul>
+{% endif %}
 <h3 id="ingredients-heading">Ingredients</h3>
 <div id="ingredient-tools">
   <span id="copy" class="material-icons" title="Copy ingredients to clipboard" data-ingredients="{{ copy_ingredients }}">content_copy</span>

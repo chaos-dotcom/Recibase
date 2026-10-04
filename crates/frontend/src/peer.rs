@@ -32,7 +32,7 @@ impl Peer {
         let backend = Arc::new(BackendClient::new(api_base_url));
         let recipes = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
-            move || backend.get_json("recipes/?withRevision=true")
+            move || backend.get_json("recipes/?withRevision=true&withTags=true")
         }));
         Peer {
             label,

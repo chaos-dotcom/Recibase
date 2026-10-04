@@ -34,10 +34,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script defer src="/static/material.min.js"></script>
   <link rel="stylesheet" href="/static/styles.css?v={{ config.frontendVersion }}" />
-  <script defer src="/static/search.js?v={{ config.frontendVersion }}"></script>
   <script defer src="/static/copy.js?v={{ config.frontendVersion }}"></script>
   <script defer src="/static/wakelock.js?v={{ config.frontendVersion }}"></script>
-  <script defer src="/static/onlyours.js?v={{ config.frontendVersion }}"></script>
+  <script defer src="/static/filters.js?v={{ config.frontendVersion }}"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   {% if imageSrc is defined and imageSrc %}
@@ -72,11 +71,13 @@
       <input type="checkbox" id="onlyOurs">
       Only Show Recipe's From Chaos 🥰
     </label>
+    <div class="tag-filters" id="tagFilters" hidden></div>
+    <div class="filter-status" id="filterStatus" hidden></div>
     <nav class="mdl-navigation">
       {% set current_recipe_url = recipeUrl|default('') %}
       <a class="mdl-navigation__link add-recipe{{ ' is-current' if current_recipe_url == 'contribute' else '' }}" href="/contribute">Add a recipe</a>
       {% for listItem in fetchRecipeList() %}
-        <a class="mdl-navigation__link {{ 'is-current' if listItem['permalink'] == current_recipe_url }}" data-ours="{{ 'true' if listItem['ours']|default(false) else 'false' }}" href="{{ listItem['href'] }}">{{ listItem['name'] }}{% if listItem['source'] %}<span class="recipe-source">{{ listItem['source'] }}</span>{% endif %}{% if listItem['also'] %}<span class="recipe-also" title="Also on {{ listItem['also'][0]['label'] }}">⇄</span>{% endif %}</a>
+        <a class="mdl-navigation__link {{ 'is-current' if listItem['permalink'] == current_recipe_url }}" data-ours="{{ 'true' if listItem['ours']|default(false) else 'false' }}" data-tags="{{ listItem['tags']|default([])|join('|') }}" href="{{ listItem['href'] }}">{{ listItem['name'] }}{% if listItem['source'] %}<span class="recipe-source">{{ listItem['source'] }}</span>{% endif %}{% if listItem['also'] %}<span class="recipe-also" title="Also on {{ listItem['also'][0]['label'] }}">⇄</span>{% endif %}</a>
       {% endfor %}
     </nav>
   </div>

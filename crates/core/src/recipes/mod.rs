@@ -84,6 +84,7 @@ pub mod polenta_with_balsamic_sausages_mushrooms;
 pub mod pomegranate_lime_ice_cream;
 pub mod pomegranate_persian_halloumi;
 pub mod prosciutto_cabbage_bean_stew;
+pub mod pumpkin_black_eyed_bean_coconut_curry;
 pub mod quesadillas;
 pub mod quick_roasted_fennel_and_bulgur_wheat_with_mozzarella_figs_pomegranate_and_dill;
 pub mod red_pepper_and_almond_linguine;

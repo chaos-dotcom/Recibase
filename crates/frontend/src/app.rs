@@ -111,10 +111,9 @@ impl App {
         let backend = Arc::new(BackendClient::new(backend_url.clone()));
         let recipe_list = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
-            // `withRevision` adds each recipe's content digest, which the
-            // drawer/merge uses to tell same-recipe from same-name; the plain
-            // `/recipes/` response is unchanged.
-            move || backend.get_json("recipes/?withRevision=true")
+            // `withRevision` adds each recipe's content digest and `withTags`
+            // its tags; the plain `/recipes/` response is unchanged.
+            move || backend.get_json("recipes/?withRevision=true&withTags=true")
         }));
         let api_version = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);

@@ -30,9 +30,13 @@ impl Usage {
 }
 
 /// `RecipeController.listRecipes`. `with_revision` adds each recipe's content
-/// digest, which the default (`false`) response does not carry so it stays
-/// byte-identical to the Scala's.
-pub fn list_recipes(has_ingredient: Option<&str>, with_revision: bool) -> Vec<MenuEntry> {
+/// digest and `with_tags` its tags; the default (`false`) response carries
+/// neither, so it stays byte-identical to the Scala's.
+pub fn list_recipes(
+    has_ingredient: Option<&str>,
+    with_revision: bool,
+    with_tags: bool,
+) -> Vec<MenuEntry> {
     let ours = recibase_core::recipes::chaos_recipes();
     let mut entries: Vec<MenuEntry> = recibase_core::recipes::recipes()
         .iter()
@@ -46,6 +50,13 @@ pub fn list_recipes(has_ingredient: Option<&str>, with_revision: bool) -> Vec<Me
             if with_revision {
                 entry.revision = Some(recipe.revision());
             }
+            if with_tags {
+                entry.tags = recipe
+                    .tags
+                    .iter()
+                    .map(|tag| tag.entry_name().to_string())
+                    .collect();
+            }
             entry
         })
         .collect();
@@ -53,9 +64,9 @@ pub fn list_recipes(has_ingredient: Option<&str>, with_revision: bool) -> Vec<Me
     entries
 }
 
-pub fn recipes_json(has_ingredient: Option<&str>, with_revision: bool) -> Value {
+pub fn recipes_json(has_ingredient: Option<&str>, with_revision: bool, with_tags: bool) -> Value {
     Value::Array(
-        list_recipes(has_ingredient, with_revision)
+        list_recipes(has_ingredient, with_revision, with_tags)
             .iter()
             .map(|e| e.to_json())
             .collect(),

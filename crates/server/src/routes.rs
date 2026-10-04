@@ -88,10 +88,12 @@ fn dispatch(request: &Request, context: &Context) -> (Response, bool) {
         if path == "/recipes/" {
             let ingredient = request.query_param("hasIngredient");
             let with_revision = request.query_param("withRevision").as_deref() == Some("true");
+            let with_tags = request.query_param("withTags").as_deref() == Some("true");
             return (
                 Response::json(&controllers::recipes_json(
                     ingredient.as_deref(),
                     with_revision,
+                    with_tags,
                 )),
                 true,
             );
