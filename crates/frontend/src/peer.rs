@@ -4,10 +4,9 @@
 //! entry; a peer-only recipe is added, labelled with their name, and served by
 //! *this* frontend - its drawer link is the local permalink and the recipe page
 //! is rendered from the peer's API, so a reader never leaves for the peer's
-//! site. Our own entry gains an `also` link when a peer lists the same name with
-//! a different content digest, the hint that they have a different version, and
-//! that link does go to their site. Our own recipes are listed first, ahead of
-//! the peers'.
+//! site. Our own entry gains a peer hint when a peer lists the same name with a
+//! different content digest - `Found on <peer> too.` - a link that does go to
+//! their site. Our own recipes are listed first, ahead of the peers'.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -22,8 +21,8 @@ use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
 pub struct Peer {
     /// The owners' name, shown next to their recipes ("Kit & Alex").
     pub label: String,
-    /// The peer's website, with no trailing slash, so an `also` link can point
-    /// at their copy as `<site_url>/<permalink>`.
+    /// The peer's website, with no trailing slash, so the hint can point at
+    /// their copy as `<site_url>/<permalink>`.
     pub site_url: String,
     /// The peer's `/recipes/` list, cached on the same 15-minute TTL as ours.
     pub recipes: Arc<CachedBackendCall<Value>>,
@@ -53,8 +52,8 @@ impl Peer {
         self.backend.get(&format!("recipes/{permalink}"))
     }
 
-    /// The peer's page for one of their recipes, for an `also` link that does
-    /// leave for their site.
+    /// The peer's page for one of their recipes, for the hint that does leave
+    /// for their site.
     pub fn recipe_url(&self, permalink: &str) -> String {
         format!("{}/{}", self.site_url, permalink)
     }

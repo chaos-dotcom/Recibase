@@ -77,7 +77,7 @@
       {% set current_recipe_url = recipeUrl|default('') %}
       <a class="mdl-navigation__link add-recipe{{ ' is-current' if current_recipe_url == 'contribute' else '' }}" href="/contribute">Add a recipe</a>
       {% for listItem in fetchRecipeList() %}
-        <a class="mdl-navigation__link {{ 'is-current' if listItem['permalink'] == current_recipe_url }}" data-ours="{{ 'true' if listItem['ours']|default(false) else 'false' }}" data-tags="{{ listItem['tags']|default([])|join('|') }}"{% if not listItem['ours']|default(false) %} hidden{% endif %} href="{{ listItem['href'] }}">{{ listItem['name'] }}{% if listItem['source'] %}<span class="recipe-source">{{ listItem['source'] }}</span>{% endif %}{% if listItem['also'] %}<span class="recipe-also" title="Also on {{ listItem['also'][0]['label'] }}">⇄</span>{% endif %}</a>
+        <a class="mdl-navigation__link {{ 'is-current' if listItem['permalink'] == current_recipe_url }}" data-ours="{{ 'true' if listItem['ours']|default(false) else 'false' }}" data-tags="{{ listItem['tags']|default([])|join('|') }}"{% if not listItem['ours']|default(false) %} hidden{% endif %} href="{{ listItem['href'] }}">{{ listItem['name'] }}{% if listItem['source'] %}<span class="recipe-source">{{ listItem['source'] }}</span>{% endif %}{% if listItem['also'] %}<span class="recipe-also" title="Found on {{ listItem['also'][0]['label'] }} too">⇄</span>{% endif %}</a>
       {% endfor %}
     </nav>
   </div>

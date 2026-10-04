@@ -397,8 +397,8 @@ impl App {
         let blocks = recipe.get("ingredients_blocks").unwrap_or(&empty);
         let copy_ingredients = scaler::ingredients_copy_text(blocks);
 
-        // A recipe served from a peer is already the "also on" place; there is
-        // nothing local to point back at, so the hint is only for our own.
+        // A recipe served from a peer is already theirs; there is nothing local
+        // to point back at, so the hint is only for our own.
         let also = if from_peer {
             Vec::new()
         } else {
@@ -471,7 +471,7 @@ impl App {
     }
 
     /// The peers that list a recipe with this name *and a different content
-    /// digest*, as `{label, url}` for the "also on" hint on the recipe page. A
+    /// digest*, as `{label, url}` for the "found on" hint on the recipe page. A
     /// peer the digest says is identical is skipped; a peer that cannot be
     /// reached is skipped.
     fn peer_matches(&self, name: Option<&str>) -> Vec<Value> {
