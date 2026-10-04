@@ -72,6 +72,7 @@ pub mod mushroom_risotto;
 pub mod new_york_bagel;
 pub mod nut_roast;
 pub mod olive_pesto_casarecce;
+pub mod oven_baked_shakshuka_roasted_peppers_tomatoes_chilli_with_eggs;
 pub mod pancakes;
 pub mod paneer_jalfrezi;
 pub mod parsnip_ginger_soup;
