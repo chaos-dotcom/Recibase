@@ -362,7 +362,7 @@ impl App {
             return Ok(pages::redirect(301, &format!("/{}", name.to_lowercase())));
         }
 
-        let Some((mut recipe, server, from_peer)) = self.fetch_recipe(name)? else {
+        let Some((mut recipe, mut server, from_peer)) = self.fetch_recipe(name)? else {
             return self.not_found();
         };
 
@@ -397,12 +397,22 @@ impl App {
         let blocks = recipe.get("ingredients_blocks").unwrap_or(&empty);
         let copy_ingredients = scaler::ingredients_copy_text(blocks);
 
-        // A recipe served from a peer is already theirs; there is nothing local
-        // to point back at, so the hint is only for our own.
-        let also = if from_peer {
+        let recipe_name = recipe.get("name").and_then(Value::as_str);
+        let is_ours = self.is_ours(recipe_name);
+        // A recipe that is not ours came from the other server first, so the
+        // caption credits that server rather than the one hosting it.
+        if !from_peer
+            && !is_ours
+            && let Some(origin) = self.origin_server(recipe_name)
+        {
+            server = origin;
+        }
+        // The caption is the credit for a peer's recipe; our own get a hint only
+        // when a peer holds a different version.
+        let also = if from_peer || !is_ours {
             Vec::new()
         } else {
-            self.peer_matches(recipe.get("name").and_then(Value::as_str))
+            self.peer_matches(recipe_name)
         };
         let context = TemplateValue::from_serialize(json!({
             "recipe": recipe,
@@ -470,18 +480,14 @@ impl App {
         }
     }
 
-    /// The peers that list a recipe with this name, as `{label, url}` for the
-    /// "found on" hint on the recipe page. A recipe that is not ours came from
-    /// the other server first, so its peer is credited whatever the digest; one
-    /// of ours is credited only when the digest differs. A peer that cannot be
-    /// reached is skipped.
-    fn peer_matches(&self, name: Option<&str>) -> Vec<Value> {
+    /// Whether `name` is one of ours (chaos-tagged), read from the `ours` flag
+    /// the API sets on the list. A recipe without it came from the other server
+    /// first.
+    fn is_ours(&self, name: Option<&str>) -> bool {
         let Some(name) = name else {
-            return Vec::new();
+            return false;
         };
-        // Our digest for the recipe, and whether it is ours (chaos-tagged).
-        let (our_revision, our_ours) = self
-            .recipe_list
+        self.recipe_list
             .fetch_data()
             .ok()
             .and_then(|list| {
@@ -489,15 +495,51 @@ impl App {
                     .as_array()?
                     .iter()
                     .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))?;
-                Some((
-                    entry
-                        .get("revision")
-                        .and_then(Value::as_str)
-                        .map(str::to_string),
-                    entry.get("ours").and_then(Value::as_bool).unwrap_or(false),
-                ))
+                Some(entry.get("ours").and_then(Value::as_bool).unwrap_or(false))
             })
-            .unwrap_or((None, false));
+            .unwrap_or(false)
+    }
+
+    /// The peer that lists `name`, as `{label, url}` for the caption: the other
+    /// server a recipe we did not write came from. `None` when no peer lists it,
+    /// so the caption falls back to this deployment.
+    fn origin_server(&self, name: Option<&str>) -> Option<Value> {
+        let name = name?;
+        for peer in &self.peers {
+            let Ok(list) = peer.recipes.fetch_data() else {
+                continue;
+            };
+            let Some(entries) = list.as_array() else {
+                continue;
+            };
+            if entries
+                .iter()
+                .any(|entry| entry.get("name").and_then(Value::as_str) == Some(name))
+            {
+                return Some(json!({ "label": peer.label, "url": peer.site_url }));
+            }
+        }
+        None
+    }
+
+    /// The peers that list one of our own recipes with a *different* digest, as
+    /// `{label, url}` for the hint that a different version exists elsewhere. A
+    /// peer the digest says is identical is skipped; a peer that cannot be
+    /// reached is skipped.
+    fn peer_matches(&self, name: Option<&str>) -> Vec<Value> {
+        let Some(name) = name else {
+            return Vec::new();
+        };
+        let our_revision = self.recipe_list.fetch_data().ok().and_then(|list| {
+            let entry = list
+                .as_array()?
+                .iter()
+                .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))?;
+            entry
+                .get("revision")
+                .and_then(Value::as_str)
+                .map(str::to_string)
+        });
         let mut matches = Vec::new();
         for peer in &self.peers {
             let Ok(list) = peer.recipes.fetch_data() else {
@@ -512,12 +554,10 @@ impl App {
             else {
                 continue;
             };
-            if our_ours
-                && crate::peer::same_revision(
-                    our_revision.as_deref(),
-                    entry.get("revision").and_then(Value::as_str),
-                )
-            {
+            if crate::peer::same_revision(
+                our_revision.as_deref(),
+                entry.get("revision").and_then(Value::as_str),
+            ) {
                 continue;
             }
             let permalink = entry

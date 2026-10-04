@@ -77,15 +77,18 @@ deployments whose recipes the drawer lists alongside ours. Entries are
 `Kit & Alex|https://api.reciba.se/|https://reciba.se`. A peer's recipe is
 labelled with their name and **served by this frontend**: its drawer link is the
 local permalink and `/<permalink>` renders it from the peer's API, so a reader
-never leaves for the peer's site. A name we already hold is not listed again, but
-the peer is credited with a hint that *does* go to their site, reading `Found on
-<peer> too.` A recipe that is not ours - no `chaos-tag:`, so it came from the
-other server first - is always credited; one of ours only when the two disagree,
-which the frontend decides from each backend's `recipes/?withRevision=true`
-content digest (opt-in, so the default API response is unchanged): an equal
-digest means the same recipe, a missing one means we cannot tell, so we hint. An
-unreachable peer is skipped rather than failing the page, and its recipes simply
-do not appear.
+never leaves for the peer's site. A name we already hold is not listed again.
+
+Originality decides the caption. A recipe without `chaos-tag:` came from the
+other server first, so the caption credits the peer that lists it - `Found on
+<peer> across the reci-verse.` - rather than the deployment hosting the page;
+one of ours is credited to our own server (below). Our own recipe gains a `Found
+on <peer> too.` hint that *does* go to their site only when a peer holds a
+*different* version, which the frontend decides from each backend's
+`recipes/?withRevision=true` content digest (opt-in, so the default API response
+is unchanged): an equal digest means the same recipe, a missing one means we
+cannot tell, so we hint. An unreachable peer is skipped rather than failing the
+page, and its recipes simply do not appear.
 
 The drawer lists our own recipes first, then the peers'. It keeps to the recipes
 we host by default; a peer-only recipe (one we do not have at all) appears only
@@ -94,8 +97,8 @@ unticked-by-default box in the drawer (its state is remembered in
 `localStorage`).
 
 `SERVER_IDENTITY` is the same idea for this deployment itself: `label|site`, so
-the recipe page can say `Found on <label> across the reci-verse.` and link the
-label to that site, instead of the generic `this server`. Because it lives on
+a recipe that is ours can say `Found on <label> across the reci-verse.` and link
+the label to that site, instead of the generic `this server`. Because it lives on
 the frontend, the same image can be pointed at another deployment's API and name
 whichever server it is attached to. Unset, the caption is the generic one.
 

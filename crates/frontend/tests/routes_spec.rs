@@ -131,11 +131,15 @@ fn peer_recipes_appear_in_the_drawer() {
         "{body}"
     );
 
-    // The recipe page credits the peer too: the recipe is not ours, so the peer
-    // is its origin whatever the digest.
+    // The recipe page credits the origin server in the caption: the recipe is
+    // not ours, so it came from Kit & Alex, and there is no separate hint.
     let page = body_of(&app.handle(&get("/test-recipe")));
-    assert!(page.contains("class=\"recipe-also\""), "{page}");
-    assert!(page.contains("https://reciba.se/test-recipe"), "{page}");
+    assert!(
+        page.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the"),
+        "{page}"
+    );
+    // No separate "Found on ... too." line: the caption carries the credit.
+    assert!(!page.contains("<p class=\"recipe-also\">"), "{page}");
 }
 
 /// Clicking a peer's recipe keeps you here: the page is rendered from the
@@ -226,6 +230,49 @@ fn the_recipe_page_names_and_links_our_server() {
     assert!(
         body.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the <span class=\"reci-verse__term\">reci-verse</span>."),
         "{body}"
+    );
+}
+
+/// A recipe of ours (chaos-tagged, so `ours: true`) keeps our own server in the
+/// caption even when a peer lists the same name; the peer is only the origin of
+/// recipes we did not write.
+#[test]
+fn the_recipe_page_keeps_our_own_recipes_on_our_server() {
+    let stub = StubApi::start();
+    stub.on(
+        "GET",
+        "/recipes/",
+        Answer::json(r#"[{"permalink": "test-recipe", "name": "Test Recipe", "ours": true}]"#),
+    );
+    let peer = StubApi::start();
+    peer.on(
+        "GET",
+        "/recipes/",
+        Answer::json(r#"[{"name": "Test Recipe", "permalink": "test-recipe"}]"#),
+    );
+    let app = App::with_peers(
+        stub.base_url().to_string(),
+        "latest".to_string(),
+        8080,
+        vec![Peer::new(
+            "Kit & Alex".to_string(),
+            peer.base_url().to_string(),
+            "https://reciba.se".to_string(),
+        )],
+    )
+    .with_server(Some(ServerIdentity {
+        label: "Casa Chaos".to_string(),
+        site_url: "https://recibase.shed.gay".to_string(),
+    }));
+
+    let page = body_of(&app.handle(&get("/test-recipe")));
+    assert!(
+        page.contains("Found on <a href=\"https://recibase.shed.gay\">Casa Chaos</a> across the"),
+        "{page}"
+    );
+    assert!(
+        !page.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the"),
+        "{page}"
     );
 }
 
