@@ -3,6 +3,9 @@ name = "recibase-frontend"
 version.workspace = true
 edition.workspace = true
 
+[lints]
+workspace = true
+
 [dependencies]
 chrono.workspace = true
 minijinja.workspace = true

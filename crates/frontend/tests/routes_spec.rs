@@ -698,7 +698,6 @@ fn options_home_is_empty_200_with_allow() {
 /// `If-None-Match`, and answers 206 to `Range: bytes=0-9`.
 #[test]
 fn static_styles_css_is_served_conditionally() {
-    root_statics_at_source();
     let stub = StubApi::start();
     let app = app_on(&stub);
 

@@ -115,6 +115,13 @@ impl App {
         self
     }
 
+    /// [`App::with_peers`], with the static root supplied rather than read
+    /// from the environment (the tests use this).
+    pub fn with_statics(mut self, statics: StaticFiles) -> App {
+        self.statics = statics;
+        self
+    }
+
     /// [`App::new`], with the peers supplied rather than read from the
     /// environment (the tests use this).
     pub fn with_peers(

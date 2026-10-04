@@ -3,6 +3,9 @@ name = "recibase-server"
 version.workspace = true
 edition.workspace = true
 
+[lints]
+workspace = true
+
 [dependencies]
 recibase-core.workspace = true
 recibase-submit.workspace = true

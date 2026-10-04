@@ -19,6 +19,10 @@ serde_json = { version = "1", features = ["preserve_order"] }
 unicode-normalization = "0.1"
 ureq = { version = "3", default-features = false, features = ["json"] }
 
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
 [profile.release]
 debug = false
 lto = true

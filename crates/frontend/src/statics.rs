@@ -1,4 +1,3 @@
-
 //! `/static/<filename>`, the Rust spelling of Flask's `send_from_directory`.
 //!
 //! Flask serves static files through Werkzeug's `send_file`, which sets a
@@ -24,6 +23,11 @@ pub struct StaticFiles {
 }
 
 impl StaticFiles {
+    /// [`StaticFiles`] rooted at `root`, without consulting the environment.
+    pub fn at(root: impl Into<PathBuf>) -> StaticFiles {
+        StaticFiles { root: root.into() }
+    }
+
     /// The directory `/static/` is served from.
     ///
     /// `STATIC_DIR` wins. Otherwise `static` is looked for beside the
@@ -32,8 +36,18 @@ impl StaticFiles {
     /// above the executable (`target/release/`) and above the working directory
     /// (`cargo run`).
     pub fn from_env() -> StaticFiles {
-        if let Ok(dir) = std::env::var("STATIC_DIR") {
-            return StaticFiles { root: PathBuf::from(dir) };
+        StaticFiles::from_lookup(|name| std::env::var(name).ok())
+    }
+
+    /// [`StaticFiles::from_env`], with the environment read through `lookup`.
+    ///
+    /// This exists so the tests can exercise the `STATIC_DIR` precedence
+    /// without mutating the process environment, which is `unsafe` in edition
+    /// 2024.
+    #[doc(hidden)]
+    pub fn from_lookup(lookup: impl Fn(&str) -> Option<String>) -> StaticFiles {
+        if let Some(dir) = lookup("STATIC_DIR") {
+            return StaticFiles::at(dir);
         }
         let mut candidates: Vec<PathBuf> = Vec::new();
         let mut collect = |base: Option<&Path>| {
@@ -54,8 +68,8 @@ impl StaticFiles {
             .iter()
             .find(|dir| dir.is_dir())
             .cloned()
-            .map(|root| StaticFiles { root })
-            .unwrap_or_else(|| StaticFiles { root: PathBuf::from("static") })
+            .map(|root| StaticFiles::at(root))
+            .unwrap_or_else(|| StaticFiles::at("static"))
     }
 
     pub fn root(&self) -> &Path {
@@ -66,7 +80,10 @@ impl StaticFiles {
         if filename.is_empty() || filename.starts_with('/') {
             return Outcome::NotFound;
         }
-        if filename.split('/').any(|segment| segment == ".." || segment == ".") {
+        if filename
+            .split('/')
+            .any(|segment| segment == ".." || segment == ".")
+        {
             return Outcome::NotFound;
         }
         let path = self.root.join(filename);
@@ -102,7 +119,10 @@ impl StaticFiles {
 
         let entity_headers = |response: Response| {
             response
-                .header("Content-Disposition", format!("inline; filename={}", basename))
+                .header(
+                    "Content-Disposition",
+                    format!("inline; filename={}", basename),
+                )
                 .header("Content-Type", format!("{}; charset=utf-8", content_type))
         };
         let full_headers = |response: Response, length: Option<usize>| {
@@ -123,17 +143,21 @@ impl StaticFiles {
         let mut served_range = None;
         if conditional
             && let Some(range_header) = request.header("Range")
-                && range_is_processable(request, &etag, &last_modified) {
-                    match parse_range(range_header, size) {
-                        Some(range) => served_range = Some(range),
-                        None => return Outcome::Served(pages::range_not_satisfiable(size)),
-                    }
-                }
+            && range_is_processable(request, &etag, &last_modified)
+        {
+            match parse_range(range_header, size) {
+                Some(range) => served_range = Some(range),
+                None => return Outcome::Served(pages::range_not_satisfiable(size)),
+            }
+        }
 
         if let Some((start, end)) = served_range {
             let body = contents[start..end].to_vec();
             let response = full_headers(Response::new(206), Some(body.len()))
-                .header("Content-Range", format!("bytes {}-{}/{}", start, end - 1, size))
+                .header(
+                    "Content-Range",
+                    format!("bytes {}-{}/{}", start, end - 1, size),
+                )
                 .body(body);
             return Outcome::Served(response);
         }
@@ -146,7 +170,10 @@ impl StaticFiles {
                 return Outcome::Served(response);
             }
             let response = Response::new(304)
-                .header("Content-Disposition", format!("inline; filename={}", basename))
+                .header(
+                    "Content-Disposition",
+                    format!("inline; filename={}", basename),
+                )
                 .header("Cache-Control", "no-cache")
                 .header("ETag", etag.clone())
                 .header("Accept-Ranges", "bytes");
@@ -259,7 +286,6 @@ fn range_is_processable(request: &Request, etag: &str, last_modified: &str) -> b
     }
 }
 
-
 /// An `ETag` header, parsed the way Werkzeug's `parse_etags` does.
 #[derive(Debug, Default)]
 struct ParsedEtags {
@@ -275,7 +301,10 @@ impl ParsedEtags {
             return ParsedEtags::default();
         }
         if value == "*" {
-            return ParsedEtags { star: true, ..ParsedEtags::default() };
+            return ParsedEtags {
+                star: true,
+                ..ParsedEtags::default()
+            };
         }
         let mut parsed = ParsedEtags::default();
         for item in value.split(',') {

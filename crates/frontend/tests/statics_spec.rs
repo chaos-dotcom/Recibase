@@ -9,8 +9,7 @@ use chrono::DateTime;
 use recibase_frontend::http::http_date;
 use recibase_frontend::statics::{Outcome, StaticFiles, python_float_repr};
 use support::{
-    StubApi, app_on, body_of, get, header, header_or, root_statics_at_source, static_dir,
-    with_header,
+    StubApi, app_on, body_of, get, header, header_or, source_statics, static_dir, with_header,
 };
 
 /// `repr(float)` is what the ETag quotes: `1790891551.0`, not
@@ -31,20 +30,24 @@ fn styles() -> PathBuf {
 
 #[test]
 fn static_files_root_is_the_environment_variable() {
-    let root = root_statics_at_source();
-    assert_eq!(StaticFiles::from_env().root(), root.as_path());
+    let root = static_dir();
+    let files = StaticFiles::from_lookup(|name| {
+        (name == "STATIC_DIR").then(|| root.to_string_lossy().into_owned())
+    });
+    assert_eq!(files.root(), root.as_path());
 }
 
 #[test]
 fn a_static_file_carries_werkzeugs_headers() {
-    root_statics_at_source();
-    let response = StaticFiles::from_env()
-        .serve(&get("/static/styles.css"), "styles.css");
+    let response = source_statics().serve(&get("/static/styles.css"), "styles.css");
     let Outcome::Served(response) = response else {
         panic!("styles.css is not being served");
     };
     assert_eq!(response.status, 200);
-    assert_eq!(header_or(&response, "Content-Type"), "text/css; charset=utf-8");
+    assert_eq!(
+        header_or(&response, "Content-Type"),
+        "text/css; charset=utf-8"
+    );
     assert_eq!(
         header_or(&response, "Content-Disposition"),
         "inline; filename=styles.css",
@@ -89,10 +92,11 @@ fn a_static_file_carries_werkzeugs_headers() {
 /// at the file's own `Last-Modified` is the same.
 #[test]
 fn a_matching_conditional_request_is_not_modified() {
-    root_statics_at_source();
-    let files = StaticFiles::from_env();
+    let files = source_statics();
     let fresh = files.serve(&get("/static/styles.css"), "styles.css");
-    let Outcome::Served(fresh) = fresh else { panic!("styles.css is not being served") };
+    let Outcome::Served(fresh) = fresh else {
+        panic!("styles.css is not being served")
+    };
     let etag = header_or(&fresh, "ETag").to_string();
     let last_modified = header_or(&fresh, "Last-Modified").to_string();
 
@@ -105,16 +109,22 @@ fn a_matching_conditional_request_is_not_modified() {
     assert_eq!(header_or(&response, "ETag"), etag.as_str());
     assert_eq!(header(&response, "Content-Type"), None);
 
-    let request =
-        with_header(get("/static/styles.css"), "If-Modified-Since", &last_modified);
+    let request = with_header(
+        get("/static/styles.css"),
+        "If-Modified-Since",
+        &last_modified,
+    );
     let Outcome::Served(response) = files.serve(&request, "styles.css") else {
         panic!("styles.css is not being served")
     };
     assert_eq!(response.status, 304);
 
     // A stale `If-None-Match` is the whole file.
-    let request =
-        with_header(get("/static/styles.css"), "If-None-Match", "\"something-else\"");
+    let request = with_header(
+        get("/static/styles.css"),
+        "If-None-Match",
+        "\"something-else\"",
+    );
     let Outcome::Served(response) = files.serve(&request, "styles.css") else {
         panic!("styles.css is not being served")
     };
@@ -124,8 +134,7 @@ fn a_matching_conditional_request_is_not_modified() {
 
 #[test]
 fn a_range_request_is_partial_content() {
-    root_statics_at_source();
-    let files = StaticFiles::from_env();
+    let files = source_statics();
     let contents = std::fs::read(styles()).expect("static/styles.css");
 
     let request = with_header(get("/static/styles.css"), "Range", "bytes=0-9");
@@ -160,11 +169,15 @@ fn a_range_request_is_partial_content() {
 /// An unsatisfiable range is Werkzeug's 416, with the file's size.
 #[test]
 fn an_unsatisfiable_range_is_416() {
-    root_statics_at_source();
-    let files = StaticFiles::from_env();
+    let files = source_statics();
     let size = std::fs::read(styles()).expect("static/styles.css").len();
 
-    for range in ["bytes=999999999-", "bytes=0-1,4-5", "items=0-9", "bytes=5-4"] {
+    for range in [
+        "bytes=999999999-",
+        "bytes=0-1,4-5",
+        "items=0-9",
+        "bytes=5-4",
+    ] {
         let request = with_header(get("/static/styles.css"), "Range", range);
         let Outcome::Served(response) = files.serve(&request, "styles.css") else {
             panic!("styles.css is not being served")
@@ -180,11 +193,20 @@ fn an_unsatisfiable_range_is_416() {
 
 #[test]
 fn missing_and_unreachable_files_are_not_found() {
-    root_statics_at_source();
-    let files = StaticFiles::from_env();
-    for filename in ["nope.css", "", "/styles.css", "../Cargo.toml", "./styles.css", "sub/../styles.css"] {
+    let files = source_statics();
+    for filename in [
+        "nope.css",
+        "",
+        "/styles.css",
+        "../Cargo.toml",
+        "./styles.css",
+        "sub/../styles.css",
+    ] {
         assert!(
-            matches!(files.serve(&get("/static/styles.css"), filename), Outcome::NotFound),
+            matches!(
+                files.serve(&get("/static/styles.css"), filename),
+                Outcome::NotFound
+            ),
             "{filename:?} should not be served",
         );
     }
@@ -194,7 +216,6 @@ fn missing_and_unreachable_files_are_not_found() {
 /// exist as well as for a traversal attempt.
 #[test]
 fn an_unknown_static_file_is_the_404_page() {
-    root_statics_at_source();
     let stub = StubApi::start();
     let app = app_on(&stub);
     let response = app.handle(&get("/static/nope.css"));
@@ -218,9 +239,12 @@ fn adler32(data: &[u8]) -> u32 {
 /// the served file is the one under the root.
 #[test]
 fn the_root_joins_the_filename() {
-    let root = root_statics_at_source();
+    let root = static_dir();
     assert!(root.join("styles.css").is_file());
-    assert_eq!(root.file_name().and_then(|name| name.to_str()), Some("static"));
+    assert_eq!(
+        root.file_name().and_then(|name| name.to_str()),
+        Some("static")
+    );
     assert_eq!(Path::new(env!("CARGO_MANIFEST_DIR")).join("static"), root);
 }
 
@@ -234,7 +258,10 @@ fn the_root_joins_the_filename() {
 /// `styles.css`, whose own timestamp happens to be a whole second.
 #[test]
 fn a_fractional_timestamp_still_matches_if_modified_since() {
-    fn served(files: &StaticFiles, request: &recibase_frontend::http::Request) -> recibase_frontend::http::Response {
+    fn served(
+        files: &StaticFiles,
+        request: &recibase_frontend::http::Request,
+    ) -> recibase_frontend::http::Response {
         match files.serve(request, "styles.css") {
             Outcome::Served(response) => response,
             Outcome::NotFound => panic!("styles.css is not being served"),
@@ -247,14 +274,16 @@ fn a_fractional_timestamp_still_matches_if_modified_since() {
     std::fs::copy(styles(), &file).expect("copy styles.css");
     // 2026-10-01 21:52:31 UTC, with 750 ms on top.
     let when = std::time::UNIX_EPOCH + std::time::Duration::from_millis(1790891551750);
-    let handle = std::fs::File::options().write(true).open(&file).expect("open");
+    let handle = std::fs::File::options()
+        .write(true)
+        .open(&file)
+        .expect("open");
     handle
         .set_times(std::fs::FileTimes::new().set_modified(when))
         .expect("set mtime");
     drop(handle);
 
-    unsafe { std::env::set_var("STATIC_DIR", &dir) };
-    let files = StaticFiles::from_env();
+    let files = StaticFiles::at(&dir);
 
     let fresh = served(&files, &get("/static/styles.css"));
     assert_eq!(fresh.status, 200);
@@ -289,6 +318,4 @@ fn a_fractional_timestamp_still_matches_if_modified_since() {
     let response = served(&files, &request);
     assert_eq!(response.status, 200);
     assert!(!response.body.is_empty());
-
-    unsafe { std::env::set_var("STATIC_DIR", static_dir()) };
 }

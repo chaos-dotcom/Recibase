@@ -16,6 +16,7 @@ use std::sync::{Arc, Mutex};
 
 use recibase_frontend::app::App;
 use recibase_frontend::http::{Request, Response};
+use recibase_frontend::statics::StaticFiles;
 
 /// `SAMPLE_RECIPES` from `conftest.py`.
 pub const SAMPLE_RECIPES: &str = r#"[{"permalink": "test-recipe", "name": "Test Recipe"}]"#;
@@ -84,7 +85,12 @@ impl Answer {
     }
 
     pub fn text(status: u16, content_type: impl Into<String>, body: impl Into<String>) -> Answer {
-        Answer { status, content_type: content_type.into(), body: body.into(), hangup: false }
+        Answer {
+            status,
+            content_type: content_type.into(),
+            body: body.into(),
+            hangup: false,
+        }
     }
 
     /// Accept the connection and drop it without answering. The client sees
@@ -148,7 +154,10 @@ pub struct StubApi {
 impl StubApi {
     pub fn start() -> StubApi {
         let listener = TcpListener::bind(("127.0.0.1", 0)).expect("bind the stub API");
-        let port = listener.local_addr().expect("the stub API's address").port();
+        let port = listener
+            .local_addr()
+            .expect("the stub API's address")
+            .port();
         let shared = Arc::new(Mutex::new(Shared {
             routes: default_routes(),
             requests: Vec::new(),
@@ -161,7 +170,10 @@ impl StubApi {
                 std::thread::spawn(move || serve(stream, state));
             }
         });
-        StubApi { base_url: format!("http://127.0.0.1:{}/", port), shared }
+        StubApi {
+            base_url: format!("http://127.0.0.1:{}/", port),
+            shared,
+        }
     }
 
     /// `http://127.0.0.1:<port>/`, the shape `app.py`'s `backendBaseUrl` has.
@@ -172,11 +184,17 @@ impl StubApi {
     /// Replaces what the stub answers for one route.
     pub fn on(&self, method: &str, path: &str, answer: Answer) {
         let mut shared = self.shared.lock().expect("the stub API's state");
-        shared.routes.insert((method.to_uppercase(), path.to_string()), answer);
+        shared
+            .routes
+            .insert((method.to_uppercase(), path.to_string()), answer);
     }
 
     pub fn requests(&self) -> Vec<Recorded> {
-        self.shared.lock().expect("the stub API's state").requests.clone()
+        self.shared
+            .lock()
+            .expect("the stub API's state")
+            .requests
+            .clone()
     }
 
     pub fn requests_to(&self, method: &str, path: &str) -> Vec<Recorded> {
@@ -191,7 +209,12 @@ impl StubApi {
     /// one, which is what the ported Python assertions assume.
     pub fn single_request(&self, method: &str, path: &str) -> Recorded {
         let found = self.requests_to(method, path);
-        assert_eq!(found.len(), 1, "expected one {method} {path}, got {}", found.len());
+        assert_eq!(
+            found.len(),
+            1,
+            "expected one {method} {path}, got {}",
+            found.len()
+        );
         found.into_iter().next().expect("just checked the length")
     }
 }
@@ -199,7 +222,10 @@ impl StubApi {
 /// The routes `_mock_requests_get` and the contribute tests answer.
 fn default_routes() -> HashMap<(String, String), Answer> {
     let mut routes = HashMap::new();
-    routes.insert(("GET".to_string(), "/recipes/".to_string()), Answer::json(SAMPLE_RECIPES));
+    routes.insert(
+        ("GET".to_string(), "/recipes/".to_string()),
+        Answer::json(SAMPLE_RECIPES),
+    );
     routes.insert(
         ("GET".to_string(), "/manifest".to_string()),
         Answer::json(r#"{"version": "deadbeef"}"#),
@@ -222,7 +248,9 @@ fn default_routes() -> HashMap<(String, String), Answer> {
 }
 
 fn serve(stream: TcpStream, shared: Arc<Mutex<Shared>>) {
-    let Ok(mut writer) = stream.try_clone() else { return };
+    let Ok(mut writer) = stream.try_clone() else {
+        return;
+    };
     let mut reader = BufReader::new(stream);
     loop {
         let mut line = String::new();
@@ -261,10 +289,13 @@ fn serve(stream: TcpStream, shared: Arc<Mutex<Shared>>) {
             return;
         }
         let wants_close = headers.iter().any(|(name, value)| {
-            name.eq_ignore_ascii_case("connection")
-                && value.to_ascii_lowercase().contains("close")
+            name.eq_ignore_ascii_case("connection") && value.to_ascii_lowercase().contains("close")
         });
-        let path = target.split_once('?').map(|(path, _)| path).unwrap_or(&target).to_string();
+        let path = target
+            .split_once('?')
+            .map(|(path, _)| path)
+            .unwrap_or(&target)
+            .to_string();
 
         let answer = {
             let mut state = shared.lock().expect("the stub API's state");
@@ -314,7 +345,10 @@ fn reason(status: u16) -> &'static str {
 /// A port on which nothing is listening: bind one, learn it, drop it.
 pub fn closed_port() -> u16 {
     let listener = TcpListener::bind(("127.0.0.1", 0)).expect("bind a port to close");
-    let port = listener.local_addr().expect("the closed port's address").port();
+    let port = listener
+        .local_addr()
+        .expect("the closed port's address")
+        .port();
     drop(listener);
     port
 }
@@ -326,7 +360,7 @@ pub fn app(backend_url: &str, frontend_version: &str) -> App {
 
 /// The frontend, pointed at a stub API, deployed as `latest`.
 pub fn app_on(stub: &StubApi) -> App {
-    app(stub.base_url(), "latest")
+    app(stub.base_url(), "latest").with_statics(source_statics())
 }
 
 /// `crates/frontend/static`, which is where the served files live.
@@ -334,16 +368,13 @@ pub fn static_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("static")
 }
 
-/// Points the frontend's static root at the real `static/` directory.
+/// The frontend's static files, rooted at the source `static/` directory.
 ///
-/// `StaticFiles::from_env` reads `STATIC_DIR`, else looks beside the test
-/// binary. Every caller passes the same directory, so setting the variable
-/// again is harmless; `set_var` is `unsafe` in edition 2024 for the general
-/// case of another thread reading the environment at the same time.
-pub fn root_statics_at_source() -> PathBuf {
-    let dir = static_dir();
-    unsafe { std::env::set_var("STATIC_DIR", &dir) };
-    dir
+/// Supplied through [`App::with_statics`] and [`StaticFiles::at`] rather than
+/// `STATIC_DIR`, because mutating the process environment is `unsafe` in
+/// edition 2024 and would race the other tests running in parallel.
+pub fn source_statics() -> StaticFiles {
+    StaticFiles::at(static_dir())
 }
 
 // -- request builders -------------------------------------------------
@@ -364,9 +395,8 @@ pub fn request(method: &str, target: &str) -> Request {
         Some((path, query)) => (path, query.to_string()),
         None => (target, String::new()),
     };
-    let path = recibase_frontend::http::merge_slashes(&recibase_frontend::http::percent_decode(
-        raw_path,
-    ));
+    let path =
+        recibase_frontend::http::merge_slashes(&recibase_frontend::http::percent_decode(raw_path));
     Request {
         method: method.to_string(),
         target: target.to_string(),
@@ -431,8 +461,7 @@ pub fn header<'a>(response: &'a Response, name: &str) -> Option<&'a str> {
 
 /// A response header, or a panic naming the one that is missing.
 pub fn header_or<'a>(response: &'a Response, name: &str) -> &'a str {
-    header(response, name)
-        .unwrap_or_else(|| panic!("no {} header in {:?}", name, response.headers))
+    header(response, name).unwrap_or_else(|| panic!("no {} header in {:?}", name, response.headers))
 }
 
 /// The body as text, the way a test would read the rendered page.
