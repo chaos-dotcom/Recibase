@@ -10,6 +10,7 @@ pub fn recipes() -> &'static [RecipeDef] {
             super::baked_salmon_olives_spaghetti::recipe(),
             super::baobab_ice_cream::recipe(),
             super::basa_pathia::recipe(),
+            super::basil_thyme_roasted_onions_with_squash_goats_cheese_walnuts::recipe(),
             super::beef_stroganoff::recipe(),
             super::beef_wraps::recipe(),
             super::beetroot_ice_cream::recipe(),
@@ -134,6 +135,7 @@ pub fn recipes() -> &'static [RecipeDef] {
 /// list entries so the frontend can tell them from the upstream corpus.
 pub fn chaos_recipes() -> &'static [&'static str] {
     &[
+        "BasilThymeRoastedOnionsWithSquashGoatsCheeseWalnuts",
         "CheddarLeekOrzotto",
         "CoconutPotatoCurry",
         "CreamyLeekCroustade",

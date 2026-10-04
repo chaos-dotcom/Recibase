@@ -7,6 +7,7 @@ pub mod baked_rigatoni_aubergine;
 pub mod baked_salmon_olives_spaghetti;
 pub mod baobab_ice_cream;
 pub mod basa_pathia;
+pub mod basil_thyme_roasted_onions_with_squash_goats_cheese_walnuts;
 pub mod beef_stroganoff;
 pub mod beef_wraps;
 pub mod beetroot_ice_cream;
