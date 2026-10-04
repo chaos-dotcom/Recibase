@@ -314,30 +314,32 @@ p.recipe-also {
 /* Feature chips: the tag filters in the drawer and the tag row on a recipe.
    Quiet outlines by default, indigo fill when active; no shadows, no fills on
    the idle state (Operate restraint). */
-.chips,
-.tag-filters {
+.chips {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-}
-
-.chips {
   margin: 0.75rem 0 0.25rem;
   padding: 0;
   list-style: none;
 }
 
+/* The drawer's filter bar: category rows stacked, dashed rule between them. */
 .tag-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   padding: 0 1rem 0.5rem;
-  align-items: center;
-  gap: 0.4rem 0.5rem;
 }
 
-/* A hairline rule between chip categories; stretches to the row's height. */
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .tag-divider {
-  align-self: stretch;
-  width: 1px;
-  background: rgba(0, 0, 0, 0.15);
+  height: 0;
+  border-top: 1px dashed rgba(0, 0, 0, 0.25);
 }
 
 .chip,

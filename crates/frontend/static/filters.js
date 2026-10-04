@@ -1,7 +1,8 @@
 // The drawer's filters, in one place so they cannot fight over a row's
 // visibility: the "only ours" switch, the ingredient search, and the tag chips
 // (which a recipe page links to as `/?tag=<tag>`). Replaces search.js and
-// onlyours.js.
+// onlyours.js. Several tags can be active at once: a row shows if it carries
+// any of them.
 (function () {
   var STORAGE_KEY = 'recibase-only-ours';
   var box = document.getElementById('onlyOurs');
@@ -15,8 +16,8 @@
   );
 
   // The facets the bar offers, grouped so the chips read as categories with a
-  // small divider between them. Only groups that have present tags are shown,
-  // so the bar stays short.
+  // dashed rule between them. Only groups that have present tags are shown, so
+  // the bar stays short.
   var FACETS = [
     ['Vegetarian', 'Vegan', 'Pescatarian', 'Vegetarian-ish', 'Vegan-ish', 'Gluten-Free'],
     ['Pudding', 'Lunch', 'Soup', 'Baking', 'Christmas'],
@@ -25,7 +26,7 @@
     ['Freezes', 'Better Next Day']
   ];
 
-  var activeTag = new URLSearchParams(window.location.search).get('tag') || null;
+  var activeTags = new URLSearchParams(window.location.search).getAll('tag').filter(Boolean);
   var searchTerm = '';
   var matchedPermalinks = null;
   var apiUrl = null;
@@ -48,7 +49,13 @@
 
   function rowVisible(row) {
     if (box && box.checked && row.getAttribute('data-ours') !== 'true') return false;
-    if (activeTag && tagsOf(row).indexOf(activeTag) === -1) return false;
+    if (activeTags.length) {
+      var tags = tagsOf(row);
+      var carriesOne = activeTags.some(function (tag) {
+        return tags.indexOf(tag) !== -1;
+      });
+      if (!carriesOne) return false;
+    }
     if (searchTerm) {
       var byName = row.textContent.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
       var byIngredient = matchedPermalinks && matchedPermalinks.has(row.getAttribute('href'));
@@ -72,13 +79,14 @@
   }
 
   function chipFor(tag) {
+    var active = activeTags.indexOf(tag) !== -1;
     var chip = document.createElement('button');
     chip.type = 'button';
-    chip.className = 'tag-chip' + (tag === activeTag ? ' is-active' : '');
+    chip.className = 'tag-chip' + (active ? ' is-active' : '');
     chip.textContent = tag;
-    chip.setAttribute('aria-pressed', tag === activeTag ? 'true' : 'false');
+    chip.setAttribute('aria-pressed', active ? 'true' : 'false');
     chip.addEventListener('click', function () {
-      setActiveTag(tag === activeTag ? null : tag);
+      toggleTag(tag);
     });
     return chip;
   }
@@ -93,11 +101,13 @@
     }).filter(function (tags) {
       return tags.length > 0;
     });
-    // The active tag always shows, even if it is not one of the facets.
-    var shown = groups.some(function (tags) {
-      return tags.indexOf(activeTag) !== -1;
+    // An active tag always shows, even when it is not a facet or is absent.
+    activeTags.forEach(function (tag) {
+      var shown = groups.some(function (tags) {
+        return tags.indexOf(tag) !== -1;
+      });
+      if (!shown) groups.push([tag]);
     });
-    if (activeTag && !shown) groups.push([activeTag]);
     if (!groups.length) {
       filtersBar.hidden = true;
       filtersBar.textContent = '';
@@ -112,15 +122,18 @@
         divider.setAttribute('aria-hidden', 'true');
         filtersBar.appendChild(divider);
       }
+      var group = document.createElement('span');
+      group.className = 'tag-group';
       tags.forEach(function (tag) {
-        filtersBar.appendChild(chipFor(tag));
+        group.appendChild(chipFor(tag));
       });
+      filtersBar.appendChild(group);
     });
   }
 
   function renderStatus(visible) {
     if (!statusBar) return;
-    if (!activeTag && !searchTerm) {
+    if (!activeTags.length && !searchTerm) {
       statusBar.hidden = true;
       statusBar.textContent = '';
       return;
@@ -130,24 +143,36 @@
     var count = document.createElement('span');
     count.textContent = visible + (visible === 1 ? ' recipe' : ' recipes');
     statusBar.appendChild(count);
-    if (activeTag) {
+    if (activeTags.length) {
       var clear = document.createElement('button');
       clear.type = 'button';
       clear.className = 'filter-clear';
       clear.textContent = 'Clear';
-      clear.addEventListener('click', function () {
-        setActiveTag(null);
-      });
+      clear.addEventListener('click', clearTags);
       statusBar.appendChild(clear);
     }
   }
 
-  function setActiveTag(tag) {
-    activeTag = tag;
+  function syncUrl() {
     var url = new URL(window.location.href);
-    if (tag) url.searchParams.set('tag', tag);
-    else url.searchParams.delete('tag');
+    url.searchParams.delete('tag');
+    activeTags.forEach(function (tag) {
+      url.searchParams.append('tag', tag);
+    });
     window.history.replaceState({}, '', url);
+  }
+
+  function toggleTag(tag) {
+    var at = activeTags.indexOf(tag);
+    if (at === -1) activeTags.push(tag);
+    else activeTags.splice(at, 1);
+    syncUrl();
+    apply();
+  }
+
+  function clearTags() {
+    activeTags = [];
+    syncUrl();
     apply();
   }
 
