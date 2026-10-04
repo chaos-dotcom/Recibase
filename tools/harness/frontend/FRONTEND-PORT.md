@@ -66,6 +66,7 @@ same defaults:
 |---|---|---|
 | `PORT` | `8080` | the port to listen on |
 | `BACKEND_URL` | `http://localhost:8081/` | the recipe API, **with** its trailing slash |
+| `SERVER_IDENTITY` | - | this deployment's own server, `label\|site`, for the recipe page's "reci-verse" caption (e.g. `Chaos' Recibase Server\|https://recibase.shed.gay`) |
 | `STATIC_DIR` | discovered: `static` beside the executable, else `crates/frontend/static` above the executable or the working directory | the directory `/static/` is served from |
 | `SOURCE_COMMIT`, `GIT_COMMIT`, `GITHUB_SHA` | - | the deployed commit, shown in the footer |
 | `GIT_COMMIT` (file) | - | read beside the executable, then in the working directory, when none of the variables holds a commit |
@@ -80,6 +81,12 @@ which the frontend decides from each backend's `recipes/?withRevision=true`
 content digest (opt-in, so the default API response is unchanged): an equal
 digest means the same recipe, a missing one means we cannot tell, so we hint.
 An unreachable peer is skipped rather than failing the page.
+
+`SERVER_IDENTITY` is the same idea for this deployment itself: `label|site`, so
+the recipe page can say `Found on <label> across the reci-verse.` and link the
+label to that site, instead of the generic `this server`. Because it lives on
+the frontend, the same image can be pointed at another deployment's API and name
+whichever server it is attached to. Unset, the caption is the generic one.
 
 When none of these is set the footer still names a commit: `crates/frontend/build.rs`
 bakes the checkout's `HEAD` - or a `SOURCE_COMMIT` / `GIT_COMMIT` / `GITHUB_SHA` build

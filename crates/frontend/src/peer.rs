@@ -69,6 +69,33 @@ pub fn parse_peer_backends(value: &str) -> Vec<Peer> {
         .collect()
 }
 
+/// The frontend's own server, for the recipe page's "reci-verse" caption:
+/// the name shown and the site it links to.
+///
+/// `SERVER_IDENTITY` supplies it - `label|site`, e.g.
+/// `Chaos' Recibase Server|https://recibase.shed.gay`. Unset, the caption
+/// keeps its generic "this server", so the same frontend can be pointed at any
+/// deployment and name whichever one it is attached to.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ServerIdentity {
+    /// The name shown in the caption ("Chaos' Recibase Server").
+    pub label: String,
+    /// The site linked to, with no trailing slash.
+    pub site_url: String,
+}
+
+/// Parses `SERVER_IDENTITY`. A malformed value is `None`, so a typo leaves the
+/// generic caption rather than failing the page.
+pub fn parse_server_identity(value: &str) -> Option<ServerIdentity> {
+    let mut fields = value.split('|').map(str::trim);
+    let label = fields.next().filter(|field| !field.is_empty())?;
+    let site = fields.next().filter(|field| !field.is_empty())?;
+    Some(ServerIdentity {
+        label: label.to_string(),
+        site_url: site.trim_end_matches('/').to_string(),
+    })
+}
+
 /// One peer's recipe list, already fetched and ready to merge.
 pub struct PeerList {
     pub label: String,

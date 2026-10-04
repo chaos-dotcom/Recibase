@@ -15,7 +15,7 @@ use serde_json::json;
 use support::*;
 
 use recibase_frontend::app::App;
-use recibase_frontend::peer::Peer;
+use recibase_frontend::peer::{Peer, ServerIdentity};
 
 // -- the ported `test_routes.py` cases --------------------------------
 
@@ -125,6 +125,43 @@ fn peer_recipes_appear_in_the_drawer() {
     );
     // Our same-named recipe wins, with the hint pointing at theirs.
     assert!(body.contains("title=\"Also on Kit &amp; Alex\""), "{body}");
+}
+
+/// The recipe page names and links this deployment's own server when
+/// `SERVER_IDENTITY` is set, instead of the generic "this server".
+#[test]
+fn the_recipe_page_names_and_links_our_server() {
+    let stub = StubApi::start();
+    let app = App::with_peers(
+        stub.base_url().to_string(),
+        "latest".to_string(),
+        8080,
+        Vec::new(),
+    )
+    .with_server(Some(ServerIdentity {
+        label: "Kit & Alex".to_string(),
+        site_url: "https://reciba.se".to_string(),
+    }));
+
+    let body = body_of(&app.handle(&get("/test-recipe")));
+    assert!(
+        body.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the <span class=\"reci-verse__term\">reci-verse</span>."),
+        "{body}"
+    );
+}
+
+/// With no own server configured, the caption keeps its generic wording.
+#[test]
+fn the_recipe_page_falls_back_to_this_server() {
+    let stub = StubApi::start();
+    let app = app_on(&stub);
+    let body = body_of(&app.handle(&get("/test-recipe")));
+    assert!(
+        body.contains(
+            "Found on this server across the <span class=\"reci-verse__term\">reci-verse</span>."
+        ),
+        "{body}"
+    );
 }
 
 /// `test_recipe_page`.

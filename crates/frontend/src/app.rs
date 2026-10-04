@@ -22,7 +22,7 @@ use serde_json::{Map, Value, json};
 use crate::backend::BackendClient;
 use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
 use crate::http::{Request, Response};
-use crate::peer::Peer;
+use crate::peer::{Peer, ServerIdentity};
 use crate::statics::{Outcome, StaticFiles};
 use crate::templates::{Templates, is_backend_unavailable};
 use crate::{contribute, pages, scaler};
@@ -88,6 +88,9 @@ pub struct App {
     pub api_version: Arc<CachedBackendCall<String>>,
     /// Other deployments whose recipes we list alongside ours.
     pub peers: Vec<Peer>,
+    /// The frontend's own server, for the recipe page's "reci-verse" caption.
+    /// `None` leaves the caption's generic "this server".
+    pub server: Option<ServerIdentity>,
     pub fallback_host: String,
 }
 
@@ -97,7 +100,19 @@ impl App {
         // `Kit & Alex|https://api.reciba.se/|https://reciba.se`.
         let peers =
             crate::peer::parse_peer_backends(&std::env::var("PEER_BACKENDS").unwrap_or_default());
-        App::with_peers(backend_url, frontend_version, port, peers)
+        // `SERVER_IDENTITY`, e.g.
+        // `Chaos' Recibase Server|https://recibase.shed.gay`.
+        let server = crate::peer::parse_server_identity(
+            &std::env::var("SERVER_IDENTITY").unwrap_or_default(),
+        );
+        App::with_peers(backend_url, frontend_version, port, peers).with_server(server)
+    }
+
+    /// [`App::new`], with the frontend's own server identity rather than the
+    /// environment (the tests use this).
+    pub fn with_server(mut self, server: Option<ServerIdentity>) -> App {
+        self.server = server;
+        self
     }
 
     /// [`App::new`], with the peers supplied rather than read from the
@@ -141,6 +156,7 @@ impl App {
             recipe_list,
             api_version,
             peers,
+            server: None,
             fallback_host: format!("localhost:{}", port),
         }
     }
@@ -390,12 +406,17 @@ impl App {
         let copy_ingredients = scaler::ingredients_copy_text(blocks);
 
         let also = self.peer_matches(recipe.get("name").and_then(Value::as_str));
+        let server = self
+            .server
+            .as_ref()
+            .map(|server| json!({ "label": server.label, "url": server.site_url }));
         let context = TemplateValue::from_serialize(json!({
             "recipe": recipe,
             "scale_factor": scale_factor,
             "combined_notes": combined_notes,
             "copy_ingredients": copy_ingredients,
             "also": also,
+            "server": server,
         }));
         self.render("recipe.html", context)
     }

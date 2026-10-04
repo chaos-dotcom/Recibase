@@ -43,6 +43,8 @@ services:
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8081/}
       # Other deployments to list alongside ours: `label|api|site`, `;`-separated.
       PEER_BACKENDS: ${PEER_BACKENDS:-}
+      # This deployment's own server for the recipe caption: `label|site`.
+      SERVER_IDENTITY: ${SERVER_IDENTITY:-}
     depends_on:
       recibase:
         condition: service_healthy

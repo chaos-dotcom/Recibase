@@ -2,7 +2,9 @@
 
 mod support;
 
-use recibase_frontend::peer::{PeerList, merge_recipe_lists, parse_peer_backends};
+use recibase_frontend::peer::{
+    PeerList, merge_recipe_lists, parse_peer_backends, parse_server_identity,
+};
 use serde_json::json;
 
 /// `PEER_BACKENDS` is `label|api|site`, several separated by `;`.
@@ -82,4 +84,24 @@ fn merge_hints_only_when_the_digest_differs() {
 
     let differing = merge_recipe_lists(&own, &peer("bbbb"));
     assert_eq!(differing[0]["also"][0]["url"], "https://reciba.se/pasta");
+}
+
+/// `SERVER_IDENTITY` is `label|site`, and a trailing slash is trimmed so the
+/// caption's link has no double slash.
+#[test]
+fn parse_server_identity_reads_label_and_site() {
+    let identity = parse_server_identity("Chaos' Recibase Server|https://recibase.shed.gay/")
+        .expect("the identity is well formed");
+    assert_eq!(identity.label, "Chaos' Recibase Server");
+    assert_eq!(identity.site_url, "https://recibase.shed.gay");
+}
+
+/// A malformed value leaves the generic caption rather than naming a broken
+/// server: both halves are required.
+#[test]
+fn parse_server_identity_rejects_malformed_values() {
+    assert!(parse_server_identity("").is_none());
+    assert!(parse_server_identity("Chaos' Recibase Server").is_none());
+    assert!(parse_server_identity("|https://recibase.shed.gay").is_none());
+    assert!(parse_server_identity("Chaos' Recibase Server|").is_none());
 }
