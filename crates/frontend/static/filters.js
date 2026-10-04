@@ -13,6 +13,11 @@
   var rows = Array.prototype.slice.call(
     document.querySelectorAll('.mdl-navigation__link[data-peer]')
   );
+  // Each row's permalink, kept aside so the live `href` can carry the active
+  // tags without losing the base on a later apply.
+  rows.forEach(function (row) {
+    row.setAttribute('data-href', row.getAttribute('href'));
+  });
 
   // The facets the bar offers, grouped so the chips read as categories with a
   // dashed rule between them. Only groups that have present tags are shown, so
@@ -59,7 +64,7 @@
     }
     if (searchTerm) {
       var byName = row.textContent.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-      var byIngredient = matchedPermalinks && matchedPermalinks.has(row.getAttribute('href'));
+      var byIngredient = matchedPermalinks && matchedPermalinks.has(row.getAttribute('data-href'));
       if (!byName && !byIngredient) return false;
     }
     return true;
@@ -70,6 +75,7 @@
     rows.forEach(function (row) {
       var show = rowVisible(row);
       row.hidden = !show;
+      row.setAttribute('href', linkWithTags(row));
       if (show) visible += 1;
     });
     renderChips();
@@ -158,6 +164,22 @@
       url.searchParams.append('tag', tag);
     });
     window.history.replaceState({}, '', url);
+  }
+
+  function tagsQuery() {
+    return activeTags
+      .map(function (tag) {
+        return 'tag=' + encodeURIComponent(tag);
+      })
+      .join('&');
+  }
+
+  // Recipe links carry the active tags, so a filter survives a click from one
+  // recipe to the next.
+  function linkWithTags(row) {
+    var base = row.getAttribute('data-href');
+    var query = tagsQuery();
+    return query ? base + '?' + query : base;
   }
 
   function toggleTag(tag) {
