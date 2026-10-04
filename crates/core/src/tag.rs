@@ -37,6 +37,10 @@ pub enum Tag {
     Popular,
     Infrequent,
     New,
+    /// Fork tag (not in the upstream Scala): a dish that contains meat, so the
+    /// euphemistic `VegetarianIsh` is not the only thing saying so. Set only on
+    /// our own (chaos) recipes, never on a captured one, so parity holds.
+    ItsMadeOfMeat,
 }
 
 /// Declaration order, as `Tag.values` (enumeratum `findValues`).
@@ -72,6 +76,7 @@ pub const TAGS: &[Tag] = &[
     Tag::Popular,
     Tag::Infrequent,
     Tag::New,
+    Tag::ItsMadeOfMeat,
 ];
 
 impl Tag {
@@ -109,6 +114,7 @@ impl Tag {
             Tag::Popular => "Popular",
             Tag::Infrequent => "Infrequent",
             Tag::New => "New",
+            Tag::ItsMadeOfMeat => "Made of Meat",
         }
     }
 
@@ -127,6 +133,7 @@ impl Tag {
             Tag::LowEffort => "LowEffort",
             Tag::BetterNextDay => "BetterNextDay",
             Tag::NeverEaten => "NeverEaten",
+            Tag::ItsMadeOfMeat => "ItsMadeOfMeat",
             _ => self.entry_name(),
         }
     }

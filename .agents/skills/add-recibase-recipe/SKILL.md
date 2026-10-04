@@ -183,18 +183,26 @@ format!("Preheat the oven to {}.", celsius(180)) // "180°C (355°F, gas mark 4)
 
 ## Tags
 
-Pick from existing tags only (`crates/core/src/tag.rs`). Common choices:
+Pick from existing tags only (`crates/core/src/tag.rs`). The whole vocabulary:
 
 | Category | Tags |
 |----------|------|
-| Meal type | `Pudding`, `Lunch`, `Baking`, `Soup`, `Christmas` |
-| Dietary | `Vegan`, `VeganIsh`, `Vegetarian`, `VegetarianIsh`, `Pescatarian` |
+| Meal type | `Pudding`, `Lunch`, `Baking`, `Soup`, `Christmas`, `NonMeal` |
+| Dietary | `Vegan`, `VeganIsh`, `Vegetarian`, `VegetarianIsh`, `Pescatarian`, `GlutenFree` |
 | Vibe | `Stodge`, `Spicy`, `ColdWeather`, `HotWeather` |
 | Effort | `Slow`, `Quick`, `Scales`, `HighEffort`, `LowEffort` |
 | Storage | `Freezes`, `BetterNextDay` |
+| Marker | `AI` — renders the "carefully review this, AI was used" warning on the page |
 
 Do **not** add `NeverEaten`, `Popular`, `Infrequent`, or `New` — those are
 applied automatically from usage data.
+
+Dietary tags are a chain and the parents are inherited: set only the most
+specific one. `Tag::Vegan` alone yields `VeganIsh`, `Vegetarian`,
+`VegetarianIsh` and `Pescatarian` in `inherited_tags` automatically
+(`Tag::all_parent_tags`); never list a parent explicitly. The chain is
+`Vegan` → `VeganIsh` → `Vegetarian` → `VegetarianIsh` → `Pescatarian`, and
+`GlutenFree` and `Pescatarian` are standalone (no parent).
 
 Meat dishes often use `VegetarianIsh` (not `Vegetarian`). Baking/puddings use
 `Pudding` + `Baking` + `Vegetarian` when egg/dairy only.
