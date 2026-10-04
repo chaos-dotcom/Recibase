@@ -252,8 +252,8 @@ impl App {
     /// target carries no leading slash, so the `Location` header is relative.
     ///
     /// `?onlyOurs=true` restricts the draw to the recipes the API marks
-    /// `ours`, which is what the drawer asks for while its reci-verse toggle is
-    /// unticked.
+    /// `ours` (chaos-tagged originals). The plain draw already stays within our
+    /// own list, so it matches the drawer's default set.
     fn random(&self, request: &Request) -> Result<Response, RouteError> {
         let recipes = self
             .recipe_list
