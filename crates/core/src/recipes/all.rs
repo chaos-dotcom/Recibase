@@ -6,6 +6,7 @@ use std::sync::LazyLock;
 pub fn recipes() -> &'static [RecipeDef] {
     static RECIPES: LazyLock<Vec<RecipeDef>> = LazyLock::new(|| {
         vec![
+            super::baby_aubergines_stuffed_with_peanut_coconut::recipe(),
             super::baked_rigatoni_aubergine::recipe(),
             super::baked_salmon_olives_spaghetti::recipe(),
             super::baobab_ice_cream::recipe(),
@@ -141,6 +142,7 @@ pub fn recipes() -> &'static [RecipeDef] {
 /// list entries so the frontend can tell them from the upstream corpus.
 pub fn chaos_recipes() -> &'static [&'static str] {
     &[
+        "BabyAuberginesStuffedWithPeanutCoconut",
         "BasilThymeRoastedOnionsWithSquashGoatsCheeseWalnuts",
         "CheddarLeekOrzotto",
         "CoalSmokedAubergineCurry",
