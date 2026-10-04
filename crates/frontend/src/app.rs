@@ -462,7 +462,7 @@ impl App {
             if (200..300).contains(&response.status) {
                 let recipe = parse_recipe(&response.text)?;
                 let server = json!({ "label": peer.display_name(), "url": peer.site_url });
-                return Ok(Some((recipe, server)));
+                return Ok(Some((recipe, server, true)));
             }
             if response.status != 404 {
                 return Err(RouteError::BackendUnavailable);
@@ -564,7 +564,8 @@ impl App {
                 .get("permalink")
                 .and_then(Value::as_str)
                 .unwrap_or_default();
-            matches.push(json!({ "label": peer.label, "url": peer.recipe_url(permalink) }));
+            matches
+                .push(json!({ "label": peer.display_name(), "url": peer.recipe_url(permalink) }));
         }
         matches
     }

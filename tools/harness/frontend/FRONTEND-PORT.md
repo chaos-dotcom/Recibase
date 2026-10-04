@@ -74,8 +74,9 @@ same defaults:
 `PEER_BACKENDS` is a port addition, not in the Python: other Recibase
 deployments whose recipes the drawer lists alongside ours. Entries are
 `label|api|site`, separated by `;`, e.g.
-`Kit & Alex|https://api.reciba.se/|https://reciba.se`. A peer's recipe is
-labelled with their name and **served by this frontend**: its drawer link is the
+`Kit & Alex|https://api.reciba.se/|https://reciba.se`. A peer is named by its
+site's host (`reciba.se`), not the label - the label is kept for configuration
+only. A peer's recipe is **served by this frontend**: its drawer link is the
 local permalink and `/<permalink>` renders it from the peer's API, so a reader
 never leaves for the peer's site. A name we already hold is not listed again.
 
