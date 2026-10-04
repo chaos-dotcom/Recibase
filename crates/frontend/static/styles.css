@@ -329,6 +329,15 @@ p.recipe-also {
 
 .tag-filters {
   padding: 0 1rem 0.5rem;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+}
+
+/* A hairline rule between chip categories; stretches to the row's height. */
+.tag-divider {
+  align-self: stretch;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .chip,

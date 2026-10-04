@@ -14,14 +14,15 @@
     document.querySelectorAll('.mdl-navigation__link[data-ours]')
   );
 
-  // Curated facets, in reading order. Only the ones present in the list are
-  // shown, so the bar stays short.
-  var PREFERRED = [
-    'Vegetarian', 'Vegan', 'Pescatarian', 'Vegetarian-ish', 'Vegan-ish', 'Gluten-Free',
-    'Made of Meat',
-    'Quick', 'Low Effort', 'Slow', 'High Effort', 'Scales',
-    'Pudding', 'Lunch', 'Soup', 'Baking', 'Christmas',
-    'Cold Weather', 'Hot Weather', 'Spicy', 'Freezes', 'Better Next Day'
+  // The facets the bar offers, grouped so the chips read as categories with a
+  // small divider between them. Only groups that have present tags are shown,
+  // so the bar stays short.
+  var FACETS = [
+    ['Vegetarian', 'Vegan', 'Pescatarian', 'Vegetarian-ish', 'Vegan-ish', 'Gluten-Free'],
+    ['Pudding', 'Lunch', 'Soup', 'Baking', 'Christmas'],
+    ['Quick', 'Low Effort', 'Slow', 'High Effort', 'Scales'],
+    ['Cold Weather', 'Hot Weather', 'Spicy'],
+    ['Freezes', 'Better Next Day']
   ];
 
   var activeTag = new URLSearchParams(window.location.search).get('tag') || null;
@@ -70,31 +71,50 @@
     renderStatus(visible);
   }
 
+  function chipFor(tag) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'tag-chip' + (tag === activeTag ? ' is-active' : '');
+    chip.textContent = tag;
+    chip.setAttribute('aria-pressed', tag === activeTag ? 'true' : 'false');
+    chip.addEventListener('click', function () {
+      setActiveTag(tag === activeTag ? null : tag);
+    });
+    return chip;
+  }
+
   function renderChips() {
     if (!filtersBar) return;
     var present = presentTags();
-    var chips = PREFERRED.filter(function (tag) {
-      return present.indexOf(tag) !== -1;
+    var groups = FACETS.map(function (facet) {
+      return facet.filter(function (tag) {
+        return present.indexOf(tag) !== -1;
+      });
+    }).filter(function (tags) {
+      return tags.length > 0;
     });
-    // The active tag always gets a chip, even if it is not a preferred facet.
-    if (activeTag && chips.indexOf(activeTag) === -1) chips.push(activeTag);
-    if (!chips.length) {
+    // The active tag always shows, even if it is not one of the facets.
+    var shown = groups.some(function (tags) {
+      return tags.indexOf(activeTag) !== -1;
+    });
+    if (activeTag && !shown) groups.push([activeTag]);
+    if (!groups.length) {
       filtersBar.hidden = true;
       filtersBar.textContent = '';
       return;
     }
     filtersBar.hidden = false;
     filtersBar.textContent = '';
-    chips.forEach(function (tag) {
-      var chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'tag-chip' + (tag === activeTag ? ' is-active' : '');
-      chip.textContent = tag;
-      chip.setAttribute('aria-pressed', tag === activeTag ? 'true' : 'false');
-      chip.addEventListener('click', function () {
-        setActiveTag(tag === activeTag ? null : tag);
+    groups.forEach(function (tags, index) {
+      if (index > 0) {
+        var divider = document.createElement('span');
+        divider.className = 'tag-divider';
+        divider.setAttribute('aria-hidden', 'true');
+        filtersBar.appendChild(divider);
+      }
+      tags.forEach(function (tag) {
+        filtersBar.appendChild(chipFor(tag));
       });
-      filtersBar.appendChild(chip);
     });
   }
 
