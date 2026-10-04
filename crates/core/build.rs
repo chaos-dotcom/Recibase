@@ -1,0 +1,171 @@
+//! Generates the recipe module list and registry for `src/recipes/mod.rs`.
+//!
+//! Rust has no reflection, so the corpus needs a hand-maintained module list and
+//! a registry that calls each recipe's `recipe()`. Rather than commit those two
+//! generated files and keep them in sync with the directory by hand (the old
+//! `tools/gen_recipes.py` did), this build script derives both from
+//! `src/recipes/*.rs` at compile time: adding, removing or renaming a recipe file
+//! is enough, and there is nothing to regenerate or commit.
+//!
+//! `mod.rs` `include!`s the emitted file, so `recipes::recipes()` and
+//! `recipes::chaos_recipes()` keep their paths.
+//!
+//! Recipe order does not affect byte compatibility: every consumer treats the
+//! corpus as a Set or sorts it, and the Scala side's reflection order is itself
+//! unstable. The list is sorted by filename to keep a build reproducible.
+
+use std::env;
+use std::fmt::Write as _;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+/// The `chaos-tag:` marker (see `recibase_core::recipe::CHAOS_TAG`): a recipe
+/// that is ours rather than part of Kit's and Alex's upstream corpus. It has no
+/// Scala capture, so the byte-for-byte test skips it and the API marks its list
+/// entry.
+const CHAOS_MARKER: &str = "chaos-tag:";
+
+/// One recipe module: the file, its module name (the filename stem) and, for a
+/// chaos-tagged recipe, its `object_name`.
+struct Module {
+    name: String,
+    object_name: Option<String>,
+    file: PathBuf,
+}
+
+fn main() {
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+    let recipes_dir = manifest_dir.join("src").join("recipes");
+    // A directory is fingerprinted recursively, so adding or removing a recipe
+    // reruns this script just as editing one does.
+    println!("cargo:rerun-if-changed={}", recipes_dir.display());
+
+    let modules = recipe_modules(&recipes_dir);
+    assert!(
+        !modules.is_empty(),
+        "{} contains no recipe modules",
+        recipes_dir.display()
+    );
+
+    // `chaos_recipes()` is checked against the sources by
+    // `tests/recipe_corpus.rs`; sort it so the generated file is deterministic.
+    let mut chaos: Vec<&str> = modules
+        .iter()
+        .filter_map(|module| module.object_name.as_deref())
+        .collect();
+    chaos.sort_unstable();
+
+    let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR"));
+    let out = out_dir.join("recipes_generated.rs");
+    fs::write(&out, generate(&modules, &chaos))
+        .unwrap_or_else(|e| panic!("write {}: {e}", out.display()));
+}
+
+/// Every `*.rs` in `dir` except `mod.rs`, sorted by filename.
+fn recipe_modules(dir: &Path) -> Vec<Module> {
+    let mut files: Vec<PathBuf> = fs::read_dir(dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| entry.expect("directory entry").path())
+        .filter(|path| {
+            path.extension().is_some_and(|ext| ext == "rs")
+                && path.file_name().and_then(|name| name.to_str()) != Some("mod.rs")
+        })
+        .collect();
+    files.sort();
+
+    files
+        .into_iter()
+        .map(|file| {
+            let source = fs::read_to_string(&file)
+                .unwrap_or_else(|e| panic!("read {}: {e}", file.display()));
+            let name = file
+                .file_stem()
+                .expect("recipe file has a stem")
+                .to_string_lossy()
+                .into_owned();
+            let object_name = source
+                .contains(CHAOS_MARKER)
+                .then(|| extract_object_name(&source, &file));
+            Module {
+                name,
+                object_name,
+                file,
+            }
+        })
+        .collect()
+}
+
+/// `object_name: "BeefStroganoff"` -> `BeefStroganoff`. A chaos-tagged file
+/// without one is a mistake (it would silently vanish from `chaos_recipes()`),
+/// so this panics rather than guessing.
+fn extract_object_name(source: &str, file: &Path) -> String {
+    const KEY: &str = "object_name:";
+    let after = source
+        .split_once(KEY)
+        .unwrap_or_else(|| {
+            panic!(
+                "{}: carries `{CHAOS_MARKER}` but has no `{KEY}`",
+                file.display()
+            )
+        })
+        .1
+        .trim_start();
+    let value = after
+        .strip_prefix('"')
+        .unwrap_or_else(|| panic!("{}: `{KEY}` is not a string literal", file.display()));
+    value
+        .split_once('"')
+        .unwrap_or_else(|| panic!("{}: unterminated `{KEY}` string", file.display()))
+        .0
+        .to_string()
+}
+
+/// The generated `include!`d by `src/recipes/mod.rs`.
+fn generate(modules: &[Module], chaos: &[&str]) -> String {
+    let mut out = String::new();
+
+    // A plain comment, not `//!`: this text is `include!`d into `mod.rs`, which
+    // already carries the module's inner doc comment, so an inner one here is
+    // rejected (`E0753`).
+    out.push_str(
+        "// GENERATED by crates/core/build.rs - do not edit by hand.\n\n\
+         use crate::recipe::RecipeDef;\nuse std::sync::LazyLock;\n\n",
+    );
+
+    // The module declarations. This text is `include!`d from `OUT_DIR`, which is
+    // the directory rustc resolves a bare `pub mod foo;` against, so `#[path]`
+    // pins each module to its file in `src/recipes`.
+    for module in modules {
+        writeln!(
+            out,
+            "#[path = {:?}]\npub mod {};",
+            module.file.display().to_string(),
+            module.name
+        )
+        .unwrap();
+    }
+    out.push('\n');
+
+    out.push_str(
+        "pub fn recipes() -> &'static [RecipeDef] {\n\
+         \x20   static RECIPES: LazyLock<Vec<RecipeDef>> = LazyLock::new(|| {\n\
+         \x20       vec![\n",
+    );
+    for module in modules {
+        writeln!(out, "            self::{}::recipe(),", module.name).unwrap();
+    }
+    out.push_str("        ]\n    });\n    &RECIPES\n}\n");
+
+    out.push_str(
+        "\n/// The `object_name`s of recipes that are ours (the files carrying\n\
+         /// `chaos-tag:`). `recipe_corpus` skips them, and the API marks their\n\
+         /// list entries so the frontend can tell them from the upstream corpus.\n\
+         pub fn chaos_recipes() -> &'static [&'static str] {\n    &[\n",
+    );
+    for name in chaos {
+        writeln!(out, "        \"{name}\",").unwrap();
+    }
+    out.push_str("    ]\n}\n");
+
+    out
+}

@@ -10,7 +10,8 @@ use serde_json::Value;
 pub const RECIPE_DIR: &str =
     "https://github.com/chaos-dotcom/Recibase/tree/main/crates/core/src/recipes";
 
-/// `BeefStroganoff` -> `beef_stroganoff`, matching `tools/gen_recipes.py`.
+/// `BeefStroganoff` -> `beef_stroganoff`, the recipe module filename in
+/// `src/recipes` (and so the `edit` link's filename).
 pub fn snake_case(name: &str) -> String {
     let mut out = String::new();
     for (i, c) in name.chars().enumerate() {
