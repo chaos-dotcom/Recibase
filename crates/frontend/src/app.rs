@@ -126,9 +126,9 @@ impl App {
         let backend = Arc::new(BackendClient::new(backend_url.clone()));
         let recipe_list = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
-            // `withRevision` adds each recipe's content digest and `withTags`
-            // its tags; the plain `/recipes/` response is unchanged.
-            move || backend.get_json("recipes/?withRevision=true&withTags=true")
+            // `withTags` adds each recipe's tags for the drawer's tag chips; the
+            // plain `/recipes/` response is unchanged.
+            move || backend.get_json("recipes/?withTags=true")
         }));
         let api_version = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
@@ -362,7 +362,7 @@ impl App {
             return Ok(pages::redirect(301, &format!("/{}", name.to_lowercase())));
         }
 
-        let Some((mut recipe, server, from_peer)) = self.fetch_recipe(name)? else {
+        let Some((mut recipe, server)) = self.fetch_recipe(name)? else {
             return self.not_found();
         };
 
@@ -397,19 +397,11 @@ impl App {
         let blocks = recipe.get("ingredients_blocks").unwrap_or(&empty);
         let copy_ingredients = scaler::ingredients_copy_text(blocks);
 
-        // A recipe served from a peer is already the "also on" place; there is
-        // nothing local to point back at, so the hint is only for our own.
-        let also = if from_peer {
-            Vec::new()
-        } else {
-            self.peer_matches(recipe.get("name").and_then(Value::as_str))
-        };
         let context = TemplateValue::from_serialize(json!({
             "recipe": recipe,
             "scale_factor": scale_factor,
             "combined_notes": combined_notes,
             "copy_ingredients": copy_ingredients,
-            "also": also,
             "server": server,
         }));
         self.render("recipe.html", context)
@@ -417,16 +409,16 @@ impl App {
 
     /// The recipe for `/<permalink>`: ours if we hold it, else a peer's - fetched
     /// from that peer's API and rendered here, so the reader stays on this
-    /// frontend. `Ok(None)` is the 404 page. The `server` is the `{label, url}`
-    /// the caption credits, and the flag says the recipe came from a peer.
-    fn fetch_recipe(&self, permalink: &str) -> Result<Option<(Value, Value, bool)>, RouteError> {
+    /// frontend. `Ok(None)` is the 404 page, and `server` is the `{label, url}`
+    /// the caption credits.
+    fn fetch_recipe(&self, permalink: &str) -> Result<Option<(Value, Value)>, RouteError> {
         let response = self
             .backend
             .get(&format!("recipes/{permalink}"))
             .map_err(|_| RouteError::BackendUnavailable)?;
         if (200..300).contains(&response.status) {
             let recipe = parse_recipe(&response.text)?;
-            return Ok(Some((recipe, self.server_json(), false)));
+            return Ok(Some((recipe, self.server_json())));
         }
         if response.status != 404 {
             return Err(RouteError::BackendUnavailable);
@@ -452,7 +444,7 @@ impl App {
             if (200..300).contains(&response.status) {
                 let recipe = parse_recipe(&response.text)?;
                 let server = json!({ "label": peer.label, "url": peer.site_url });
-                return Ok(Some((recipe, server, true)));
+                return Ok(Some((recipe, server)));
             }
             if response.status != 404 {
                 return Err(RouteError::BackendUnavailable);
@@ -468,53 +460,6 @@ impl App {
             Some(server) => json!({ "label": server.label, "url": server.site_url }),
             None => Value::Null,
         }
-    }
-
-    /// The peers that list a recipe with this name *and a different content
-    /// digest*, as `{label, url}` for the "also on" hint on the recipe page. A
-    /// peer the digest says is identical is skipped; a peer that cannot be
-    /// reached is skipped.
-    fn peer_matches(&self, name: Option<&str>) -> Vec<Value> {
-        let Some(name) = name else {
-            return Vec::new();
-        };
-        let our_revision = self.recipe_list.fetch_data().ok().and_then(|list| {
-            let entry = list
-                .as_array()?
-                .iter()
-                .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))?;
-            entry
-                .get("revision")
-                .and_then(Value::as_str)
-                .map(str::to_string)
-        });
-        let mut matches = Vec::new();
-        for peer in &self.peers {
-            let Ok(list) = peer.recipes.fetch_data() else {
-                continue;
-            };
-            let Some(entries) = list.as_array() else {
-                continue;
-            };
-            let Some(entry) = entries
-                .iter()
-                .find(|entry| entry.get("name").and_then(Value::as_str) == Some(name))
-            else {
-                continue;
-            };
-            if crate::peer::same_revision(
-                our_revision.as_deref(),
-                entry.get("revision").and_then(Value::as_str),
-            ) {
-                continue;
-            }
-            let permalink = entry
-                .get("permalink")
-                .and_then(Value::as_str)
-                .unwrap_or_default();
-            matches.push(json!({ "label": peer.label, "url": peer.recipe_url(permalink) }));
-        }
-        matches
     }
 }
 

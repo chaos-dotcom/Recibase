@@ -1,18 +1,16 @@
 //! Peers: other Recibase deployments whose recipes we list alongside our own.
 //!
-//! Ours wins a name collision, so a copy we hold never shadows the peer's
-//! entry; a peer-only recipe is added, labelled with their name, and served by
-//! *this* frontend - its drawer link is the local permalink and the recipe page
-//! is rendered from the peer's API, so a reader never leaves for the peer's
-//! site. Our own entry gains an `also` link when a peer lists the same name with
-//! a different content digest, the hint that they have a different version, and
-//! that link does go to their site. Our own recipes are listed first, ahead of
-//! the peers'.
+//! A recipe we already have wins its name, so a peer never shadows it; a
+//! peer-only recipe is added, labelled with their name, and served by *this*
+//! frontend - its drawer link is the local permalink and the recipe page is
+//! rendered from the peer's API, so a reader never leaves for the peer's site.
+//! Our own recipes are listed first, ahead of the peers'. Nothing is added for a
+//! name we already hold: the reci-verse is only the recipes we do not have.
 
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::sync::Arc;
 
-use serde_json::{Value, json};
+use serde_json::Value;
 
 use crate::backend::{BackendClient, BackendResponse};
 use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
@@ -22,8 +20,7 @@ use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
 pub struct Peer {
     /// The owners' name, shown next to their recipes ("Kit & Alex").
     pub label: String,
-    /// The peer's website, with no trailing slash, so an `also` link can point
-    /// at their copy as `<site_url>/<permalink>`.
+    /// The peer's website, with no trailing slash.
     pub site_url: String,
     /// The peer's `/recipes/` list, cached on the same 15-minute TTL as ours.
     pub recipes: Arc<CachedBackendCall<Value>>,
@@ -37,7 +34,7 @@ impl Peer {
         let backend = Arc::new(BackendClient::new(api_base_url));
         let recipes = Arc::new(CachedBackendCall::new({
             let backend = Arc::clone(&backend);
-            move || backend.get_json("recipes/?withRevision=true&withTags=true")
+            move || backend.get_json("recipes/?withTags=true")
         }));
         Peer {
             label,
@@ -53,8 +50,7 @@ impl Peer {
         self.backend.get(&format!("recipes/{permalink}"))
     }
 
-    /// The peer's page for one of their recipes, for an `also` link that does
-    /// leave for their site.
+    /// The peer's page for one of their recipes, `<site_url>/<permalink>`.
     pub fn recipe_url(&self, permalink: &str) -> String {
         format!("{}/{}", self.site_url, permalink)
     }
@@ -122,51 +118,41 @@ pub struct PeerList {
 /// `href`; both ours and a peer's are the relative permalink, because this
 /// frontend serves a peer's recipe from the peer's API rather than linking out.
 pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
-    // The names we have, and our content digest for each when we have one.
-    let mut known: HashMap<&str, Option<&str>> = HashMap::new();
+    // The names we already hold; a peer's recipe with one of them is not the
+    // reci-verse and is not added at all.
+    let mut known: HashSet<&str> = HashSet::new();
     for entry in own {
         if let Some(name) = entry.get("name").and_then(Value::as_str) {
-            known.insert(name, entry.get("revision").and_then(Value::as_str));
+            known.insert(name);
         }
     }
 
-    let mut also: HashMap<&str, Vec<Value>> = HashMap::new();
     let mut extras: Vec<Value> = Vec::new();
     for peer in peers {
         for entry in &peer.recipes {
             let Some(name) = entry.get("name").and_then(Value::as_str) else {
                 continue;
             };
+            if known.contains(name) {
+                continue;
+            }
             let permalink = entry
                 .get("permalink")
                 .and_then(Value::as_str)
                 .unwrap_or_default();
-            let link =
-                json!({ "label": peer.label, "url": format!("{}/{}", peer.site_url, permalink) });
-            match known.get(name).copied() {
-                // Same name. An equal digest is the same recipe, so there is
-                // nothing to point at; anything else is a difference to hint.
-                Some(our_revision) => {
-                    if !same_revision(our_revision, entry.get("revision").and_then(Value::as_str)) {
-                        also.entry(name).or_default().push(link);
-                    }
-                }
-                None => {
-                    let mut copy = entry.clone();
-                    if let Value::Object(map) = &mut copy {
-                        // `ours` and the digest are the sending deployment's,
-                        // not ours, and neither belongs in the drawer.
-                        map.remove("ours");
-                        map.remove("revision");
-                        // The local permalink, so this frontend renders their
-                        // recipe from their API instead of linking out.
-                        map.insert("href".to_string(), Value::String(permalink.to_string()));
-                        map.insert("source".to_string(), Value::String(peer.label.clone()));
-                    }
-                    known.insert(name, None);
-                    extras.push(copy);
-                }
+            let mut copy = entry.clone();
+            if let Value::Object(map) = &mut copy {
+                // `ours` and the digest are the sending deployment's, not ours,
+                // and neither belongs in the drawer.
+                map.remove("ours");
+                map.remove("revision");
+                // The local permalink, so this frontend renders their recipe
+                // from their API instead of linking out.
+                map.insert("href".to_string(), Value::String(permalink.to_string()));
+                map.insert("source".to_string(), Value::String(peer.label.clone()));
             }
+            known.insert(name);
+            extras.push(copy);
         }
     }
 
@@ -183,11 +169,6 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
             if let Value::Object(map) = &mut copy {
                 map.remove("revision");
                 map.insert("href".to_string(), Value::String(permalink.to_string()));
-                if let Some(name) = entry.get("name").and_then(Value::as_str)
-                    && let Some(links) = also.get(name)
-                {
-                    map.insert("also".to_string(), Value::Array(links.clone()));
-                }
             }
             copy
         })
@@ -196,12 +177,6 @@ pub fn merge_recipe_lists(own: &[Value], peers: &[PeerList]) -> Vec<Value> {
     extras.sort_by(|a, b| name_of(a).cmp(name_of(b)));
     ours.extend(extras);
     ours
-}
-
-/// Two digests agree only when both are present: a missing digest means the
-/// sender did not report one, which is not the same as "identical".
-pub fn same_revision(left: Option<&str>, right: Option<&str>) -> bool {
-    matches!((left, right), (Some(a), Some(b)) if a == b)
 }
 
 fn name_of(entry: &Value) -> &str {

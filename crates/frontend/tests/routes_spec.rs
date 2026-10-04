@@ -91,8 +91,8 @@ fn random_recipe_redirects_respects_only_ours() {
 }
 
 /// A peer's recipes appear in the drawer, labelled with their name and linked
-/// to *our* page for them; a recipe of ours with the same name wins and gains
-/// the "also on" hint.
+/// to *our* page for them; a recipe of ours with the same name wins and the
+/// peer's version is not listed at all.
 #[test]
 fn peer_recipes_appear_in_the_drawer() {
     let stub = StubApi::start();
@@ -122,13 +122,14 @@ fn peer_recipes_appear_in_the_drawer() {
     // The link stays on this frontend: a local permalink, not their site.
     assert!(body.contains("href=\"their-recipe\""), "{body}");
     assert!(!body.contains("https://reciba.se/their-recipe"), "{body}");
-    // Our same-named recipe wins, with the hint pointing at theirs.
-    assert!(body.contains("title=\"Also on Kit &amp; Alex\""), "{body}");
+    // Our same-named recipe wins: theirs is not listed, and no cross-reference
+    // to it appears.
+    assert!(!body.contains("title=\"Also on Kit &amp; Alex\""), "{body}");
+    assert!(!body.contains("recipe-also"), "{body}");
 }
 
 /// Clicking a peer's recipe keeps you here: the page is rendered from the
-/// peer's API, credited to them in the caption, and carries no "also on" hint
-/// (the peer *is* the other place).
+/// peer's API and credited to them in the caption.
 #[test]
 fn a_peer_recipe_is_served_by_this_frontend() {
     let stub = StubApi::start();
@@ -165,7 +166,7 @@ fn a_peer_recipe_is_served_by_this_frontend() {
         body.contains("Found on <a href=\"https://reciba.se\">Kit &amp; Alex</a> across the"),
         "{body}"
     );
-    assert!(!body.contains("class=\"recipe-also\""), "{body}");
+    assert!(!body.contains("Also on"), "{body}");
 }
 
 /// A permalink no one holds is still the 404 page.
