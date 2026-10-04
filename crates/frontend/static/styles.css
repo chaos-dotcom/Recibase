@@ -301,7 +301,8 @@ footer a:not(:hover) {
   vertical-align: middle;
 }
 
-/* The "also on" hint: a marker in the drawer, a line on the recipe page. */
+/* The peer hint: a marker in the drawer, a line on the recipe page, crediting
+   the other server a recipe came from. */
 .mdl-navigation__link .recipe-also {
   margin-left: 0.4rem;
   color: rgb(124, 77, 255);

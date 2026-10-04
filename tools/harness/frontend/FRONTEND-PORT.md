@@ -77,19 +77,21 @@ deployments whose recipes the drawer lists alongside ours. Entries are
 `Kit & Alex|https://api.reciba.se/|https://reciba.se`. A peer's recipe is
 labelled with their name and **served by this frontend**: its drawer link is the
 local permalink and `/<permalink>` renders it from the peer's API, so a reader
-never leaves for the peer's site. A recipe we also have wins by name, and the
-peer's entry gains a hint - a link that *does* go to the peer's site, reading
-`Found on <peer> too.` The hint is shown only when the two disagree, which the
-frontend decides from each backend's `recipes/?withRevision=true` content digest
-(opt-in, so the default API response is unchanged): an equal digest means the
-same recipe, a missing one means we cannot tell, so we hint. An unreachable peer
-is skipped rather than failing the page, and its recipes simply do not appear.
+never leaves for the peer's site. A name we already hold is not listed again, but
+the peer is credited with a hint that *does* go to their site, reading `Found on
+<peer> too.` A recipe that is not ours - no `chaos-tag:`, so it came from the
+other server first - is always credited; one of ours only when the two disagree,
+which the frontend decides from each backend's `recipes/?withRevision=true`
+content digest (opt-in, so the default API response is unchanged): an equal
+digest means the same recipe, a missing one means we cannot tell, so we hint. An
+unreachable peer is skipped rather than failing the page, and its recipes simply
+do not appear.
 
-The drawer lists our own recipes first, then the peers'. It keeps to our own by
-default: a peer's recipes appear only when the reader ticks **Show recipes from
-across the reci-verse**, an unticked-by-default box in the drawer (its state is
-remembered in `localStorage`). While it is unticked the random link draws from
-our own recipes only, matching the list.
+The drawer lists our own recipes first, then the peers'. It keeps to the recipes
+we host by default; a peer-only recipe (one we do not have at all) appears only
+when the reader ticks **Show recipes from across the reci-verse**, an
+unticked-by-default box in the drawer (its state is remembered in
+`localStorage`).
 
 `SERVER_IDENTITY` is the same idea for this deployment itself: `label|site`, so
 the recipe page can say `Found on <label> across the reci-verse.` and link the

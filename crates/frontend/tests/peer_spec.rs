@@ -60,15 +60,17 @@ fn merge_keeps_ours_on_a_name_collision_and_links_the_peer() {
     assert_eq!(curry["name"], "Curry");
     assert_eq!(curry["source"], "Kit & Alex");
     assert_eq!(curry["href"], "curry");
+    // Peer-only, so the drawer keeps it back for the reci-verse toggle.
+    assert_eq!(curry["peer"], true);
     // `ours` is relative to the server that sent the list, not ours.
     assert!(curry.get("ours").is_none());
 }
 
-/// An equal digest means the same recipe, so there is nothing to hint at; a
-/// different digest (or a missing one) is a difference worth linking.
+/// A recipe that is not ours (no chaos tag) came from the other server first,
+/// so its peer is always credited; one of ours is credited only when the digest
+/// differs.
 #[test]
-fn merge_hints_only_when_the_digest_differs() {
-    let own = vec![json!({"name": "Pasta", "permalink": "pasta", "revision": "aaaa"})];
+fn merge_hints_by_originality_then_digest() {
     let peer = |revision: &str| {
         vec![PeerList {
             label: "Kit & Alex".to_string(),
@@ -77,13 +79,21 @@ fn merge_hints_only_when_the_digest_differs() {
         }]
     };
 
-    let identical = merge_recipe_lists(&own, &peer("aaaa"));
+    // Not ours: the peer is credited even when the digest matches.
+    let ported = vec![json!({"name": "Pasta", "permalink": "pasta", "revision": "aaaa"})];
+    let same = merge_recipe_lists(&ported, &peer("aaaa"));
+    assert_eq!(same[0]["also"][0]["url"], "https://reciba.se/pasta");
+
+    // Ours: the peer is credited only when the digest differs.
+    let ours =
+        vec![json!({"name": "Pasta", "permalink": "pasta", "revision": "aaaa", "ours": true})];
+    let identical = merge_recipe_lists(&ours, &peer("aaaa"));
     assert_eq!(identical.len(), 1);
     assert!(identical[0].get("also").is_none());
     // The digest is the sender's, not ours: it is stripped from the drawer.
     assert!(identical[0].get("revision").is_none());
 
-    let differing = merge_recipe_lists(&own, &peer("bbbb"));
+    let differing = merge_recipe_lists(&ours, &peer("bbbb"));
     assert_eq!(differing[0]["also"][0]["url"], "https://reciba.se/pasta");
 }
 

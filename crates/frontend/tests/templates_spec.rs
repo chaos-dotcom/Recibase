@@ -131,36 +131,35 @@ fn every_template_is_embedded_and_renders() {
     assert!(contribute.contains("name=\"passcode\""), "{contribute}");
 }
 
-/// The reci-verse toggle: our recipes carry `data-ours="true"`, the rest
-/// `"false"`, the box is unticked by default, and the filter script is wired
-/// into the layout.
+/// The reci-verse toggle: a peer-only recipe carries `data-peer="true"` and is
+/// hidden by default, our own rows carry `"false"` and show; the box is unticked
+/// by default and the filter script is wired into the layout.
 #[test]
-fn the_drawer_marks_our_recipes_for_the_reci_verse_toggle() {
+fn the_drawer_marks_peer_recipes_for_the_reci_verse_toggle() {
     let home = templates_with_list(json!([
         {"name": "Our Recipe", "permalink": "our-recipe", "ours": true},
-        {"name": "Their Recipe", "permalink": "their-recipe"},
+        {"name": "Their Recipe", "permalink": "their-recipe", "peer": true},
     ]))
     .render("home.html", TemplateValue::from_serialize(json!({})))
     .expect("home.html renders");
 
+    // A peer-only row is hidden until the box is ticked; ours is shown.
+    assert!(
+        home.contains("data-peer=\"true\" data-tags=\"\" hidden href=\"their-recipe\""),
+        "{home}"
+    );
+    assert!(
+        home.contains("data-peer=\"false\" data-tags=\"\" href=\"our-recipe\""),
+        "{home}"
+    );
+    // Originality still travels as `data-ours` for the chaos-tagged recipe.
     assert!(home.contains("data-ours=\"true\""), "{home}");
-    // A peer's row is hidden until the box is ticked; ours is shown.
-    assert!(
-        home.contains("data-ours=\"false\" data-tags=\"\" hidden href=\"their-recipe\""),
-        "{home}"
-    );
-    assert!(
-        home.contains("data-ours=\"true\" data-tags=\"\" href=\"our-recipe\""),
-        "{home}"
-    );
     // The box exists and is unticked by default, so the drawer keeps to ours.
     assert!(
         home.contains("<input type=\"checkbox\" id=\"reciVerse\">"),
         "{home}"
     );
     assert!(home.contains("/static/filters.js"), "{home}");
-    // The random link is rewritten by filters.js to carry the toggle state.
-    assert!(home.contains("href=\"/random\""), "{home}");
 }
 
 /// The drawer exposes each recipe's tags so `filters.js` can filter the menu.

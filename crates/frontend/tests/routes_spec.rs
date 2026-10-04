@@ -122,11 +122,20 @@ fn peer_recipes_appear_in_the_drawer() {
     // The link stays on this frontend: a local permalink, not their site.
     assert!(body.contains("href=\"their-recipe\""), "{body}");
     assert!(!body.contains("https://reciba.se/their-recipe"), "{body}");
+    // A peer-only recipe is kept back for the reci-verse toggle.
+    assert!(body.contains("data-peer=\"true\""), "{body}");
+    assert!(body.contains("hidden href=\"their-recipe\""), "{body}");
     // Our same-named recipe wins, with the hint pointing at theirs.
     assert!(
         body.contains("title=\"Found on Kit &amp; Alex too\""),
         "{body}"
     );
+
+    // The recipe page credits the peer too: the recipe is not ours, so the peer
+    // is its origin whatever the digest.
+    let page = body_of(&app.handle(&get("/test-recipe")));
+    assert!(page.contains("class=\"recipe-also\""), "{page}");
+    assert!(page.contains("https://reciba.se/test-recipe"), "{page}");
 }
 
 /// Clicking a peer's recipe keeps you here: the page is rendered from the
