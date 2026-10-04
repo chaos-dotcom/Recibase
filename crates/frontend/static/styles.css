@@ -148,10 +148,6 @@ footer a:not(:hover) {
   color: grey;
 }
 
-.mdl-navigation__link.add-recipe {
-  font-weight: 500;
-}
-
 .form-error {
   background: #fdecea;
   padding: 0.75rem 1rem;

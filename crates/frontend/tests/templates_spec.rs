@@ -162,9 +162,9 @@ fn the_drawer_marks_peer_recipes_for_the_reci_verse_toggle() {
     assert!(home.contains("/static/filters.js"), "{home}");
 }
 
-/// The drawer exposes each recipe's tags so `filters.js` can filter the menu.
+/* The chip header exposes each recipe's tags to `filters.js`. */
 #[test]
-fn the_drawer_exposes_tags_for_filtering() {
+fn the_chips_header_exposes_tags_for_filtering() {
     let home = templates_with_list(json!([
         {"name": "Curry", "permalink": "curry", "tags": ["Vegan", "Quick"]},
         {"name": "Plain", "permalink": "plain"},

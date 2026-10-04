@@ -604,7 +604,6 @@ fn contribute_page_renders_the_default_state() {
     assert!(page.contains("Drafts saved for 7 days using a cookie, or until submitted."));
     assert!(page.contains("Save Draft"));
     assert!(page.contains("Delete Draft"));
-    assert!(page.contains("mdl-navigation__link add-recipe is-current"));
 }
 
 /// The tags reach the page in `TAG_GROUPS` order, and the Diet group is the
