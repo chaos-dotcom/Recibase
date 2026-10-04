@@ -177,12 +177,14 @@ fn recipes_list_links_to_each_recipe() {
     );
 }
 
-/// `?withRevision=true` adds the content digest; the default response does not
-/// carry it, so it stays byte-identical to the Scala's.
+/// `?withRevision=true` adds the content digest and `?withTags=true` the tags;
+/// the default response carries neither, so it stays byte-identical to the
+/// Scala's.
 #[test]
-fn recipes_list_revision_is_opt_in() {
+fn recipes_list_revision_and_tags_are_opt_in() {
     let plain = body(&route(&request("GET", "/recipes/"), &context()));
     assert!(!plain.contains("\"revision\""), "{plain}");
+    assert!(!plain.contains("\"tags\""), "{plain}");
 
     let response = route(&request("GET", "/recipes/?withRevision=true"), &context());
     let with = body(&response);
@@ -196,6 +198,20 @@ fn recipes_list_revision_is_opt_in() {
             revision.len() == 16 && revision.bytes().all(|byte| byte.is_ascii_hexdigit())
         })
     }));
+
+    let tagged = body(&route(
+        &request("GET", "/recipes/?withTags=true"),
+        &context(),
+    ));
+    assert!(tagged.contains("\"tags\":["), "{tagged}");
+    assert!(
+        !tagged.contains("\"revision\""),
+        "withTags alone must not add the digest: {tagged}"
+    );
+    let entries: Vec<serde_json::Value> =
+        serde_json::from_str(&tagged).expect("the recipe list is JSON");
+    // Every entry carries its tags as entry names.
+    assert!(entries.iter().all(|entry| entry["tags"].is_array()));
 }
 
 #[test]
