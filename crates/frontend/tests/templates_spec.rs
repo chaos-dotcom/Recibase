@@ -150,6 +150,29 @@ fn the_drawer_marks_our_recipes_for_the_only_ours_toggle() {
     assert!(home.contains("href=\"/random\""), "{home}");
 }
 
+/// A recipe's tags render as filter chips that link back to the filtered menu.
+#[test]
+fn recipe_tags_render_as_filter_chips() {
+    let mut recipe = sample_recipe();
+    recipe["tags"] = json!(["Cold Weather", "Quick"]);
+    let page = working_templates("latest")
+        .render(
+            "recipe.html",
+            TemplateValue::from_serialize(json!({
+                "recipe": recipe,
+                "scale_factor": 1,
+                "combined_notes": [],
+                "copy_ingredients": "",
+            })),
+        )
+        .expect("recipe.html renders");
+
+    assert!(page.contains("class=\"chip\""), "{page}");
+    assert!(page.contains("href=\"/?tag=Quick\""), "{page}");
+    // The space is URL-encoded, so `filters.js` reads the entry name back.
+    assert!(page.contains("?tag=Cold%20Weather"), "{page}");
+}
+
 /// The footer carries the frontend version the `App` was deployed as, and
 /// the API version `fetchApiVersion` returns.
 #[test]

@@ -25,7 +25,7 @@
 {% if recipe['tags']|length > 0 %}
   <ul class="chips" aria-label="Recipe tags">
     {% for tag in recipe['tags'] %}
-      <li><a class="chip" href="/?tag={{ tag|urlencode }}">{{ tag }}</a></li>
+      <li><a class="chip" href="/?tag={{ tag|replace(' ', '%20') }}">{{ tag }}</a></li>
     {% endfor %}
   </ul>
 {% endif %}
