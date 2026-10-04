@@ -136,6 +136,33 @@ byte-identical after normalising `Date` and the manifest `version`.
   same recipe agree on the digest, which is how the frontend tells a copied
   recipe from a same-named *different* one (see `FRONTEND-PORT.md`).
 
+## The contract, and what is only content
+
+The port began as a byte-for-byte reimplementation, and the Scala captures are
+its record. A deployment is now a product of its own - it hosts a subset of the
+upstream recipes plus its own - so byte equality cannot hold for anything that
+carries the corpus. The line drawn is:
+
+* **The declaration** - the routes, the JSON keys and their order, the status
+  codes, the content types, the docs map, the manifest's field list - is the
+  contract, and stays identical to Kit's and Alex's API.
+* **The manifest of that declaration** - the recipes, the tags, the meals and
+  the manifest's *values* - belongs to the deployment and may differ.
+
+Two specs hold that line, alongside the port's captured record:
+
+* `crates/server/tests/contract.rs` pins the declaration against this
+  deployment's own data (it takes a recipe from the registry rather than naming
+  one), so it is deterministic offline.
+* `crates/server/tests/live_contract.rs` compares that declaration with another
+  live deployment's, shape for shape. It runs only when `RECIBASE_LIVE_API`
+  names one (e.g. `https://api.reciba.se/`), so it is never the only gate.
+
+The corpus spec (`crates/core/tests/recipe_corpus.rs`) still compares every
+upstream recipe we host byte for byte, and records the ones this deployment
+deliberately does not host in `crates/core/tests/fixtures/omitted_recipes.txt`,
+so that dropping a recipe is a deliberate edit rather than a silent loss.
+
 ## Tests
 
 ```

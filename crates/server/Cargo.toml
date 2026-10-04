@@ -9,3 +9,8 @@ recibase-submit.workspace = true
 chrono.workspace = true
 serde_json.workspace = true
 ureq.workspace = true
+
+[dev-dependencies]
+# The live-conformance spec reaches another deployment over https, so the test
+# build, unlike the server itself, needs `ureq`'s TLS.
+ureq = { workspace = true, features = ["rustls"] }

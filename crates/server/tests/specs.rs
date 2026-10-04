@@ -171,10 +171,9 @@ fn recipes_list_returns_200() {
 #[test]
 fn recipes_list_links_to_each_recipe() {
     let response = route(&request("GET", "/recipes/"), &context());
-    assert!(
-        body(&response)
-            .contains("{\"name\":\"Vegetable Primavera\",\"permalink\":\"vegetable-primavera\"}")
-    );
+    assert!(body(&response).contains(
+        "{\"name\":\"Baked Rigatoni with Aubergine\",\"permalink\":\"baked-rigatoni-aubergine\"}"
+    ));
 }
 
 /// `?withRevision=true` adds the content digest and `?withTags=true` the tags;
@@ -231,8 +230,8 @@ fn recipes_list_marks_our_recipes_with_ours() {
     // byte-identical to before.
     let theirs = entries
         .iter()
-        .find(|entry| entry["permalink"] == "vegetable-primavera")
-        .expect("Vegetable Primavera is in the list");
+        .find(|entry| entry["permalink"] == "baked-rigatoni-aubergine")
+        .expect("Baked Rigatoni with Aubergine is in the list");
     assert!(
         theirs.get("ours").is_none(),
         "their entry must not carry ours"
@@ -273,10 +272,13 @@ fn missing_recipe_returns_404() {
 
 #[test]
 fn existing_recipe_returns_200_and_json() {
-    let response = route(&request("GET", "/recipes/vegetable-primavera"), &context());
+    let response = route(
+        &request("GET", "/recipes/baked-rigatoni-aubergine"),
+        &context(),
+    );
     assert_eq!(response.status, 200);
     let json: serde_json::Value = serde_json::from_str(&body(&response)).unwrap();
-    assert_eq!(json["name"], "Vegetable Primavera");
+    assert_eq!(json["name"], "Baked Rigatoni with Aubergine");
 }
 
 // ------------------------------------------------- RecipeSubmissionRoutesSpec
@@ -427,7 +429,7 @@ fn meals_raw_is_sorted_and_filtered_to_dinners() {
     sorted.sort();
     assert_eq!(names, sorted);
     // Non-dinner meals (puddings, lunches, baking, non-meals) are filtered out.
-    assert!(!names.contains(&"Birthday Cake"));
-    assert!(names.contains(&"Vegetable Primavera"));
+    assert!(!names.contains(&"Easy Pancakes"));
+    assert!(names.contains(&"Baked Rigatoni with Aubergine"));
     let _ = to_string;
 }

@@ -8,7 +8,7 @@
 //! (`capture-scala-cors*`).
 
 use recibase_server::http::{Request, Response};
-use recibase_server::routes::{route, Context};
+use recibase_server::routes::{Context, route};
 
 const DATE: &str = "Thu, 01 Oct 2026 21:04:30 GMT";
 
@@ -43,7 +43,13 @@ const ORIGIN: &str = "https://c.reciba.se";
 
 #[test]
 fn preflight_is_answered_by_the_middleware_for_any_path() {
-    for target in ["/recipes/", "/recipes/vegetable-primavera", "/health", "/meals/", "/nope"] {
+    for target in [
+        "/recipes/",
+        "/recipes/vegetable-primavera",
+        "/health",
+        "/meals/",
+        "/nope",
+    ] {
         let response = route(
             &request(
                 "OPTIONS",
@@ -82,12 +88,17 @@ fn preflight_echoes_the_requested_headers_trimmed_and_space_separated() {
             &[
                 ("Origin", ORIGIN),
                 ("Access-Control-Request-Method", "POST"),
-                ("Access-Control-Request-Headers", "authorization,content-type"),
+                (
+                    "Access-Control-Request-Headers",
+                    "authorization,content-type",
+                ),
             ],
         ),
         &context(),
     );
-    assert!(wire(&response).contains("Access-Control-Allow-Headers: authorization, content-type\r\n"));
+    assert!(
+        wire(&response).contains("Access-Control-Allow-Headers: authorization, content-type\r\n")
+    );
 
     // No requested headers at all still produces the header, empty.
     let response = route(
@@ -116,7 +127,11 @@ fn options_without_an_origin_or_a_requested_method_is_not_found() {
 #[test]
 fn a_matched_route_gets_the_allow_origin_header_after_content_length() {
     let response = route(
-        &request("GET", "/recipes/vegetable-primavera", &[("Origin", ORIGIN)]),
+        &request(
+            "GET",
+            "/recipes/baked-rigatoni-aubergine",
+            &[("Origin", ORIGIN)],
+        ),
         &context(),
     );
     let text = wire(&response);
@@ -165,7 +180,10 @@ fn an_unmatched_request_gets_no_cors_header() {
 
 #[test]
 fn without_an_origin_the_response_is_unchanged() {
-    let with = wire(&route(&request("GET", "/manifest", &[("Origin", ORIGIN)]), &context()));
+    let with = wire(&route(
+        &request("GET", "/manifest", &[("Origin", ORIGIN)]),
+        &context(),
+    ));
     let without = wire(&route(&request("GET", "/manifest", &[]), &context()));
     assert!(with.contains("Access-Control-Allow-Origin: *"));
     assert!(!without.contains("Access-Control"));

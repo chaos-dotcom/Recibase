@@ -1,12 +1,18 @@
-//! Every recipe's JSON encoding must equal the Scala capture byte for byte.
+//! Every upstream recipe's JSON encoding must equal the Scala capture byte for
+//! byte; the captures we deliberately do not host are listed alongside.
 //!
 //! The captures are the byte-exact HTTP responses in `capture-scala/` (and
 //! `capture-scala-csv/`); a recipe is matched to its capture through the `edit`
 //! field, which ends with `/<ObjectName>.scala`. Both `tags` and
 //! `inherited_tags` are Scala `Set`s, so this also proves the CHAMP iteration
 //! order reproduced by `core::scala_hash`.
+//!
+//! The captures are Kit's and Alex's *full* corpus, but a deployment hosts a
+//! subset of it plus its own recipes, so the captures for the recipes it does
+//! not host are recorded as deliberately omitted in
+//! `fixtures/omitted_recipes.txt` rather than compared.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
 
@@ -114,13 +120,27 @@ fn is_ours(object_name: &str) -> bool {
     core::recipes::chaos_recipes().contains(&object_name)
 }
 
+/// The upstream recipes this deployment deliberately does not host, from
+/// `fixtures/omitted_recipes.txt` (`#` comments and blank lines ignored).
+const OMITTED: &str = include_str!("fixtures/omitted_recipes.txt");
+
+fn omitted_recipes() -> BTreeSet<String> {
+    OMITTED
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .map(str::to_string)
+        .collect()
+}
+
 #[test]
-fn every_recipe_equals_its_capture_byte_for_byte() {
+fn every_hosted_recipe_equals_its_capture_byte_for_byte() {
     let captures = captured_bodies();
     let recipes = core::recipes::recipes();
     assert!(!recipes.is_empty(), "the recipe registry is empty");
 
-    let mut checked = 0usize;
+    // Every upstream recipe we host still matches its capture byte for byte.
+    let mut hosted: BTreeSet<String> = BTreeSet::new();
     for recipe in recipes {
         let name = &recipe.object_name;
         // Our own (chaos-tagged) recipes are not part of the upstream corpus
@@ -137,12 +157,26 @@ fn every_recipe_equals_its_capture_byte_for_byte() {
             without_edit(expected),
             "{name}: the JSON body differs from the Scala capture"
         );
-        checked += 1;
+        hosted.insert(name.clone());
     }
+
+    // Every capture is either a recipe we host or one listed as deliberately
+    // omitted: a capture that is neither means a recipe was dropped without
+    // recording it, and an omitted name we now host means the list is stale.
+    let omitted = omitted_recipes();
+    assert!(
+        omitted.is_disjoint(&hosted),
+        "a recipe is both hosted and listed as omitted"
+    );
+    let captured: BTreeSet<String> = captures.keys().cloned().collect();
+    let accounted: BTreeSet<String> = hosted.union(&omitted).cloned().collect();
     assert_eq!(
-        checked,
-        captures.len(),
-        "every capture must belong to a recipe in the registry"
+        accounted,
+        captured,
+        "captures must be exactly the hosted upstream recipes plus the omitted list\n\
+         only in captures: {:?}\nonly in hosted+omitted: {:?}",
+        captured.difference(&accounted).collect::<Vec<_>>(),
+        accounted.difference(&captured).collect::<Vec<_>>(),
     );
 }
 
