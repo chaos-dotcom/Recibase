@@ -5,6 +5,11 @@
   var drawer = document.querySelector('.mdl-layout__drawer');
   if (!drawer) return;
 
+  // MDL rewrites the layout into a fresh container on `load`, which resets the
+  // drawer's scroll. The restore therefore waits for that to finish, and saving
+  // stays quiet until then, so the transient reset cannot overwrite the value.
+  var ready = false;
+
   function read() {
     try {
       return window.sessionStorage.getItem(KEY);
@@ -14,6 +19,7 @@
   }
 
   function write() {
+    if (!ready) return;
     try {
       window.sessionStorage.setItem(KEY, String(drawer.scrollTop));
     } catch (error) {
@@ -35,10 +41,19 @@
     }
   }
 
-  var saved = read();
-  var top = saved === null ? NaN : parseInt(saved, 10);
-  if (!isNaN(top)) drawer.scrollTop = top;
-  revealCurrent();
+  function restore() {
+    var saved = read();
+    var top = saved === null ? NaN : parseInt(saved, 10);
+    if (!isNaN(top)) drawer.scrollTop = top;
+    revealCurrent();
+    ready = true;
+  }
+
+  // Deferred scripts run before `load`, which is when MDL moves the layout, so
+  // restoring has to wait for that event. An already-loaded document (a cached
+  // script) restores immediately.
+  if (document.readyState === 'complete') restore();
+  else window.addEventListener('load', restore);
 
   var queued = false;
   drawer.addEventListener('scroll', function () {
