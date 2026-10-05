@@ -13,7 +13,8 @@ pub fn recipe() -> RecipeDef {
         source: Some("Vegetarian Cookery Bible (2012: Reader's Digest)".to_string()),
         description: None,
         tagline: None,
-        notes: vec!["Traditional parmesan is not vegetarian".to_string()],
+        notes: vec!
+            ["Traditional parmesan is not vegetarian".to_string()],
         tags: vec![
             Tag::Vegetarian,
             Tag::Slow,

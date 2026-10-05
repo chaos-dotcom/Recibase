@@ -13,7 +13,10 @@ pub fn recipe() -> RecipeDef {
         source: None,
         description: None,
         tagline: None,
-        notes: vec!["<a href=\"https://t.sci1.uk/risotto-calculator/\">An arborio rice/water ratio calculator</a>".to_string()],
+        notes: vec![
+                "<a href=\"https://t.sci1.uk/risotto-calculator/\">An arborio rice/water ratio calculator</a>".to_string(),
+                "Chaos Note 👀: I've found this is very simular to the recipie found in I think the green roasting tin. - But the additonal kit step of roasting the betroot first is amazing 😍 ".to_string(),
+        ],
         tags: vec![
             Tag::Vegetarian,
             Tag::Slow,
