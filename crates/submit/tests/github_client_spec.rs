@@ -77,7 +77,13 @@ impl FakeGithub {
                 }
             }
         });
-        FakeGithub { port, calls, rules, stop, handle: Some(handle) }
+        FakeGithub {
+            port,
+            calls,
+            rules,
+            stop,
+            handle: Some(handle),
+        }
     }
 
     fn base(&self) -> String {
@@ -111,7 +117,11 @@ impl FakeGithub {
     }
 }
 
-fn serve(mut stream: TcpStream, calls: &Arc<Mutex<Vec<GithubCall>>>, rules: &Arc<Mutex<Vec<Rule>>>) {
+fn serve(
+    mut stream: TcpStream,
+    calls: &Arc<Mutex<Vec<GithubCall>>>,
+    rules: &Arc<Mutex<Vec<Rule>>>,
+) {
     stream.set_read_timeout(Some(Duration::from_secs(5))).ok();
     let mut reader = BufReader::new(match stream.try_clone() {
         Ok(clone) => clone,
@@ -258,7 +268,12 @@ fn recipe() -> GeneratedRecipe {
 #[test]
 fn creates_a_branch_commits_the_file_and_opens_a_pull_request() {
     let mut github = FakeGithub::new();
-    github.respond("GET", |path| path.contains("/git/ref/heads/master"), 200, SHA);
+    github.respond(
+        "GET",
+        |path| path.contains("/git/ref/heads/master"),
+        200,
+        SHA,
+    );
     github.respond("POST", |path| path.ends_with("/git/refs"), 201, "{}");
     github.respond("PUT", |path| path.contains("/contents/"), 201, "{}");
     github.respond(
@@ -299,16 +314,28 @@ fn creates_a_branch_commits_the_file_and_opens_a_pull_request() {
     }
 
     let file = recorded[2].json();
-    assert_eq!(file.get("message").and_then(Value::as_str), Some("Add Phone Test Soup"));
-    assert_eq!(file.get("branch").and_then(Value::as_str), Some("recipe/phone-test-soup"));
-    let encoded = file.get("content").and_then(Value::as_str).expect("content");
+    assert_eq!(
+        file.get("message").and_then(Value::as_str),
+        Some("Add Phone Test Soup")
+    );
+    assert_eq!(
+        file.get("branch").and_then(Value::as_str),
+        Some("recipe/phone-test-soup")
+    );
+    let encoded = file
+        .get("content")
+        .and_then(Value::as_str)
+        .expect("content");
     assert_eq!(
         String::from_utf8(base64_decode(encoded)).expect("utf8"),
         recipe().source
     );
 
     let pull = recorded[3].json();
-    assert_eq!(pull.get("head").and_then(Value::as_str), Some("recipe/phone-test-soup"));
+    assert_eq!(
+        pull.get("head").and_then(Value::as_str),
+        Some("recipe/phone-test-soup")
+    );
     assert_eq!(pull.get("base").and_then(Value::as_str), Some("master"));
     assert_eq!(pull.get("draft"), Some(&Value::Bool(true)));
     assert_eq!(
@@ -322,7 +349,12 @@ fn creates_a_branch_commits_the_file_and_opens_a_pull_request() {
 #[test]
 fn returns_a_conflict_when_the_branch_already_exists() {
     let mut github = FakeGithub::new();
-    github.respond("GET", |path| path.contains("/git/ref/heads/master"), 200, SHA);
+    github.respond(
+        "GET",
+        |path| path.contains("/git/ref/heads/master"),
+        200,
+        SHA,
+    );
     github.respond(
         "POST",
         |path| path.ends_with("/git/refs"),
@@ -334,7 +366,11 @@ fn returns_a_conflict_when_the_branch_already_exists() {
     let result = client.open(&recipe(), "Add", "Add", "body");
     assert_eq!(result, Err(PullRequestFailure::BranchAlreadyExists));
 
-    let methods: Vec<String> = github.recorded().iter().map(|call| call.method.clone()).collect();
+    let methods: Vec<String> = github
+        .recorded()
+        .iter()
+        .map(|call| call.method.clone())
+        .collect();
     assert_eq!(methods, vec!["GET".to_string(), "POST".to_string()]);
 
     github.close();
@@ -343,9 +379,19 @@ fn returns_a_conflict_when_the_branch_already_exists() {
 #[test]
 fn deletes_the_branch_when_the_file_upload_fails() {
     let mut github = FakeGithub::new();
-    github.respond("GET", |path| path.contains("/git/ref/heads/master"), 200, SHA);
+    github.respond(
+        "GET",
+        |path| path.contains("/git/ref/heads/master"),
+        200,
+        SHA,
+    );
     github.respond("POST", |path| path.ends_with("/git/refs"), 201, "{}");
-    github.respond("PUT", |path| path.contains("/contents/"), 500, r#"{"message":"nope"}"#);
+    github.respond(
+        "PUT",
+        |path| path.contains("/contents/"),
+        500,
+        r#"{"message":"nope"}"#,
+    );
     github.respond("DELETE", |path| path.contains("/git/refs/heads/"), 204, "");
 
     let client = GithubClient::new(&settings(), Some(&github.base()));
@@ -361,13 +407,20 @@ fn deletes_the_branch_when_the_file_upload_fails() {
     let methods: Vec<String> = recorded.iter().map(|call| call.method.clone()).collect();
     assert_eq!(
         methods,
-        vec!["GET".to_string(), "POST".to_string(), "PUT".to_string(), "DELETE".to_string()]
+        vec![
+            "GET".to_string(),
+            "POST".to_string(),
+            "PUT".to_string(),
+            "DELETE".to_string()
+        ]
     );
-    assert!(recorded
-        .last()
-        .expect("a delete call")
-        .path
-        .contains("heads/recipe%2Fphone-test-soup"));
+    assert!(
+        recorded
+            .last()
+            .expect("a delete call")
+            .path
+            .contains("heads/recipe%2Fphone-test-soup")
+    );
 
     github.close();
 }
@@ -375,10 +428,20 @@ fn deletes_the_branch_when_the_file_upload_fails() {
 #[test]
 fn deletes_the_branch_when_the_pull_request_creation_fails() {
     let mut github = FakeGithub::new();
-    github.respond("GET", |path| path.contains("/git/ref/heads/master"), 200, SHA);
+    github.respond(
+        "GET",
+        |path| path.contains("/git/ref/heads/master"),
+        200,
+        SHA,
+    );
     github.respond("POST", |path| path.ends_with("/git/refs"), 201, "{}");
     github.respond("PUT", |path| path.contains("/contents/"), 201, "{}");
-    github.respond("POST", |path| path.ends_with("/pulls"), 422, r#"{"message":"Validation Failed"}"#);
+    github.respond(
+        "POST",
+        |path| path.ends_with("/pulls"),
+        422,
+        r#"{"message":"Validation Failed"}"#,
+    );
     github.respond("DELETE", |path| path.contains("/git/refs/heads/"), 204, "");
 
     let client = GithubClient::new(&settings(), Some(&github.base()));
@@ -390,7 +453,11 @@ fn deletes_the_branch_when_the_pull_request_creation_fails() {
         other => panic!("expected GithubRejected, got {:?}", other),
     }
 
-    let methods: Vec<String> = github.recorded().iter().map(|call| call.method.clone()).collect();
+    let methods: Vec<String> = github
+        .recorded()
+        .iter()
+        .map(|call| call.method.clone())
+        .collect();
     assert_eq!(methods, vec!["GET", "POST", "PUT", "POST", "DELETE"]);
 
     github.close();
@@ -400,22 +467,31 @@ fn deletes_the_branch_when_the_pull_request_creation_fails() {
 fn rejects_a_branch_or_path_that_does_not_match_the_patterns() {
     let client = GithubClient::new(&settings(), Some("http://127.0.0.1:1"));
 
-    let bad_branch = GeneratedRecipe { branch: "recipe/Phone-Test".to_string(), ..recipe() };
+    let bad_branch = GeneratedRecipe {
+        branch: "recipe/Phone-Test".to_string(),
+        ..recipe()
+    };
     assert_eq!(
         client.open(&bad_branch, "Add", "Add", "body"),
-        Err(PullRequestFailure::GithubRejected("invalid branch".to_string()))
+        Err(PullRequestFailure::GithubRejected(
+            "invalid branch".to_string()
+        ))
     );
 
-    let bad_path = GeneratedRecipe { path: "src/main/scala/recipes/PhoneTestSoup.scala".to_string(), ..recipe() };
+    let bad_path = GeneratedRecipe {
+        path: "src/main/scala/recipes/PhoneTestSoup.scala".to_string(),
+        ..recipe()
+    };
     assert_eq!(
         client.open(&bad_path, "Add", "Add", "body"),
-        Err(PullRequestFailure::GithubRejected("invalid path".to_string()))
+        Err(PullRequestFailure::GithubRejected(
+            "invalid path".to_string()
+        ))
     );
 }
 
 fn base64_decode(input: &str) -> Vec<u8> {
-    const ALPHABET: &[u8; 64] =
-        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut lookup = [255u8; 256];
     for (index, byte) in ALPHABET.iter().enumerate() {
         lookup[*byte as usize] = index as u8;

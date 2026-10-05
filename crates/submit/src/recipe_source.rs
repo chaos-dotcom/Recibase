@@ -172,10 +172,16 @@ impl RecipeSource {
                 return invalid("Each ingredient needs a name");
             }
             let name = text("An ingredient field", &ingredient.name, TEXT_LIMIT, true)?;
-            let quantity = optional_text("An ingredient field", ingredient.quantity.as_deref(), true)?;
+            let quantity =
+                optional_text("An ingredient field", ingredient.quantity.as_deref(), true)?;
             let prep = optional_text("An ingredient field", ingredient.prep.as_deref(), true)?;
             let notes = optional_text("An ingredient field", ingredient.notes.as_deref(), true)?;
-            result.push(CleanIngredient { name, quantity, prep, notes });
+            result.push(CleanIngredient {
+                name,
+                quantity,
+                prep,
+                notes,
+            });
         }
 
         if result.is_empty() {
@@ -186,7 +192,10 @@ impl RecipeSource {
     }
 
     fn identify(clean: CleanRecipe) -> Result<IdentifiedRecipe, SubmitRejection> {
-        let object_name: String = words(&clean.name).iter().map(|word| capitalise(word)).collect();
+        let object_name: String = words(&clean.name)
+            .iter()
+            .map(|word| capitalise(word))
+            .collect();
         let slug = permalink(&clean.name);
         if object_name.is_empty()
             || !is_object_name(&object_name)
@@ -195,7 +204,11 @@ impl RecipeSource {
         {
             invalid("Recipe name cannot be turned into a Scala file name")
         } else {
-            Ok(IdentifiedRecipe { clean, object_name, permalink: slug })
+            Ok(IdentifiedRecipe {
+                clean,
+                object_name,
+                permalink: slug,
+            })
         }
     }
 
@@ -262,24 +275,36 @@ impl RecipeSource {
             ));
         }
         if !clean.notes.is_empty() {
-            let notes: Vec<String> = clean.notes.iter().map(|note| ScalaLiteral::quote(note)).collect();
-            metadata.extend(indented_list("override val notes: List[String] = List", &notes));
+            let notes: Vec<String> = clean
+                .notes
+                .iter()
+                .map(|note| ScalaLiteral::quote(note))
+                .collect();
+            metadata.extend(indented_list(
+                "override val notes: List[String] = List",
+                &notes,
+            ));
         }
 
         let tags = if clean.tags.is_empty() {
             "  val tags = Set.empty[Tag]".to_string()
         } else {
-            let entries: Vec<String> = clean.tags.iter().map(|tag| format!("Tag.{}", tag)).collect();
+            let entries: Vec<String> = clean
+                .tags
+                .iter()
+                .map(|tag| format!("Tag.{}", tag))
+                .collect();
             format!("  val tags = Set({})", entries.join(", "))
         };
 
-        let mut lines: Vec<String> = vec![
-            "package se.reciba.api.recipes".to_string(),
-            String::new(),
-        ];
+        let mut lines: Vec<String> =
+            vec!["package se.reciba.api.recipes".to_string(), String::new()];
         lines.extend(imports);
         lines.push(String::new());
-        lines.push(format!("case object {} extends Recipe {{", identified.object_name));
+        lines.push(format!(
+            "case object {} extends Recipe {{",
+            identified.object_name
+        ));
         lines.push(format!("  val name = {}", ScalaLiteral::quote(&clean.name)));
         lines.push(format!(
             "  val createdAt = LocalDate.of({}, {}, {})",
@@ -544,8 +569,7 @@ fn unsupported(value: &str, single_line: bool) -> bool {
                 && code_point != '\n'
                 && code_point != '\r'
                 && code_point != '\t')
-            || (single_line
-                && (code_point == '\n' || code_point == '\r' || code_point == '\t'));
+            || (single_line && (code_point == '\n' || code_point == '\r' || code_point == '\t'));
         if blocked {
             return true;
         }

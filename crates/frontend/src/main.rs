@@ -1,4 +1,3 @@
-
 //! The frontend binary: `app.py` plus the server `gunicorn` provides.
 
 use std::net::TcpListener;
@@ -13,8 +12,8 @@ fn main() {
         .ok()
         .and_then(|value| value.parse().ok())
         .unwrap_or(8080);
-    let backend_url = std::env::var("BACKEND_URL")
-        .unwrap_or_else(|_| "http://localhost:8081/".to_string());
+    let backend_url =
+        std::env::var("BACKEND_URL").unwrap_or_else(|_| "http://localhost:8081/".to_string());
     let frontend_version = resolve_deployed_version();
 
     let app = Arc::new(App::new(backend_url, frontend_version, port));

@@ -90,7 +90,11 @@ impl RecipeSubmissionConfig {
 
         Some(RecipeSubmissionConfig {
             passcode,
-            github: GithubSettings { token, repository, base_branch },
+            github: GithubSettings {
+                token,
+                repository,
+                base_branch,
+            },
             turnstile: TurnstileSettings { secret, hostnames },
         })
     }
@@ -124,8 +128,5 @@ fn branch_pattern_matches(branch: &str) -> bool {
 }
 
 fn name_character(character: char) -> bool {
-    character.is_ascii_alphanumeric()
-        || character == '_'
-        || character == '.'
-        || character == '-'
+    character.is_ascii_alphanumeric() || character == '_' || character == '.' || character == '-'
 }

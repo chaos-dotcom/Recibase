@@ -1,7 +1,7 @@
 //! The circe acceptance rules the Scala `Decoder`s have, and `Passcode.equal`.
 
 use recibase_submit::recipe_submission::{IngredientSubmission, Passcode, RecipeSubmission};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 fn full() -> Value {
     json!({
@@ -36,7 +36,10 @@ fn decodes_every_field() {
                     prep: Some("chopped".to_string()),
                     notes: Some("Fresh".to_string()),
                 },
-                IngredientSubmission { name: "Oil".to_string(), ..Default::default() },
+                IngredientSubmission {
+                    name: "Oil".to_string(),
+                    ..Default::default()
+                },
             ],
             method: vec!["Simmer.".to_string()],
         }
@@ -66,7 +69,13 @@ fn null_and_missing_optionals_become_none_or_empty_lists() {
     assert_eq!(submission.description, None);
     assert_eq!(submission.notes, Vec::<String>::new());
     assert_eq!(submission.tags, Vec::<String>::new());
-    assert_eq!(submission.ingredients[0], IngredientSubmission { name: "Onion".to_string(), ..Default::default() });
+    assert_eq!(
+        submission.ingredients[0],
+        IngredientSubmission {
+            name: "Onion".to_string(),
+            ..Default::default()
+        }
+    );
 
     let value = json!({
         "name": "Soup",
@@ -83,11 +92,19 @@ fn a_missing_or_null_ingredients_or_method_field_fails() {
     for field in ["ingredients", "method"] {
         let mut missing = full();
         missing.as_object_mut().expect("object").remove(field);
-        assert!(RecipeSubmission::from_json(&missing).is_none(), "missing {}", field);
+        assert!(
+            RecipeSubmission::from_json(&missing).is_none(),
+            "missing {}",
+            field
+        );
 
         let mut null = full();
         null[field] = Value::Null;
-        assert!(RecipeSubmission::from_json(&null).is_none(), "null {}", field);
+        assert!(
+            RecipeSubmission::from_json(&null).is_none(),
+            "null {}",
+            field
+        );
     }
 }
 

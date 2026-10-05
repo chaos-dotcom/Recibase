@@ -6,7 +6,10 @@ use std::net::TcpListener;
 fn main() {
     let env = |key: &str| std::env::var(key).ok();
     let context = std::sync::Arc::new(recibase_server::Context::new(Box::new(env)));
-    let port = std::env::var("PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(8081);
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8081);
     let listener = TcpListener::bind(("0.0.0.0", port)).expect("bind");
     eprintln!("Recibase listening on 0.0.0.0:{}", port);
     for stream in listener.incoming() {
@@ -22,7 +25,10 @@ fn main() {
     }
 }
 
-fn serve(mut stream: std::net::TcpStream, context: &recibase_server::Context) -> std::io::Result<()> {
+fn serve(
+    mut stream: std::net::TcpStream,
+    context: &recibase_server::Context,
+) -> std::io::Result<()> {
     loop {
         let Some(request) = recibase_server::http::read_request(&stream)? else {
             return Ok(());

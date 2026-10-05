@@ -54,7 +54,12 @@ fn query_param_takes_the_first_value() {
 fn form_parses_urlencoded_bodies() {
     let request = post_form(
         "/contribute",
-        &[("name", "A&B"), ("name", "second"), ("blank", ""), ("pct", "\"x\"")],
+        &[
+            ("name", "A&B"),
+            ("name", "second"),
+            ("blank", ""),
+            ("pct", "\"x\""),
+        ],
     );
     let form = request.form();
     assert_eq!(form.get("name"), Some("A&B"));
@@ -68,7 +73,11 @@ fn form_parses_urlencoded_bodies() {
 /// form, so anything else is an empty `request.form`.
 #[test]
 fn form_ignores_other_content_types() {
-    let request = with_header(request("POST", "/contribute"), "Content-Type", "application/json");
+    let request = with_header(
+        request("POST", "/contribute"),
+        "Content-Type",
+        "application/json",
+    );
     assert!(request.form().is_empty());
 }
 
@@ -132,13 +141,13 @@ fn to_bytes_writes_the_wire_format() {
          hi"
     );
 
-    let head_only = String::from_utf8_lossy(&response.to_bytes(
-        "Mon, 01 Jan 2024 00:00:00 GMT",
-        "close",
-        true,
-    ))
-    .into_owned();
-    assert!(head_only.ends_with("Connection: close\r\n\r\n"), "{head_only}");
+    let head_only =
+        String::from_utf8_lossy(&response.to_bytes("Mon, 01 Jan 2024 00:00:00 GMT", "close", true))
+            .into_owned();
+    assert!(
+        head_only.ends_with("Connection: close\r\n\r\n"),
+        "{head_only}"
+    );
     assert_eq!(response.reason(), "OK");
 }
 

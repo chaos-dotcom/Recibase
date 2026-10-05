@@ -172,15 +172,12 @@ fn scan_digits(chars: &[char], mut index: usize, out: &mut String) -> usize {
 /// is 12.0) and rewrites them to ASCII internally; neither `str::parse::<f64>`
 /// nor `char::to_digit` in the standard library sees them.
 const DECIMAL_DIGIT_ZEROS: [u32; 66] = [
-    0x30, 0x660, 0x6f0, 0x7c0, 0x966, 0x9e6, 0xa66, 0xae6,
-    0xb66, 0xbe6, 0xc66, 0xce6, 0xd66, 0xde6, 0xe50, 0xed0,
-    0xf20, 0x1040, 0x1090, 0x17e0, 0x1810, 0x1946, 0x19d0, 0x1a80,
-    0x1a90, 0x1b50, 0x1bb0, 0x1c40, 0x1c50, 0xa620, 0xa8d0, 0xa900,
-    0xa9d0, 0xa9f0, 0xaa50, 0xabf0, 0xff10, 0x104a0, 0x10d30, 0x11066,
-    0x110f0, 0x11136, 0x111d0, 0x112f0, 0x11450, 0x114d0, 0x11650, 0x116c0,
-    0x11730, 0x118e0, 0x11950, 0x11c50, 0x11d50, 0x11da0, 0x16a60, 0x16ac0,
-    0x16b50, 0x1d7ce, 0x1d7d8, 0x1d7e2, 0x1d7ec, 0x1d7f6, 0x1e140, 0x1e2f0,
-    0x1e950, 0x1fbf0,
+    0x30, 0x660, 0x6f0, 0x7c0, 0x966, 0x9e6, 0xa66, 0xae6, 0xb66, 0xbe6, 0xc66, 0xce6, 0xd66,
+    0xde6, 0xe50, 0xed0, 0xf20, 0x1040, 0x1090, 0x17e0, 0x1810, 0x1946, 0x19d0, 0x1a80, 0x1a90,
+    0x1b50, 0x1bb0, 0x1c40, 0x1c50, 0xa620, 0xa8d0, 0xa900, 0xa9d0, 0xa9f0, 0xaa50, 0xabf0, 0xff10,
+    0x104a0, 0x10d30, 0x11066, 0x110f0, 0x11136, 0x111d0, 0x112f0, 0x11450, 0x114d0, 0x11650,
+    0x116c0, 0x11730, 0x118e0, 0x11950, 0x11c50, 0x11d50, 0x11da0, 0x16a60, 0x16ac0, 0x16b50,
+    0x1d7ce, 0x1d7d8, 0x1d7e2, 0x1d7ec, 0x1d7f6, 0x1e140, 0x1e2f0, 0x1e950, 0x1fbf0,
 ];
 
 /// The value of a Unicode decimal digit, as `Py_UNICODE_TODECIMAL` gives it.
@@ -289,7 +286,10 @@ impl Frac {
 
     /// `fraction - int`, kept exact.
     fn sub_int(self, other: i128) -> Option<Frac> {
-        Frac::new(self.num.checked_sub(other.checked_mul(self.den)?)?, self.den)
+        Frac::new(
+            self.num.checked_sub(other.checked_mul(self.den)?)?,
+            self.den,
+        )
     }
 
     /// `fraction % 1 == 0`.
@@ -462,7 +462,11 @@ impl Quantity {
                 quantity: mul_num(*quantity, by),
                 suffix: suffix.clone(),
             },
-            Quantity::Range { lower, upper, suffix } => Quantity::Range {
+            Quantity::Range {
+                lower,
+                upper,
+                suffix,
+            } => Quantity::Range {
                 lower: lower * by,
                 upper: upper * by,
                 suffix: suffix.clone(),
@@ -496,13 +500,20 @@ impl Quantity {
                     }
                 }
             }
-            Quantity::Compound { count, size, unit, .. } => Quantity::Compound {
+            Quantity::Compound {
+                count, size, unit, ..
+            } => Quantity::Compound {
                 count: mul_num(*count, by),
                 size: size.clone(),
                 unit: unit.clone(),
                 explicit_count: true,
             },
-            Quantity::Parenthetical { count, unit, size, approx } => Quantity::Parenthetical {
+            Quantity::Parenthetical {
+                count,
+                unit,
+                size,
+                approx,
+            } => Quantity::Parenthetical {
                 count: mul_num(*count, by),
                 unit: unit.clone(),
                 size: if *approx {
@@ -512,7 +523,11 @@ impl Quantity {
                 },
                 approx: *approx,
             },
-            Quantity::Length { amount, spacing, has_piece } => Quantity::Length {
+            Quantity::Length {
+                amount,
+                spacing,
+                has_piece,
+            } => Quantity::Length {
                 amount: amount * by,
                 spacing: spacing.clone(),
                 has_piece: *has_piece,
@@ -521,7 +536,11 @@ impl Quantity {
                 count: count * by,
                 description: description.clone(),
             },
-            Quantity::Approximate { style, amount, unit } => Quantity::Approximate {
+            Quantity::Approximate {
+                style,
+                amount,
+                unit,
+            } => Quantity::Approximate {
                 style: *style,
                 amount: amount * by,
                 unit: unit.clone(),
@@ -535,7 +554,11 @@ impl Quantity {
             Quantity::Simple { quantity, suffix } => {
                 format!("{}{}", quantity.format(), format_suffix(suffix))
             }
-            Quantity::Range { lower, upper, suffix } => format!(
+            Quantity::Range {
+                lower,
+                upper,
+                suffix,
+            } => format!(
                 "{}-{}{}",
                 format_number_f64(*lower),
                 format_number_f64(*upper),
@@ -552,7 +575,12 @@ impl Quantity {
                     format!("{}{}", format_number_f64(*value), format_suffix(suffix))
                 }
             },
-            Quantity::Compound { count, size, unit, explicit_count } => {
+            Quantity::Compound {
+                count,
+                size,
+                unit,
+                explicit_count,
+            } => {
                 let unit = pluralize_unit(unit, *count);
 
                 if count.is_one() && !explicit_count {
@@ -561,7 +589,12 @@ impl Quantity {
                     format!("{} {size} {unit}", count.format())
                 }
             }
-            Quantity::Parenthetical { count, unit, size, approx } => {
+            Quantity::Parenthetical {
+                count,
+                unit,
+                size,
+                approx,
+            } => {
                 let unit = pluralize_unit(unit, *count);
 
                 if *approx {
@@ -570,7 +603,11 @@ impl Quantity {
                     format!("{} {unit} ({size})", count.format())
                 }
             }
-            Quantity::Length { amount, spacing, has_piece } => {
+            Quantity::Length {
+                amount,
+                spacing,
+                has_piece,
+            } => {
                 let scaled_amount = format_number_f64(*amount);
 
                 if *has_piece {
@@ -582,8 +619,7 @@ impl Quantity {
                 }
             }
             Quantity::Descriptive { count, description } => {
-                let mut words: Vec<String> =
-                    description.split(' ').map(str::to_string).collect();
+                let mut words: Vec<String> = description.split(' ').map(str::to_string).collect();
 
                 if *count != 1.0 {
                     let count = Num::Float(*count);
@@ -599,7 +635,11 @@ impl Quantity {
 
                 format!("{} {}", format_number_f64(*count), words.join(" "))
             }
-            Quantity::Approximate { style, amount, unit } => {
+            Quantity::Approximate {
+                style,
+                amount,
+                unit,
+            } => {
                 let amount = format_number_f64(*amount);
 
                 match style {
@@ -872,10 +912,7 @@ fn parse_range(chars: &[char]) -> Option<Quantity> {
 fn parse_fraction_quantity(chars: &[char]) -> Option<Quantity> {
     let numerator_end = digits_end(chars, 0);
 
-    if numerator_end == 0
-        || numerator_end >= chars.len()
-        || chars[numerator_end] != '/'
-    {
+    if numerator_end == 0 || numerator_end >= chars.len() || chars[numerator_end] != '/' {
         return None;
     }
 
@@ -991,7 +1028,10 @@ fn compound_size_and_unit(chars: &[char], start: usize) -> Option<(String, Strin
         return None;
     }
 
-    if !chars[unit_start..].iter().all(|&character| is_word_char(character)) {
+    if !chars[unit_start..]
+        .iter()
+        .all(|&character| is_word_char(character))
+    {
         return None;
     }
 
@@ -1247,11 +1287,7 @@ pub fn scale_ingredient(ingredient: &mut Value, factor: f64) {
 
 /// `scaler.normalize_unit`.
 fn normalize_unit(suffix: &Option<String>) -> String {
-    suffix
-        .clone()
-        .unwrap_or_default()
-        .trim()
-        .to_lowercase()
+    suffix.clone().unwrap_or_default().trim().to_lowercase()
 }
 
 /// `scaler.is_shopping_omitted_quantity`.
@@ -1304,8 +1340,14 @@ fn summable_parts(quantity: &Quantity) -> Option<(&Option<String>, f64)> {
 #[must_use]
 pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
     if let (
-        Quantity::Simple { quantity: left, suffix: left_suffix },
-        Quantity::Simple { quantity: right, suffix: right_suffix },
+        Quantity::Simple {
+            quantity: left,
+            suffix: left_suffix,
+        },
+        Quantity::Simple {
+            quantity: right,
+            suffix: right_suffix,
+        },
     ) = (first, second)
     {
         if normalize_unit(left_suffix) != normalize_unit(right_suffix) {
@@ -1319,8 +1361,14 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
     }
 
     if let (
-        Quantity::Fraction { quantity: left, suffix: left_suffix },
-        Quantity::Fraction { quantity: right, suffix: right_suffix },
+        Quantity::Fraction {
+            quantity: left,
+            suffix: left_suffix,
+        },
+        Quantity::Fraction {
+            quantity: right,
+            suffix: right_suffix,
+        },
     ) = (first, second)
     {
         if normalize_unit(left_suffix) != normalize_unit(right_suffix) {
@@ -1334,8 +1382,14 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
     }
 
     if let (
-        Quantity::MixedFraction { quantity: left, suffix: left_suffix },
-        Quantity::MixedFraction { quantity: right, suffix: right_suffix },
+        Quantity::MixedFraction {
+            quantity: left,
+            suffix: left_suffix,
+        },
+        Quantity::MixedFraction {
+            quantity: right,
+            suffix: right_suffix,
+        },
     ) = (first, second)
     {
         if normalize_unit(left_suffix) != normalize_unit(right_suffix) {
@@ -1363,8 +1417,16 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
 
     match (first, second) {
         (
-            Quantity::Range { lower: lower_left, upper: upper_left, suffix: left_suffix },
-            Quantity::Range { lower: lower_right, upper: upper_right, suffix: right_suffix },
+            Quantity::Range {
+                lower: lower_left,
+                upper: upper_left,
+                suffix: left_suffix,
+            },
+            Quantity::Range {
+                lower: lower_right,
+                upper: upper_right,
+                suffix: right_suffix,
+            },
         ) => {
             if normalize_unit(left_suffix) != normalize_unit(right_suffix) {
                 return None;
@@ -1377,8 +1439,16 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
             })
         }
         (
-            Quantity::Approximate { style: left_style, amount: left, unit: left_unit },
-            Quantity::Approximate { style: right_style, amount: right, unit: right_unit },
+            Quantity::Approximate {
+                style: left_style,
+                amount: left,
+                unit: left_unit,
+            },
+            Quantity::Approximate {
+                style: right_style,
+                amount: right,
+                unit: right_unit,
+            },
         ) => {
             if left_style != right_style || left_unit.to_lowercase() != right_unit.to_lowercase() {
                 return None;
@@ -1391,8 +1461,16 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
             })
         }
         (
-            Quantity::Length { amount: left, spacing, has_piece },
-            Quantity::Length { amount: right, has_piece: right_has_piece, .. },
+            Quantity::Length {
+                amount: left,
+                spacing,
+                has_piece,
+            },
+            Quantity::Length {
+                amount: right,
+                has_piece: right_has_piece,
+                ..
+            },
         ) => {
             if has_piece != right_has_piece {
                 return None;
@@ -1405,8 +1483,18 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
             })
         }
         (
-            Quantity::Compound { count: left, size, unit, .. },
-            Quantity::Compound { count: right, size: right_size, unit: right_unit, .. },
+            Quantity::Compound {
+                count: left,
+                size,
+                unit,
+                ..
+            },
+            Quantity::Compound {
+                count: right,
+                size: right_size,
+                unit: right_unit,
+                ..
+            },
         ) => {
             if size.to_lowercase() != right_size.to_lowercase()
                 || unit.to_lowercase() != right_unit.to_lowercase()
@@ -1422,7 +1510,12 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
             })
         }
         (
-            Quantity::Parenthetical { count: left, unit, size, approx },
+            Quantity::Parenthetical {
+                count: left,
+                unit,
+                size,
+                approx,
+            },
             Quantity::Parenthetical {
                 count: right,
                 unit: right_unit,
@@ -1445,8 +1538,14 @@ pub fn add_quantities(first: &Quantity, second: &Quantity) -> Option<Quantity> {
             })
         }
         (
-            Quantity::Descriptive { count: left, description },
-            Quantity::Descriptive { count: right, description: right_description },
+            Quantity::Descriptive {
+                count: left,
+                description,
+            },
+            Quantity::Descriptive {
+                count: right,
+                description: right_description,
+            },
         ) => {
             if description.to_lowercase() != right_description.to_lowercase() {
                 return None;

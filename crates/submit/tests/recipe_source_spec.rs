@@ -39,7 +39,11 @@ fn sample() -> RecipeSubmission {
         source: Some("Kit's Dad".to_string()),
         description: Some("A weeknight chilli.".to_string()),
         notes: vec!["Better the next day.".to_string()],
-        tags: vec!["VegetarianIsh".to_string(), "Spicy".to_string(), "Spicy".to_string()],
+        tags: vec![
+            "VegetarianIsh".to_string(),
+            "Spicy".to_string(),
+            "Spicy".to_string(),
+        ],
         ingredients: vec![
             IngredientSubmission {
                 name: "Mince".to_string(),
@@ -171,7 +175,10 @@ fn rejects_names_that_would_shadow_the_generated_file() {
 
 #[test]
 fn rejects_automatic_tags() {
-    let submission = RecipeSubmission { tags: vec!["New".to_string()], ..named("Phone Test Soup") };
+    let submission = RecipeSubmission {
+        tags: vec!["New".to_string()],
+        ..named("Phone Test Soup")
+    };
     assert_eq!(
         generate(&submission, &[]),
         Err(SubmitRejection::InvalidSubmission(
@@ -207,7 +214,10 @@ fn rejects_a_duplicate_name() {
 #[test]
 fn rejects_a_permalink_already_used_by_another_recipe() {
     assert_eq!(
-        generate(&named("Coffee Cake"), &[crunch_chocolate_chip_coffee_cake()]),
+        generate(
+            &named("Coffee Cake"),
+            &[crunch_chocolate_chip_coffee_cake()]
+        ),
         Err(SubmitRejection::ConflictingSubmission(
             "A recipe with permalink coffee-cake already exists".to_string()
         ))
@@ -233,8 +243,26 @@ fn tag_object_names_match_the_identifiers_the_generator_emits() {
     assert_eq!(Tag::New.object_name(), "New");
     // The generator accepts the object name of every tag except the automatic
     // ones, which are rejected earlier.
-    assert!(generate(&RecipeSubmission { tags: vec!["VegetarianIsh".to_string()], ..named("Phone Test Soup") }, &[]).is_ok());
-    assert!(generate(&RecipeSubmission { tags: vec!["Not a Meal".to_string()], ..named("Phone Test Soup") }, &[]).is_err());
+    assert!(
+        generate(
+            &RecipeSubmission {
+                tags: vec!["VegetarianIsh".to_string()],
+                ..named("Phone Test Soup")
+            },
+            &[]
+        )
+        .is_ok()
+    );
+    assert!(
+        generate(
+            &RecipeSubmission {
+                tags: vec!["Not a Meal".to_string()],
+                ..named("Phone Test Soup")
+            },
+            &[]
+        )
+        .is_err()
+    );
 }
 
 const EXPECTED_SAMPLE: &str = "\

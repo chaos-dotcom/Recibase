@@ -1,4 +1,3 @@
-
 //! The pages Werkzeug itself produces: the redirect, the 405 and the 416.
 //!
 //! Flask hands a redirect to Werkzeug's `redirect()`, an unmatched method to

@@ -1,4 +1,3 @@
-
 //! A minimal HTTP/1.1 server.
 //!
 //! The Flask application is served by two different servers in production
@@ -56,10 +55,7 @@ impl Request {
     /// `wsgi.url_scheme` (always `http` unless a WSGI server says otherwise)
     /// and the `Host` header; so does this.
     pub fn url_root(&self) -> String {
-        let host = self
-            .host
-            .clone()
-            .unwrap_or_else(|| "localhost".to_string());
+        let host = self.host.clone().unwrap_or_else(|| "localhost".to_string());
         format!("http://{}/", host)
     }
 
@@ -74,7 +70,10 @@ impl Request {
         if connection.split(',').any(|token| token.trim() == "close") {
             return false;
         }
-        if connection.split(',').any(|token| token.trim() == "keep-alive") {
+        if connection
+            .split(',')
+            .any(|token| token.trim() == "keep-alive")
+        {
             return true;
         }
         self.version.eq_ignore_ascii_case("HTTP/1.1")
@@ -151,7 +150,11 @@ pub struct Response {
 
 impl Response {
     pub fn new(status: u16) -> Response {
-        Response { status, headers: Vec::new(), body: Vec::new() }
+        Response {
+            status,
+            headers: Vec::new(),
+            body: Vec::new(),
+        }
     }
 
     pub fn html(status: u16, body: String) -> Response {
@@ -180,9 +183,7 @@ impl Response {
     /// Werkzeug and gunicorn do.
     pub fn to_bytes(&self, date: &str, connection: &str, head_only: bool) -> Vec<u8> {
         let mut out = Vec::with_capacity(self.body.len() + 256);
-        out.extend_from_slice(
-            format!("HTTP/1.1 {} {}\r\n", self.status, self.reason()).as_bytes(),
-        );
+        out.extend_from_slice(format!("HTTP/1.1 {} {}\r\n", self.status, self.reason()).as_bytes());
         out.extend_from_slice(format!("Date: {}\r\n", date).as_bytes());
         for (name, value) in &self.headers {
             out.extend_from_slice(format!("{}: {}\r\n", name, value).as_bytes());
@@ -268,7 +269,16 @@ pub fn read_request(stream: &TcpStream) -> std::io::Result<Option<Request>> {
         .find(|(k, _)| k.eq_ignore_ascii_case("host"))
         .map(|(_, v)| v.clone());
 
-    Ok(Some(Request { method, target, version, path, query, headers, body, host }))
+    Ok(Some(Request {
+        method,
+        target,
+        version,
+        path,
+        query,
+        headers,
+        body,
+        host,
+    }))
 }
 
 /// Werkzeug's `merge_slashes`, on by default: the request target
@@ -301,7 +311,11 @@ pub fn write_response(
     response: &Response,
     request: &Request,
 ) -> std::io::Result<()> {
-    let connection = if request.keeps_alive() { "keep-alive" } else { "close" };
+    let connection = if request.keeps_alive() {
+        "keep-alive"
+    } else {
+        "close"
+    };
     let now = chrono::Utc::now();
     stream.write_all(&response.to_bytes(&http_date(now), connection, request.is_head()))?;
     stream.flush()

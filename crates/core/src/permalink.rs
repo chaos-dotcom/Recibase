@@ -10,11 +10,15 @@ pub struct Permalink {
 
 impl Permalink {
     pub fn new(value: &str) -> Self {
-        Permalink { value: value.to_string() }
+        Permalink {
+            value: value.to_string(),
+        }
     }
 
     pub fn from_raw_string(raw: &str) -> Permalink {
-        Permalink { value: from_raw_string(raw) }
+        Permalink {
+            value: from_raw_string(raw),
+        }
     }
 }
 

@@ -41,7 +41,10 @@ pub struct DatedNote {
 impl DatedNote {
     pub fn to_json(&self) -> Value {
         obj(vec![
-            ("date", Value::String(self.date.format("%Y-%m-%d").to_string())),
+            (
+                "date",
+                Value::String(self.date.format("%Y-%m-%d").to_string()),
+            ),
             ("note", Value::String(self.note.clone())),
         ])
     }
@@ -58,11 +61,21 @@ pub struct MealStub {
 
 impl MealStub {
     pub fn new(name: &str, tags: Vec<Tag>) -> Self {
-        MealStub { name: name.to_string(), tags, source: None, created_at: None }
+        MealStub {
+            name: name.to_string(),
+            tags,
+            source: None,
+            created_at: None,
+        }
     }
 
     pub fn with_source(name: &str, tags: Vec<Tag>, source: Source) -> Self {
-        MealStub { name: name.to_string(), tags, source: Some(source), created_at: None }
+        MealStub {
+            name: name.to_string(),
+            tags,
+            source: Some(source),
+            created_at: None,
+        }
     }
 
     /// `MealStub(recipe)`: a stub for a full recipe in the corpus.
@@ -120,8 +133,17 @@ impl MealStubWithUsageData {
                     .map(|t| Value::String(t.entry_name().to_string()))
                     .collect()),
             ),
-            ("source", self.source.as_ref().map(|s| s.to_json()).unwrap_or(Value::Null)),
-            ("dated_notes", arr(self.dated_notes.iter().map(|n| n.to_json()).collect())),
+            (
+                "source",
+                self.source
+                    .as_ref()
+                    .map(|s| s.to_json())
+                    .unwrap_or(Value::Null),
+            ),
+            (
+                "dated_notes",
+                arr(self.dated_notes.iter().map(|n| n.to_json()).collect()),
+            ),
             ("last_eaten", opt_date(&self.last_eaten)),
             ("times_eaten", Value::from(self.times_eaten)),
             ("featured", opt_date(&self.featured)),

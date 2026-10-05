@@ -45,11 +45,17 @@ impl Request {
     /// keeps the connection, and anything else (an explicit `close`, or
     /// HTTP/1.0 without `keep-alive`) closes it.
     pub fn keeps_alive(&self) -> bool {
-        let connection = self.header("Connection").unwrap_or_default().to_ascii_lowercase();
+        let connection = self
+            .header("Connection")
+            .unwrap_or_default()
+            .to_ascii_lowercase();
         if connection.split(',').any(|token| token.trim() == "close") {
             return false;
         }
-        if connection.split(',').any(|token| token.trim() == "keep-alive") {
+        if connection
+            .split(',')
+            .any(|token| token.trim() == "keep-alive")
+        {
             return true;
         }
         self.version.eq_ignore_ascii_case("HTTP/1.1")
@@ -193,7 +199,12 @@ impl Response {
     pub fn to_bytes(&self, connection: &str, date: &str) -> Vec<u8> {
         let mut out = Vec::with_capacity(self.body.len() + 128);
         out.extend_from_slice(
-            format!("HTTP/1.1 {} {}\r\n", self.status, Response::reason(self.status)).as_bytes(),
+            format!(
+                "HTTP/1.1 {} {}\r\n",
+                self.status,
+                Response::reason(self.status)
+            )
+            .as_bytes(),
         );
         out.extend_from_slice(format!("Date: {}\r\n", date).as_bytes());
         out.extend_from_slice(format!("Connection: {}\r\n", connection).as_bytes());
@@ -212,7 +223,12 @@ impl Response {
         out
     }
 
-    pub fn write_to(&self, stream: &mut TcpStream, connection: &str, date: &str) -> std::io::Result<()> {
+    pub fn write_to(
+        &self,
+        stream: &mut TcpStream,
+        connection: &str,
+        date: &str,
+    ) -> std::io::Result<()> {
         stream.write_all(&self.to_bytes(connection, date))?;
         stream.flush()
     }
@@ -263,7 +279,15 @@ pub fn read_request(stream: &TcpStream) -> std::io::Result<Option<Request>> {
         reader.read_exact(&mut body)?;
     }
 
-    Ok(Some(Request { method, target, version, path, query, headers, body }))
+    Ok(Some(Request {
+        method,
+        target,
+        version,
+        path,
+        query,
+        headers,
+        body,
+    }))
 }
 
 /// `EEE, dd MMM yyyy HH:mm:ss GMT`, the format java.time emits for HTTP dates.

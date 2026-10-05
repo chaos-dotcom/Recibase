@@ -220,7 +220,10 @@ mod test_scale_ingredient {
 
         scale_ingredient(&mut ingredient, 2.0);
 
-        assert_eq!(ingredient, json!({"name": "Onion", "quantity": Value::Null}));
+        assert_eq!(
+            ingredient,
+            json!({"name": "Onion", "quantity": Value::Null})
+        );
     }
 
     #[test]
@@ -576,9 +579,9 @@ fn golden_scale_factors() {
         if token == "null" {
             assert!(got.is_none(), "scale {raw:?} should not be a factor");
         } else {
-            let expected: f64 = token
-                .parse()
-                .unwrap_or_else(|_| panic!("scale_factors.json `out` token {token:?} is not a number"));
+            let expected: f64 = token.parse().unwrap_or_else(|_| {
+                panic!("scale_factors.json `out` token {token:?} is not a number")
+            });
             let got = got.unwrap_or_else(|| panic!("scale {raw:?} should be {expected}"));
 
             assert!(
@@ -590,7 +593,10 @@ fn golden_scale_factors() {
         checked += 1;
     }
 
-    assert_eq!(checked, SCALE_FACTOR_CASES, "checked every scale factor case");
+    assert_eq!(
+        checked, SCALE_FACTOR_CASES,
+        "checked every scale factor case"
+    );
 }
 
 /// The `out` tokens of a golden file, in file order.
@@ -623,7 +629,8 @@ fn golden_parse_quantity() {
 
         match case["str"].as_str() {
             Some(expected) => {
-                let parsed = parsed.unwrap_or_else(|| panic!("{raw:?} should parse to {expected:?}"));
+                let parsed =
+                    parsed.unwrap_or_else(|| panic!("{raw:?} should parse to {expected:?}"));
 
                 assert_eq!(parsed.to_text(), expected, "quantity {raw:?}");
 
@@ -767,4 +774,3 @@ fn golden_ingredients_copy_text() {
 
     assert_eq!(checked, COPY_TEXT_CASES, "checked every copy text case");
 }
-

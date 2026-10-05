@@ -1,4 +1,3 @@
-
 //! HTML escaping, byte-compatible with Jinja2's.
 //!
 //! Jinja2 escapes through MarkupSafe, which turns five characters into
@@ -25,11 +24,7 @@
 //! in the test suite checks the other half of that argument - that no
 //! template contains those sequences literally.
 
-const REWRITES: [(&str, &str); 3] = [
-    ("&#x27;", "&#39;"),
-    ("&quot;", "&#34;"),
-    ("&#x2f;", "/"),
-];
+const REWRITES: [(&str, &str); 3] = [("&#x27;", "&#39;"), ("&quot;", "&#34;"), ("&#x2f;", "/")];
 
 /// Rewrites MiniJinja's entity spellings to MarkupSafe's.
 pub fn markupsafe_compat(rendered: &str) -> String {

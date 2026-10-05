@@ -1,4 +1,3 @@
-
 //! The HTTP client for the recipe API, the Rust spelling of `requests`.
 
 use std::time::Duration;
@@ -99,5 +98,9 @@ fn read_response(
         .body_mut()
         .read_to_string()
         .map_err(|_| BackendUnavailable)?;
-    Ok(BackendResponse { status, content_type, text })
+    Ok(BackendResponse {
+        status,
+        content_type,
+        text,
+    })
 }

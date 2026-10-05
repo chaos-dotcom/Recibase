@@ -30,13 +30,15 @@ fn siteverify_acceptance_rejects_every_other_shape() {
     let missing = json(r#"{"action":"contribute","hostname":"recipes.example"}"#);
     assert!(!Turnstile::accepted(&missing, &hostnames()));
 
-    let string_success = json(r#"{"success":"true","action":"contribute","hostname":"recipes.example"}"#);
+    let string_success =
+        json(r#"{"success":"true","action":"contribute","hostname":"recipes.example"}"#);
     assert!(!Turnstile::accepted(&string_success, &hostnames()));
 
     let not_an_object = json(r#"[]"#);
     assert!(!Turnstile::accepted(&not_an_object, &hostnames()));
 
-    let empty_hostnames = json(r#"{"success":true,"action":"contribute","hostname":"recipes.example"}"#);
+    let empty_hostnames =
+        json(r#"{"success":true,"action":"contribute","hostname":"recipes.example"}"#);
     assert!(!Turnstile::accepted(&empty_hostnames, &HashSet::new()));
 }
 
@@ -51,7 +53,10 @@ fn token_shape_rejects_an_empty_or_oversized_token_and_an_empty_hostname_list() 
 
 #[test]
 fn settings_are_cloneable_and_defaultable() {
-    let settings = TurnstileSettings { secret: "s".to_string(), hostnames: hostnames() };
+    let settings = TurnstileSettings {
+        secret: "s".to_string(),
+        hostnames: hostnames(),
+    };
     let copy = settings.clone();
     assert_eq!(copy.secret, "s");
     assert_eq!(TurnstileSettings::default().secret, "");

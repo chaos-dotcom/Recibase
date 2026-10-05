@@ -1,6 +1,6 @@
 //! `RecipeSubmissionConfig.from` and `fromEnv`.
 
-use recibase_submit::config::{RecipeSubmissionConfig, DEFAULT_BRANCH, DEFAULT_REPOSITORY};
+use recibase_submit::config::{DEFAULT_BRANCH, DEFAULT_REPOSITORY, RecipeSubmissionConfig};
 
 fn from(
     passcode: Option<&str>,
@@ -63,10 +63,20 @@ fn falls_back_to_the_default_repository_and_branch() {
 fn an_empty_value_counts_as_absent() {
     for (passcode, token, secret, hostnames) in [
         (Some(""), Some("token"), Some("secret"), Some("a.example")),
-        (Some("passcode"), Some(""), Some("secret"), Some("a.example")),
+        (
+            Some("passcode"),
+            Some(""),
+            Some("secret"),
+            Some("a.example"),
+        ),
         (Some("passcode"), Some("token"), Some(""), Some("a.example")),
         (Some("passcode"), Some("token"), Some("secret"), Some("")),
-        (Some("passcode"), Some("token"), Some("secret"), Some(" , , ")),
+        (
+            Some("passcode"),
+            Some("token"),
+            Some("secret"),
+            Some(" , , "),
+        ),
     ] {
         assert!(from(passcode, token, None, None, secret, hostnames).is_none());
     }
@@ -74,10 +84,25 @@ fn an_empty_value_counts_as_absent() {
 
 #[test]
 fn the_repository_and_the_branch_must_match_the_patterns() {
-    let bad_repositories = ["nope", "a/b/c", "/repo", "owner/", "owner/rep o", "owner/repo\n"];
+    let bad_repositories = [
+        "nope",
+        "a/b/c",
+        "/repo",
+        "owner/",
+        "owner/rep o",
+        "owner/repo\n",
+    ];
     for repository in bad_repositories {
         assert!(
-            from(Some("p"), Some("t"), Some(repository), Some("master"), Some("s"), Some("h")).is_none(),
+            from(
+                Some("p"),
+                Some("t"),
+                Some(repository),
+                Some("master"),
+                Some("s"),
+                Some("h")
+            )
+            .is_none(),
             "{}",
             repository
         );
@@ -86,20 +111,44 @@ fn the_repository_and_the_branch_must_match_the_patterns() {
     let bad_branches = ["master branch", "ma/ster", "master\n"];
     for branch in bad_branches {
         assert!(
-            from(Some("p"), Some("t"), Some("owner/repo"), Some(branch), Some("s"), Some("h")).is_none(),
+            from(
+                Some("p"),
+                Some("t"),
+                Some("owner/repo"),
+                Some(branch),
+                Some("s"),
+                Some("h")
+            )
+            .is_none(),
             "{}",
             branch
         );
     }
 
     // An empty repository or branch falls back to the defaults.
-    let empty = from(Some("p"), Some("t"), Some(""), Some(""), Some("s"), Some("h")).expect("configured");
+    let empty = from(
+        Some("p"),
+        Some("t"),
+        Some(""),
+        Some(""),
+        Some("s"),
+        Some("h"),
+    )
+    .expect("configured");
     assert_eq!(empty.github.repository, DEFAULT_REPOSITORY);
     assert_eq!(empty.github.base_branch, DEFAULT_BRANCH);
 
     for repository in ["owner/repo", "A._-b/C9", "chaos-dotcom/Recibase"] {
         assert!(
-            from(Some("p"), Some("t"), Some(repository), Some("release-1.0"), Some("s"), Some("h")).is_some(),
+            from(
+                Some("p"),
+                Some("t"),
+                Some(repository),
+                Some("release-1.0"),
+                Some("s"),
+                Some("h")
+            )
+            .is_some(),
             "{}",
             repository
         );

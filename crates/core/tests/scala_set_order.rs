@@ -57,10 +57,13 @@ fn capture_dirs() -> Vec<PathBuf> {
     for name in ["capture-scala", "capture-scala-csv"] {
         // The captures are made in the work directory, but the repository keeps
         // its own copy of them under tools/harness/.
-        let dir = [work.join(name), repo.join("tools").join("harness").join(name)]
-            .into_iter()
-            .find(|dir| dir.is_dir())
-            .unwrap_or_else(|| panic!("missing capture directory {}", work.join(name).display()));
+        let dir = [
+            work.join(name),
+            repo.join("tools").join("harness").join(name),
+        ]
+        .into_iter()
+        .find(|dir| dir.is_dir())
+        .unwrap_or_else(|| panic!("missing capture directory {}", work.join(name).display()));
         dirs.push(dir);
     }
     dirs

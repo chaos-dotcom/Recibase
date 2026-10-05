@@ -1,4 +1,3 @@
-
 //! `request.form`: an ordered, multi-valued map.
 //!
 //! Werkzeug's `MultiDict` keeps every value for a key in arrival order;
@@ -14,7 +13,9 @@ pub struct Form {
 
 impl Form {
     pub fn new() -> Form {
-        Form { entries: Vec::new() }
+        Form {
+            entries: Vec::new(),
+        }
     }
 
     pub fn from_pairs(pairs: Vec<(String, String)>) -> Form {

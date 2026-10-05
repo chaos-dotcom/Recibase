@@ -16,7 +16,7 @@ pub mod usage;
 pub mod utils;
 
 pub use meal::{DatedNote, MealStub, MealStubWithUsageData, Source};
-pub use misc::{docs_json, Manifest, MenuEntry};
+pub use misc::{Manifest, MenuEntry, docs_json};
 pub use permalink::Permalink;
 pub use recipe::{Image, Ingredient, IngredientsBlock, RecipeDef};
 pub use tag::Tag;

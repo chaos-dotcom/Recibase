@@ -1,4 +1,3 @@
-
 //! `cached_backend.py`: a value that is refetched once its TTL expires.
 
 use std::sync::Mutex;

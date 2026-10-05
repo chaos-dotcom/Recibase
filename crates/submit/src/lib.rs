@@ -9,8 +9,8 @@ pub mod recipe_submission;
 pub mod scala_literal;
 pub mod turnstile;
 
-pub use config::{GithubSettings, RecipeSubmissionConfig, DEFAULT_BRANCH, DEFAULT_REPOSITORY};
-pub use github_client::{GithubClient, DEFAULT_API_BASE};
+pub use config::{DEFAULT_BRANCH, DEFAULT_REPOSITORY, GithubSettings, RecipeSubmissionConfig};
+pub use github_client::{DEFAULT_API_BASE, GithubClient};
 pub use pull_requests::{PullRequestFailure, RecipePullRequests};
 pub use recipe_source::{GeneratedRecipe, RecipeSource, SubmitRejection};
 pub use recipe_submission::{IngredientSubmission, Passcode, RecipeSubmission};
@@ -123,8 +123,7 @@ pub(crate) mod java {
             match (left.next(), right.next()) {
                 (None, None) => return true,
                 (Some(x), Some(y)) => {
-                    if x == y || char_upper(x) == char_upper(y) || char_lower(x) == char_lower(y)
-                    {
+                    if x == y || char_upper(x) == char_upper(y) || char_lower(x) == char_lower(y) {
                         continue;
                     }
                     return false;

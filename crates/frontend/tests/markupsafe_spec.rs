@@ -1,8 +1,8 @@
 //! `markupsafe.rs`: the escaping Jinja2's MarkupSafe does, and the rewrite
 //! that turns MiniJinja's spellings back into it.
 
-use minijinja::{AutoEscape, Environment};
 use minijinja::value::Value as TemplateValue;
+use minijinja::{AutoEscape, Environment};
 
 use recibase_frontend::markupsafe::{escape, markupsafe_compat};
 
@@ -29,9 +29,13 @@ fn minijinja_escape(value: &str) -> String {
     env.set_auto_escape_callback(|_name| AutoEscape::Html);
     env.add_template("escape.html", "{{ value }}")
         .expect("the escape template compiles");
-    let template = env.get_template("escape.html").expect("the escape template");
+    let template = env
+        .get_template("escape.html")
+        .expect("the escape template");
     template
-        .render(TemplateValue::from_serialize(serde_json::json!({"value": value})))
+        .render(TemplateValue::from_serialize(
+            serde_json::json!({"value": value}),
+        ))
         .expect("the escape template renders")
 }
 
@@ -53,7 +57,10 @@ fn escape_matches_markupsafe() {
 /// spellings comes back unchanged, and each of the three is replaced.
 #[test]
 fn markupsafe_compat_rewrites_the_three_entities() {
-    assert_eq!(markupsafe_compat("nothing to rewrite"), "nothing to rewrite");
+    assert_eq!(
+        markupsafe_compat("nothing to rewrite"),
+        "nothing to rewrite"
+    );
     assert_eq!(markupsafe_compat("&quot;"), "&#34;");
     assert_eq!(markupsafe_compat("&#x27;"), "&#39;");
     assert_eq!(markupsafe_compat("&#x2f;"), "/");

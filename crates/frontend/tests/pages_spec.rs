@@ -11,7 +11,10 @@ fn redirect_is_werkzeugs() {
     assert_eq!(response.status, 302);
     assert_eq!(response.reason(), "FOUND");
     assert_eq!(header_or(&response, "Location"), "test-recipe");
-    assert_eq!(header_or(&response, "Content-Type"), "text/html; charset=utf-8");
+    assert_eq!(
+        header_or(&response, "Content-Type"),
+        "text/html; charset=utf-8"
+    );
     let body = body_of(&response);
     assert!(body.contains("<title>Redirecting...</title>"), "{body}");
     assert!(body.contains("href=\"test-recipe\""), "{body}");

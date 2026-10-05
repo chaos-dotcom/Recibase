@@ -63,7 +63,9 @@ pub mod int_utils {
     }
 
     fn formatted_temperature_string(c: i32, f: i32, gas_mark: Option<&str>) -> String {
-        let formatted_gas_mark = gas_mark.map(|g| format!(", gas mark {}", g)).unwrap_or_default();
+        let formatted_gas_mark = gas_mark
+            .map(|g| format!(", gas mark {}", g))
+            .unwrap_or_default();
         format!("{}°C ({}°F{})", c, f, formatted_gas_mark)
     }
 }

@@ -31,7 +31,9 @@ impl Turnstile {
         let hostname = body.get("hostname").and_then(Value::as_str);
         success == Some(true)
             && action == Some(Turnstile::EXPECTED_ACTION)
-            && hostname.map(|name| hostnames.contains(name)).unwrap_or(false)
+            && hostname
+                .map(|name| hostnames.contains(name))
+                .unwrap_or(false)
     }
 
     pub fn token_accepted(token: &str, hostnames: &HashSet<String>) -> bool {
@@ -101,9 +103,7 @@ fn form_body(secret: &str, token: &str) -> String {
     let fields = [("secret", secret), ("response", token)];
     fields
         .iter()
-        .map(|(key, value)| {
-            format!("{}={}", url_encode_form(key), url_encode_form(value))
-        })
+        .map(|(key, value)| format!("{}={}", url_encode_form(key), url_encode_form(value)))
         .collect::<Vec<String>>()
         .join("&")
 }

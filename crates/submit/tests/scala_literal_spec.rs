@@ -45,12 +45,18 @@ fn quotes_exactly_as_the_scala_does() {
     assert_eq!(ScalaLiteral::quote(""), r#""""#);
     assert_eq!(ScalaLiteral::quote("plain"), "\"plain\"");
     assert_eq!(ScalaLiteral::quote("purée"), "\"purée\"");
-    assert_eq!(ScalaLiteral::quote("say \"hi\""), r#""say \u005c\u0022hi\u005c\u0022""#);
+    assert_eq!(
+        ScalaLiteral::quote("say \"hi\""),
+        r#""say \u005c\u0022hi\u005c\u0022""#
+    );
     assert_eq!(ScalaLiteral::quote("line\nbreak"), r#""line\nbreak""#);
     assert_eq!(ScalaLiteral::quote("cr\rhere"), r#""cr\rhere""#);
     assert_eq!(ScalaLiteral::quote("tab\there"), r#""tab\there""#);
     assert_eq!(ScalaLiteral::quote("a\\b"), r#""a\u005c\u005cb""#);
-    assert_eq!(ScalaLiteral::quote("\"\"\""), r#""\u005c\u0022\u005c\u0022\u005c\u0022""#);
+    assert_eq!(
+        ScalaLiteral::quote("\"\"\""),
+        r#""\u005c\u0022\u005c\u0022\u005c\u0022""#
+    );
 }
 
 /// Scala translates `\u` escapes, including `\uuXXXX`, before tokenising, and
@@ -68,8 +74,8 @@ fn unicode_pass(source: &str) -> String {
             while hex < characters.len() && characters[hex] == 'u' {
                 hex += 1;
             }
-            let complete =
-                hex + 4 <= characters.len() && (0..4).all(|offset| is_hex(characters[hex + offset]));
+            let complete = hex + 4 <= characters.len()
+                && (0..4).all(|offset| is_hex(characters[hex + offset]));
             if complete {
                 let digits: String = characters[hex..hex + 4].iter().collect();
                 let value = u32::from_str_radix(&digits, 16).expect("four hex digits");

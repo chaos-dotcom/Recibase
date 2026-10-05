@@ -129,14 +129,21 @@ fn required_string_list(object: &Value, key: &str, history: &[Step]) -> DecodeRe
     }
 }
 
-fn required_ingredients(object: &Value, key: &str, history: &[Step]) -> DecodeResult<Vec<IngredientSubmission>> {
+fn required_ingredients(
+    object: &Value,
+    key: &str,
+    history: &[Step],
+) -> DecodeResult<Vec<IngredientSubmission>> {
     let here = push_field(history, key);
     match field(object, key) {
         None => Err(failure("Attempt to decode value on failed cursor", &here)),
         Some(Value::Array(items)) => {
             let mut out = Vec::with_capacity(items.len());
             for (index, item) in items.iter().enumerate() {
-                out.push(IngredientSubmission::decode_at(item, &push_index(&here, index))?);
+                out.push(IngredientSubmission::decode_at(
+                    item,
+                    &push_index(&here, index),
+                )?);
             }
             Ok(out)
         }
@@ -155,7 +162,12 @@ impl IngredientSubmission {
         let quantity = optional_string(value, "quantity", history)?;
         let prep = optional_string(value, "prep", history)?;
         let notes = optional_string(value, "notes", history)?;
-        Ok(IngredientSubmission { name, quantity, prep, notes })
+        Ok(IngredientSubmission {
+            name,
+            quantity,
+            prep,
+            notes,
+        })
     }
 }
 
@@ -171,7 +183,15 @@ impl RecipeSubmission {
         let tags = optional_string_list(value, "tags", &[])?;
         let ingredients = required_ingredients(value, "ingredients", &[])?;
         let method = required_string_list(value, "method", &[])?;
-        Ok(RecipeSubmission { name, source, description, notes, tags, ingredients, method })
+        Ok(RecipeSubmission {
+            name,
+            source,
+            description,
+            notes,
+            tags,
+            ingredients,
+            method,
+        })
     }
 
     /// As [`RecipeSubmission::decode`], for callers that only need to know

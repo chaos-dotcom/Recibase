@@ -32,7 +32,5 @@ pub fn generic_method_start() -> Vec<String> {
 }
 
 pub fn generic_method_end() -> Vec<String> {
-    vec![
-        "Decant into a freezer suitable dish and freeze for at least 6 hours.".to_string(),
-    ]
+    vec!["Decant into a freezer suitable dish and freeze for at least 6 hours.".to_string()]
 }

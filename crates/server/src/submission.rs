@@ -2,7 +2,7 @@
 
 use crate::controllers;
 use crate::http::{Request, Response};
-use crate::routes::{error_response, Context};
+use crate::routes::{Context, error_response};
 use recibase_submit::config::RecipeSubmissionConfig;
 use recibase_submit::recipe_source::{RecipeSource, SubmitRejection};
 use recibase_submit::recipe_submission::{Passcode, RecipeSubmission};
@@ -65,7 +65,12 @@ pub fn handle(request: &Request, context: &Context) -> Response {
         Ok(generated) => {
             let client = recibase_submit::github_client::GithubClient::new(&config.github, None);
             let title = format!("Add {}", generated.name);
-            match client.open(&generated, &title, &title, "Submitted from the contribute page.") {
+            match client.open(
+                &generated,
+                &title,
+                &title,
+                "Submitted from the contribute page.",
+            ) {
                 Err(recibase_submit::pull_requests::PullRequestFailure::BranchAlreadyExists) => {
                     error_response(409, "A submission for this recipe is already open")
                 }
