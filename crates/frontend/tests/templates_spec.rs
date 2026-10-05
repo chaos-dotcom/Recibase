@@ -160,6 +160,7 @@ fn the_drawer_marks_peer_recipes_for_the_reci_verse_toggle() {
         "{home}"
     );
     assert!(home.contains("/static/filters.js"), "{home}");
+    assert!(home.contains("/static/drawer.js"), "{home}");
 }
 
 /* The chip header exposes each recipe's tags to `filters.js`. */
