@@ -16,6 +16,7 @@ pub enum Tag {
     VeganIsh,
     Vegetarian,
     VegetarianIsh,
+    ItsMadeOfMeat,
     Pescatarian,
     GlutenFree,
     StephaniUnhealthy,
@@ -78,6 +79,7 @@ impl Tag {
     /// The JSON string form (`entryName`).
     pub fn entry_name(self) -> &'static str {
         match self {
+            Tag::ItsMadeOfMeat => "It's Made of Meat",
             Tag::Christmas => "Christmas",
             Tag::Pudding => "Pudding",
             Tag::Lunch => "Lunch",
