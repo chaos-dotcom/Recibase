@@ -13,7 +13,7 @@ pub fn recipe() -> RecipeDef {
         permalink_override: None,
         source: Some("Waitrose".to_string()),
         description: None,
-        tagline: Some("Put down that takeaway menu!".to_string()),
+        tagline: None,
         notes: vec![
             "Serves 2".to_string(),
             "Chiu chow chilli oil: use this condiment to add a spicy kick to all kinds of dishes. Prefer things a bit milder? Omit it from the recipe or swap for 1/4 tsp Cooks' Ingredients Peppery Pul Biber.".to_string(),
