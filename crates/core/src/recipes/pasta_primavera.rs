@@ -18,6 +18,7 @@ pub fn recipe() -> RecipeDef {
             "Serves 4".to_string(),
             "Prepare 10 minutes; cook 20 minutes.".to_string(),
             "Tarragon is optional but highly recommended.".to_string(),
+            "Chaos has Done several mods to this recpie to adjust it to her liking 🥹.".to_string(),
         ],
         tags: vec![
             Tag::Quick,
