@@ -233,18 +233,32 @@ impl Admin {
             .any(|(name, value)| name == "csrf" && value == &session.csrf_token)
     }
 
-    /// Whether a state-changing request comes from the app's own origin. A
-    /// browser always sends `Origin` on a cross-origin form POST; a missing one
-    /// is accepted (non-browser clients are already authenticated by cookie).
+    /// Whether a state-changing request comes from one of the app's own
+    /// origins. A browser always sends `Origin` on a cross-origin form POST or
+    /// `fetch`; a missing one is accepted (non-browser clients are already
+    /// authenticated by cookie). The frontend's origin counts, because its
+    /// JavaScript calls this API cross-origin.
     pub fn origin_ok(&self, request: &Request) -> bool {
         match request.header("Origin") {
             None => true,
-            Some(origin) => match app_origin(&self.config.oidc.redirect_url) {
-                Some(expected) => origin.trim_end_matches('/') == expected,
-                None => false,
-            },
+            Some(origin) => origin_allowed(
+                origin,
+                &self.config.oidc.redirect_url,
+                &self.config.post_login_redirect,
+            ),
         }
     }
+}
+
+/// Whether `origin` is one of the app's own browser origins: the API origin
+/// (where the OIDC callback lands) and, when absolute, the post-login redirect
+/// (the frontend the tracker UI is served from).
+pub fn origin_allowed(origin: &str, redirect_url: &str, post_login_redirect: &str) -> bool {
+    let origin = origin.trim_end_matches('/');
+    [redirect_url, post_login_redirect]
+        .iter()
+        .filter_map(|url| app_origin(url))
+        .any(|allowed| allowed == origin)
 }
 
 /// The result of checking a login subject against the tracker's owner.
@@ -267,4 +281,54 @@ fn app_origin(url: &str) -> Option<String> {
 /// A plain-text response with a status.
 pub fn text(status: u16, message: &str) -> Response {
     Response::status(status, "text/plain; charset=UTF-8", message.as_bytes().to_vec())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{app_origin, origin_allowed};
+
+    #[test]
+    fn an_origin_is_scheme_and_authority_only() {
+        assert_eq!(
+            app_origin("https://api.example.com/auth/callback").as_deref(),
+            Some("https://api.example.com")
+        );
+        assert_eq!(app_origin("/admin"), None);
+    }
+
+    #[test]
+    fn the_api_and_frontend_origins_are_allowed() {
+        let redirect = "https://api.recibase.shed.gay/auth/callback";
+        let post_login = "https://recibase.shed.gay/admin";
+        assert!(origin_allowed(
+            "https://api.recibase.shed.gay",
+            redirect,
+            post_login
+        ));
+        assert!(origin_allowed(
+            "https://recibase.shed.gay",
+            redirect,
+            post_login
+        ));
+        assert!(origin_allowed(
+            "https://recibase.shed.gay/",
+            redirect,
+            post_login
+        ));
+        assert!(!origin_allowed("https://evil.example", redirect, post_login));
+    }
+
+    #[test]
+    fn a_relative_post_login_redirect_adds_no_origin() {
+        assert!(origin_allowed(
+            "https://api.example.com",
+            "https://api.example.com/auth/callback",
+            "/admin"
+        ));
+        assert!(!origin_allowed(
+            "https://recibase.example",
+            "https://api.example.com/auth/callback",
+            "/admin"
+        ));
+    }
 }
