@@ -16,6 +16,7 @@ getrandom.workspace = true
 jsonwebtoken.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+sha2.workspace = true
 # OIDC discovery, token and JWKS calls are HTTPS in production, so the server
 # enables ureq's TLS support (rustls) unconditionally.
 ureq = { workspace = true, features = ["rustls"] }

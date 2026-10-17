@@ -41,10 +41,13 @@ impl Admin {
         }
         let state = crate::tokens::random_hex(32);
         let nonce = crate::tokens::random_hex(32);
-        if let Err(error) =
-            self.db
-                .create_auth_flow(&state, &nonce, now + Duration::minutes(FLOW_TTL_MINUTES))
-        {
+        let (code_verifier, code_challenge) = crate::tokens::pkce_pair();
+        if let Err(error) = self.db.create_auth_flow(
+            &state,
+            &nonce,
+            &code_verifier,
+            now + Duration::minutes(FLOW_TTL_MINUTES),
+        ) {
             eprintln!("could not start a login flow: {error}");
             return text(500, "login unavailable");
         }
@@ -55,7 +58,9 @@ impl Admin {
                 return text(503, "identity provider unavailable");
             }
         };
-        let url = self.provider.authorize_url(&discovery, &state, &nonce);
+        let url = self
+            .provider
+            .authorize_url(&discovery, &state, &nonce, &code_challenge);
         Response::redirect(302, &url)
     }
 
@@ -90,7 +95,10 @@ impl Admin {
                 return text(503, "identity provider unavailable");
             }
         };
-        let claims = match self.provider.exchange(&discovery, &code, &flow.nonce) {
+        let claims = match self
+            .provider
+            .exchange(&discovery, &code, &flow.nonce, &flow.code_verifier)
+        {
             Ok(claims) => claims,
             Err(error) => {
                 eprintln!("token exchange failed: {error}");

@@ -85,8 +85,16 @@ impl Provider {
         Ok(discovery)
     }
 
-    /// The provider's authorization endpoint URL for a login attempt.
-    pub fn authorize_url(&self, discovery: &Discovery, state: &str, nonce: &str) -> String {
+    /// The provider's authorization endpoint URL for a login attempt. PKCE
+    /// (RFC 7636) is always used, so `code_challenge` is the S256 digest of the
+    /// `code_verifier` returned on the token exchange.
+    pub fn authorize_url(
+        &self,
+        discovery: &Discovery,
+        state: &str,
+        nonce: &str,
+        code_challenge: &str,
+    ) -> String {
         let params = [
             ("response_type", "code"),
             ("client_id", self.config.client_id.as_str()),
@@ -94,6 +102,8 @@ impl Provider {
             ("scope", "openid email"),
             ("state", state),
             ("nonce", nonce),
+            ("code_challenge", code_challenge),
+            ("code_challenge_method", "S256"),
         ];
         let query = params
             .iter()
@@ -105,7 +115,13 @@ impl Provider {
 
     /// Exchanges an authorization code for tokens and returns the verified ID
     /// token claims.
-    pub fn exchange(&self, discovery: &Discovery, code: &str, nonce: &str) -> Result<IdTokenClaims, String> {
+    pub fn exchange(
+        &self,
+        discovery: &Discovery,
+        code: &str,
+        nonce: &str,
+        code_verifier: &str,
+    ) -> Result<IdTokenClaims, String> {
         let response = ureq::post(&discovery.token_endpoint)
             .send_form([
                 ("grant_type", "authorization_code"),
@@ -113,6 +129,7 @@ impl Provider {
                 ("redirect_uri", self.config.redirect_url.as_str()),
                 ("client_id", self.config.client_id.as_str()),
                 ("client_secret", self.config.client_secret.as_str()),
+                ("code_verifier", code_verifier),
             ])
             .map_err(|e| format!("token request failed: {e}"))?;
         if response.status() != 200 {

@@ -52,6 +52,7 @@ pub mod schema {
         auth_flows (state) {
             state -> Text,
             nonce -> Text,
+            code_verifier -> Text,
             created_at -> Timestamptz,
             expires_at -> Timestamptz,
         }
@@ -110,6 +111,7 @@ pub struct Session {
 pub struct AuthFlow {
     pub state: String,
     pub nonce: String,
+    pub code_verifier: String,
     pub created_at: DateTime<Utc>,
     pub expires_at: DateTime<Utc>,
 }
@@ -252,12 +254,19 @@ impl Db {
         Ok(())
     }
 
-    pub fn create_auth_flow(&self, state: &str, nonce: &str, expires_at: DateTime<Utc>) -> DbResult<()> {
+    pub fn create_auth_flow(
+        &self,
+        state: &str,
+        nonce: &str,
+        code_verifier: &str,
+        expires_at: DateTime<Utc>,
+    ) -> DbResult<()> {
         let mut conn = self.conn()?;
         diesel::insert_into(auth_flows::table)
             .values((
                 auth_flows::state.eq(state),
                 auth_flows::nonce.eq(nonce),
+                auth_flows::code_verifier.eq(code_verifier),
                 auth_flows::expires_at.eq(expires_at),
             ))
             .execute(&mut conn)?;
