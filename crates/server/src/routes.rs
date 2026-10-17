@@ -1,9 +1,12 @@
 //! `RecibaseRoutes` and `RecipeSubmissionRoutes`.
 
+use crate::auth::Admin;
 use crate::controllers::{self, Usage};
+use crate::db::{Db, MealEntryRow};
 use crate::http::{Request, Response};
 use crate::meal_log;
 use recibase_core::json::obj;
+use recibase_core::usage::MealLogEntry;
 use serde_json::Value;
 
 /// The process environment, injectable so the harness and the tests can supply
@@ -11,19 +14,75 @@ use serde_json::Value;
 pub type Env = Box<dyn Fn(&str) -> Option<String> + Send + Sync>;
 
 pub struct Context {
-    pub usage: Usage,
     pub env: Env,
+    /// The date the request is served on, pinned by `RECIBASE_TODAY`.
+    pub today: chrono::NaiveDate,
+    /// The CSV meal log, loaded once at start-up; the fallback usage store.
+    csv_entries: Vec<MealLogEntry>,
+    /// The Postgres store, when the tracker is configured.
+    db: Option<Db>,
+    /// The tracker routes, present only when the database and OIDC are
+    /// configured.
+    admin: Option<Admin>,
+    /// The OIDC subject whose entries drive usage; set with the tracker.
+    owner_subject: Option<String>,
 }
 
 impl Context {
     pub fn new(env: Env) -> Context {
-        let entries = meal_log::load_from_env(&*env);
         let today = controllers::today(&*env);
+        let csv_entries = meal_log::load_from_env(&*env);
+        let db = crate::config::database_url(&*env).and_then(|url| match Db::connect(&url) {
+            Ok(db) => Some(db),
+            Err(error) => {
+                eprintln!("database unavailable ({error}); admin tracker disabled");
+                None
+            }
+        });
+        let admin = db.as_ref().and_then(|db| {
+            crate::config::AdminConfig::from_env(&*env).map(|config| Admin::new(db.clone(), config))
+        });
+        let owner_subject = env("RECIBASE_OWNER_SUBJECT").or_else(|| {
+            admin
+                .as_ref()
+                .map(|admin| admin.config.oidc.owner_subject.clone())
+        });
         Context {
-            usage: Usage { entries, today },
             env,
+            today,
+            csv_entries,
+            db,
+            admin,
+            owner_subject,
         }
     }
+
+    /// Usage data for the read-only endpoints. The database is the source of
+    /// truth when it is configured; otherwise the start-up CSV log is used, so
+    /// an unconfigured deployment behaves exactly as before.
+    pub fn usage(&self) -> Usage {
+        Usage {
+            entries: self.current_entries(),
+            today: self.today,
+        }
+    }
+
+    fn current_entries(&self) -> Vec<MealLogEntry> {
+        match (&self.db, &self.owner_subject) {
+            (Some(db), Some(subject)) => match db.entries_for_subject(subject) {
+                Ok(rows) => rows.into_iter().map(entry_from_row).collect(),
+                Err(error) => {
+                    eprintln!("usage query failed ({error}); using the CSV log");
+                    self.csv_entries.clone()
+                }
+            },
+            _ => self.csv_entries.clone(),
+        }
+    }
+}
+
+fn entry_from_row(row: MealEntryRow) -> MealLogEntry {
+    MealLogEntry::new(&row.meal_name, row.eaten_on, row.note, row.featured)
 }
 
 fn error_json(message: &str) -> Value {
@@ -100,7 +159,7 @@ fn dispatch(request: &Request, context: &Context) -> (Response, bool) {
         }
         if let Some(permalink) = path.strip_prefix("/recipes/") {
             if !permalink.is_empty() && !permalink.contains('/') {
-                return match controllers::recipe_json(permalink, &context.usage) {
+                return match controllers::recipe_json(permalink, &context.usage()) {
                     Some(json) => (Response::json(&json), true),
                     None => (
                         Response::status(
@@ -116,21 +175,80 @@ fn dispatch(request: &Request, context: &Context) -> (Response, bool) {
         }
         if path == "/meals/" {
             return (
-                Response::json(&controllers::meals_json(&context.usage)),
+                Response::json(&controllers::meals_json(&context.usage())),
                 true,
             );
         }
         if path == "/meals/raw" {
             return (Response::plain(&controllers::meal_names()), true);
         }
+        if let Some(response) = admin_get(request, context) {
+            return (response, true);
+        }
         return (Response::not_found(), false);
     }
 
-    if request.method == "POST" && request.path == "/recipe-submissions" {
-        return (crate::submission::handle(request, context), true);
+    if request.method == "POST" {
+        if request.path == "/recipe-submissions" {
+            return (crate::submission::handle(request, context), true);
+        }
+        if let Some(response) = admin_post(request, context) {
+            return (response, true);
+        }
     }
 
     (Response::not_found(), false)
+}
+
+/// The tracker's `GET` routes, or `None` when the path is not one of them.
+fn admin_get(request: &Request, context: &Context) -> Option<Response> {
+    match request.path.as_str() {
+        "/auth/login" => Some(match &context.admin {
+            Some(admin) => admin.login(),
+            None => disabled(),
+        }),
+        "/auth/callback" => Some(match &context.admin {
+            Some(admin) => admin.callback(request),
+            None => disabled(),
+        }),
+        "/admin" => Some(match &context.admin {
+            Some(admin) => match admin.session(request) {
+                Some((session, user)) => admin.page(&session, &user),
+                None => Response::redirect(302, "/auth/login"),
+            },
+            None => disabled(),
+        }),
+        _ => None,
+    }
+}
+
+/// The tracker's `POST` routes, or `None` when the path is not one of them.
+fn admin_post(request: &Request, context: &Context) -> Option<Response> {
+    if request.path != "/auth/logout"
+        && request.path != "/admin/entries"
+        && request.path != "/admin/entries/delete"
+    {
+        return None;
+    }
+    let Some(admin) = &context.admin else {
+        return Some(disabled());
+    };
+    if request.path == "/auth/logout" {
+        return Some(admin.logout(request));
+    }
+    match admin.session(request) {
+        Some((session, user)) => Some(if request.path == "/admin/entries" {
+            admin.add_entry(request, &session, &user)
+        } else {
+            admin.delete_entry(request, &session, &user)
+        }),
+        None => Some(Response::redirect(303, "/auth/login")),
+    }
+}
+
+/// The answer when the tracker routes are reached but not configured.
+fn disabled() -> Response {
+    error_response(503, "admin tracker not configured")
 }
 
 pub fn error_response(status: u16, message: &str) -> Response {

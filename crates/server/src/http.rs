@@ -77,6 +77,38 @@ impl Request {
         }
         None
     }
+
+    /// The value of a cookie from the `Cookie` header, by name.
+    pub fn cookie(&self, name: &str) -> Option<String> {
+        for (key, value) in &self.headers {
+            if !key.eq_ignore_ascii_case("cookie") {
+                continue;
+            }
+            for pair in value.split(';') {
+                if let Some((cookie_name, cookie_value)) = pair.split_once('=')
+                    && cookie_name.trim() == name
+                {
+                    return Some(cookie_value.trim().to_string());
+                }
+            }
+        }
+        None
+    }
+}
+
+/// An `application/x-www-form-urlencoded` body as ordered name/value pairs,
+/// with `+` and `%XX` decoded. Duplicate names are kept.
+pub fn parse_form(body: &[u8]) -> Vec<(String, String)> {
+    let text = String::from_utf8_lossy(body);
+    let mut out = Vec::new();
+    for pair in text.split('&') {
+        if pair.is_empty() {
+            continue;
+        }
+        let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
+        out.push((percent_decode(key), percent_decode(value)));
+    }
+    out
 }
 
 fn percent_decode(input: &str) -> String {
@@ -136,6 +168,28 @@ impl Response {
         Response::status(200, "text/plain; charset=UTF-8", body.as_bytes().to_vec())
     }
 
+    pub fn html(body: String) -> Response {
+        Response::status(200, "text/html; charset=UTF-8", body.into_bytes())
+    }
+
+    /// A redirect with an empty body and only a `Location` header. `status` is
+    /// normally 303 (`See Other`) after a POST, or 302 for a temporary GET
+    /// bounce to the identity provider.
+    pub fn redirect(status: u16, location: &str) -> Response {
+        Response {
+            status,
+            content_type: None,
+            body: Vec::new(),
+            headers_before_length: vec![("Location", location.to_string())],
+            headers_after_length: Vec::new(),
+        }
+    }
+
+    /// Appends a `Set-Cookie` response header.
+    pub fn set_cookie(&mut self, value: String) {
+        self.headers_before_length.push(("Set-Cookie", value));
+    }
+
     pub fn status(status: u16, content_type: &'static str, body: Vec<u8>) -> Response {
         Response {
             status,
@@ -180,13 +234,19 @@ impl Response {
     fn reason(status: u16) -> &'static str {
         match status {
             200 => "OK",
+            302 => "Found",
+            303 => "See Other",
+            307 => "Temporary Redirect",
+            308 => "Permanent Redirect",
             400 => "Bad Request",
             401 => "Unauthorized",
             403 => "Forbidden",
             404 => "Not Found",
+            405 => "Method Not Allowed",
             409 => "Conflict",
             413 => "Payload Too Large",
             422 => "Unprocessable Entity",
+            429 => "Too Many Requests",
             500 => "Internal Server Error",
             502 => "Bad Gateway",
             503 => "Service Unavailable",
@@ -293,4 +353,49 @@ pub fn read_request(stream: &TcpStream) -> std::io::Result<Option<Request>> {
 /// `EEE, dd MMM yyyy HH:mm:ss GMT`, the format java.time emits for HTTP dates.
 pub fn http_date(now: chrono::DateTime<chrono::Utc>) -> String {
     now.format("%a, %d %b %Y %H:%M:%S GMT").to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn request(headers: &[(&str, &str)], body: &str) -> Request {
+        Request {
+            method: "POST".to_string(),
+            target: "/admin/entries".to_string(),
+            version: "HTTP/1.1".to_string(),
+            path: "/admin/entries".to_string(),
+            query: String::new(),
+            headers: headers
+                .iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            body: body.as_bytes().to_vec(),
+        }
+    }
+
+    #[test]
+    fn a_cookie_is_found_by_name() {
+        let request = request(&[("Cookie", "a=1; recibase_session=abc123; b=2")], "");
+        assert_eq!(request.cookie("recibase_session").as_deref(), Some("abc123"));
+        assert_eq!(request.cookie("missing"), None);
+    }
+
+    #[test]
+    fn forms_decode_plus_and_percent() {
+        let pairs = parse_form(b"meal_name=Sweet+Potato&note=a%26b&featured=on");
+        assert_eq!(pairs[0], ("meal_name".to_string(), "Sweet Potato".to_string()));
+        assert_eq!(pairs[1], ("note".to_string(), "a&b".to_string()));
+        assert_eq!(pairs[2], ("featured".to_string(), "on".to_string()));
+    }
+
+    #[test]
+    fn a_redirect_writes_its_location_and_reason() {
+        let mut response = Response::redirect(303, "/admin");
+        response.set_cookie("recibase_session=x; HttpOnly".to_string());
+        let bytes = String::from_utf8(response.to_bytes("close", "now")).unwrap();
+        assert!(bytes.starts_with("HTTP/1.1 303 See Other\r\n"), "{bytes}");
+        assert!(bytes.contains("\r\nLocation: /admin\r\n"), "{bytes}");
+        assert!(bytes.contains("\r\nSet-Cookie: recibase_session=x; HttpOnly\r\n"), "{bytes}");
+    }
 }

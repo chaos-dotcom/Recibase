@@ -10,8 +10,15 @@ workspace = true
 recibase-core.workspace = true
 recibase-submit.workspace = true
 chrono.workspace = true
+diesel.workspace = true
+diesel_migrations.workspace = true
+getrandom.workspace = true
+jsonwebtoken.workspace = true
+serde.workspace = true
 serde_json.workspace = true
-ureq.workspace = true
+# OIDC discovery, token and JWKS calls are HTTPS in production, so the server
+# enables ureq's TLS support (rustls) unconditionally.
+ureq = { workspace = true, features = ["rustls"] }
 
 [dev-dependencies]
 # The live-conformance spec reaches another deployment over https, so the test

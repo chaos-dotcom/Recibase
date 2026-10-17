@@ -142,6 +142,16 @@ impl Templates {
         Templates { env }
     }
 
+    /// Sets the `adminUrl` global, the browser-reachable URL of this
+    /// deployment's meal tracker on the API origin. `app.py` has no such link,
+    /// so the templates treat it as optional.
+    pub fn with_admin_url(mut self, backend_url: &str) -> Templates {
+        let admin_url = format!("{}/admin", backend_url.trim_end_matches('/'));
+        self.env
+            .add_global("adminUrl", Value::from(admin_url));
+        self
+    }
+
     /// `render_template`. The result is put through
     /// [`crate::markupsafe::markupsafe_compat`] so that the escaping matches
     /// Jinja2's.

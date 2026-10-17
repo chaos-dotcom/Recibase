@@ -14,6 +14,13 @@ services:
     env_file:
       - path: .env
         required: false
+    # The admin tracker's store. Unset in production it falls back to this
+    # compose database; point `DATABASE_URL` at an external one to opt out.
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://recibase:${POSTGRES_PASSWORD:-recibase}@db:5432/recibase}
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - default
       - apps-internal
@@ -24,6 +31,23 @@ services:
       - "traefik.http.routers.recibase-api.entrypoints=websecure"
       - "traefik.http.routers.recibase-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-myresolver}"
       - "traefik.http.services.recibase-api.loadbalancer.server.port=8081"
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: recibase
+      POSTGRES_USER: recibase
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-recibase}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recibase -d recibase"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
   frontend:
@@ -64,3 +88,6 @@ networks:
   default:
   apps-internal:
     external: true
+
+volumes:
+  db-data:

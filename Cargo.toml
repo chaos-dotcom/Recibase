@@ -14,7 +14,12 @@ recibase-submit = { path = "crates/submit" }
 # External crates.
 chrono = "0.4"
 csv = "1"
+diesel = { version = "2", features = ["postgres", "chrono", "r2d2"] }
+diesel_migrations = "2"
+getrandom = "0.2"
+jsonwebtoken = "9"
 minijinja = "2.24"
+serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 unicode-normalization = "0.1"
 ureq = { version = "3", default-features = false, features = ["json"] }

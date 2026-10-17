@@ -20,6 +20,11 @@
 # glibc than the runtime ships.
 FROM rust:1-slim-bookworm AS build
 WORKDIR /src
+# Diesel's Postgres backend links against libpq, so the build needs the headers
+# and `pg_config`; the shared object is collected for the distroless runtime.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq-dev pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 # The commit `build.rs` bakes into the manifest's `version`. `.git/` is not in
 # the build context, so a CI passes these instead; unset means `latest`.
 ARG GIT_COMMIT
@@ -30,10 +35,23 @@ COPY Cargo.toml Cargo.lock ./
 COPY crates/ crates/
 RUN cargo build --release --locked -p recibase-server \
     && strip target/release/recibase-server
+# `libpq.so.5` and every non-glibc library it needs, for the distroless image.
+RUN mkdir -p /libs \
+    && cp /usr/lib/x86_64-linux-gnu/libpq.so.5 /libs/ \
+    && for lib in $(ldd /usr/lib/x86_64-linux-gnu/libpq.so.5 | awk '/=> \//{print $3}'); do \
+         case "$lib" in \
+           *libc.so*|*ld-linux*|*linux-vdso*) ;; \
+           *) cp "$lib" /libs/ ;; \
+         esac; \
+       done
 
 # ------------------------------------------------- runtime: shell + healthcheck
 FROM debian:bookworm-slim AS runtime
-RUN useradd --system --uid 10001 --create-home recibase
+# The Postgres client library Diesel links against.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq5 \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --uid 10001 --create-home recibase
 COPY --from=build /src/target/release/recibase-server /usr/local/bin/recibase-server
 USER recibase
 ENV PORT=8081
@@ -45,6 +63,7 @@ ENTRYPOINT ["/usr/local/bin/recibase-server"]
 # ------------------------------ runtime: smallest glibc image, no shell
 FROM gcr.io/distroless/cc-debian12 AS distroless
 COPY --from=build /src/target/release/recibase-server /recibase-server
+COPY --from=build /libs/ /usr/lib/x86_64-linux-gnu/
 ENV PORT=8081
 EXPOSE 8081
 ENTRYPOINT ["/recibase-server"]

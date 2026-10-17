@@ -153,7 +153,8 @@ impl App {
             Arc::clone(&api_version),
             &frontend_version,
             peers.clone(),
-        );
+        )
+        .with_admin_url(&backend_url);
         App {
             backend,
             backend_url,
