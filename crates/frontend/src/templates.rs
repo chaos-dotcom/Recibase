@@ -15,11 +15,12 @@ use minijinja::{AutoEscape, Environment};
 use crate::cached_backend::{BackendUnavailable, CachedBackendCall};
 use crate::peer::{Peer, PeerList, merge_recipe_lists};
 
-/// The eight templates, compiled in.
+/// The templates, compiled in.
 pub const TEMPLATES: &[(&str, &str)] = &[
     ("layout.html", include_str!("../templates/layout.html")),
     ("home.html", include_str!("../templates/home.html")),
     ("recipe.html", include_str!("../templates/recipe.html")),
+    ("admin.html", include_str!("../templates/admin.html")),
     (
         "contribute.html",
         include_str!("../templates/contribute.html"),
@@ -142,13 +143,11 @@ impl Templates {
         Templates { env }
     }
 
-    /// Sets the `adminUrl` global, the browser-reachable URL of this
-    /// deployment's meal tracker on the API origin. `app.py` has no such link,
-    /// so the templates treat it as optional.
-    pub fn with_admin_url(mut self, backend_url: &str) -> Templates {
-        let admin_url = format!("{}/admin", backend_url.trim_end_matches('/'));
-        self.env
-            .add_global("adminUrl", Value::from(admin_url));
+    /// Sets the `apiUrl` global, the browser-reachable URL of this
+    /// deployment's API. The admin page's JavaScript calls it directly, as the
+    /// drawer's search does.
+    pub fn with_backend_url(mut self, backend_url: &str) -> Templates {
+        self.env.add_global("apiUrl", Value::from(backend_url.to_string()));
         self
     }
 

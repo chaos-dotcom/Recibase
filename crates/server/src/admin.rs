@@ -5,7 +5,9 @@ use crate::auth::{Admin, text};
 use crate::db::{MealEntryRow, NewMealEntry, Session, User};
 use crate::http::{Request, Response, parse_form};
 use chrono::{Local, NaiveDate};
+use recibase_core::json::obj;
 use recibase_core::meal_definitions::meal_stubs;
+use serde_json::Value;
 
 impl Admin {
     /// `GET /admin`: the tracker page for a signed-in owner.
@@ -79,6 +81,129 @@ impl Admin {
             }
         }
     }
+
+    /// `GET /admin/api/session`: the login state and the CSRF token the
+    /// frontend's JavaScript needs. Always 200, so the page can render a login
+    /// prompt without special-casing an error.
+    pub fn session_json(&self, request: &Request) -> Response {
+        match self.session(request) {
+            Some((session, user)) => Response::json(&obj(vec![
+                ("authenticated", Value::Bool(true)),
+                ("email", opt_value(user.email)),
+                ("csrf", Value::String(session.csrf_token)),
+            ])),
+            None => Response::json(&obj(vec![
+                ("authenticated", Value::Bool(false)),
+                ("email", Value::Null),
+                ("csrf", Value::Null),
+            ])),
+        }
+    }
+
+    /// `GET /admin/api/entries`: every entry the owner recorded, newest first.
+    pub fn entries_json(&self, _request: &Request, user: &User) -> Response {
+        match self.db.entries_for_user(user.id) {
+            Ok(rows) => Response::json(&Value::Array(rows.iter().map(entry_to_json).collect())),
+            Err(error) => {
+                eprintln!("could not load entries: {error}");
+                text(500, "could not load your meals")
+            }
+        }
+    }
+
+    /// `POST /admin/api/entries`: record one meal from the frontend's JSON.
+    pub fn add_entry_json(&self, request: &Request, session: &Session, user: &User) -> Response {
+        if !self.origin_ok(request) || !self.csrf_header_ok(request, session) {
+            return text(403, "forbidden");
+        }
+        let Ok(body) = serde_json::from_slice::<Value>(&request.body) else {
+            return text(400, "invalid json");
+        };
+        let meal_name = body
+            .get("meal_name")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .trim();
+        if meal_name.is_empty() || !is_known_meal(meal_name) {
+            return text(400, "choose a meal from the list");
+        }
+        let eaten_on = body
+            .get("eaten_on")
+            .and_then(Value::as_str)
+            .and_then(|value| NaiveDate::parse_from_str(value, "%Y-%m-%d").ok())
+            .unwrap_or_else(|| Local::now().date_naive());
+        let note = body
+            .get("note")
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|value| !value.is_empty());
+        let featured = body
+            .get("featured")
+            .and_then(Value::as_bool)
+            .unwrap_or(false);
+
+        let new = NewMealEntry {
+            user_id: user.id,
+            meal_name,
+            eaten_on,
+            note,
+            featured,
+        };
+        match self.db.add_entry(&new) {
+            Ok(row) => Response::json_status(201, &entry_to_json(&row)),
+            Err(error) => {
+                eprintln!("could not record a meal: {error}");
+                text(500, "could not record that meal")
+            }
+        }
+    }
+
+    /// `POST /admin/api/entries/delete`: remove one entry by id.
+    pub fn delete_entry_json(&self, request: &Request, session: &Session, user: &User) -> Response {
+        if !self.origin_ok(request) || !self.csrf_header_ok(request, session) {
+            return text(403, "forbidden");
+        }
+        let Ok(body) = serde_json::from_slice::<Value>(&request.body) else {
+            return text(400, "invalid json");
+        };
+        let Some(id) = body.get("id").and_then(Value::as_i64).map(|id| id as i32) else {
+            return text(400, "missing entry id");
+        };
+        match self.db.delete_entry(id, user.id) {
+            Ok(_) => Response::json(&obj(vec![("ok", Value::Bool(true))])),
+            Err(error) => {
+                eprintln!("could not delete an entry: {error}");
+                text(500, "could not delete that entry")
+            }
+        }
+    }
+
+    /// Whether the `X-CSRF-Token` header carries the session's token, the
+    /// header form the frontend's JavaScript uses.
+    pub fn csrf_header_ok(&self, request: &Request, session: &Session) -> bool {
+        request
+            .header("X-CSRF-Token")
+            .map(|token| token == session.csrf_token)
+            .unwrap_or(false)
+    }
+}
+
+/// One entry, in the shape the frontend's JavaScript consumes.
+fn entry_to_json(entry: &MealEntryRow) -> Value {
+    obj(vec![
+        ("id", Value::from(entry.id)),
+        ("meal_name", Value::String(entry.meal_name.clone())),
+        (
+            "eaten_on",
+            Value::String(entry.eaten_on.format("%Y-%m-%d").to_string()),
+        ),
+        ("note", opt_value(entry.note.clone())),
+        ("featured", Value::Bool(entry.featured)),
+    ])
+}
+
+fn opt_value(value: Option<String>) -> Value {
+    value.map(Value::String).unwrap_or(Value::Null)
 }
 
 /// Whether a name is one of the meals the corpus knows about.

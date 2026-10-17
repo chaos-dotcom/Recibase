@@ -24,6 +24,10 @@ pub struct AdminConfig {
     /// Whether the session cookie carries `Secure`. Defaults to true; set
     /// `SESSION_COOKIE_SECURE=false` for plain-HTTP local development.
     pub cookie_secure: bool,
+    /// Where the browser lands after a successful login. Defaults to `/admin`
+    /// on the API origin; point it at the frontend page when the UI is served
+    /// there.
+    pub post_login_redirect: String,
 }
 
 impl AdminConfig {
@@ -40,9 +44,12 @@ impl AdminConfig {
         let cookie_secure = env("SESSION_COOKIE_SECURE")
             .map(|value| !value.eq_ignore_ascii_case("false"))
             .unwrap_or(true);
+        let post_login_redirect =
+            env("OIDC_POST_LOGIN_REDIRECT").unwrap_or_else(|| "/admin".to_string());
         Some(AdminConfig {
             oidc,
             cookie_secure,
+            post_login_redirect,
         })
     }
 }

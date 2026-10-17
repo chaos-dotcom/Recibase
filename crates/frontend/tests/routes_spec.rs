@@ -29,6 +29,22 @@ fn homepage() {
     assert!(body_of(&response).contains("Recibase"));
 }
 
+/// `/admin` is the meal tracker page, not a recipe: it renders and hands the
+/// API URL to its client script.
+#[test]
+fn admin_page_renders_with_the_api_url() {
+    let stub = StubApi::start();
+    let app = app_on(&stub);
+    let response = app.handle(&get("/admin"));
+    assert_eq!(response.status, 200);
+    let body = body_of(&response);
+    assert!(body.contains("Meal tracker"), "{body}");
+    assert!(
+        body.contains(stub.base_url()),
+        "the API URL is embedded for the script: {body}"
+    );
+}
+
 /// `test_manifest`. The Python asserts `app.frontendVersion` and the
 /// configured backend URL; here those are what the test passed to `App::new`.
 #[test]

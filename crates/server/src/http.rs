@@ -231,9 +231,39 @@ impl Response {
         Response::status(404, "text/plain; charset=UTF-8", b"Not found".to_vec())
     }
 
+    /// A CORS preflight for a credentialed request (the admin JSON API, which
+    /// the browser calls with cookies). Unlike http4s' wildcard preflight this
+    /// reflects the caller's origin and allows credentials.
+    pub fn credentialed_preflight(origin: &str, requested_headers: &str) -> Response {
+        Response {
+            status: 200,
+            content_type: None,
+            body: Vec::new(),
+            headers_before_length: vec![
+                ("Access-Control-Allow-Origin", origin.to_string()),
+                (
+                    "Access-Control-Allow-Credentials",
+                    "true".to_string(),
+                ),
+                ("Access-Control-Allow-Methods", "GET, POST, OPTIONS".to_string()),
+                (
+                    "Access-Control-Allow-Headers",
+                    requested_headers.to_string(),
+                ),
+                (
+                    "Vary",
+                    "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+                        .to_string(),
+                ),
+            ],
+            headers_after_length: Vec::new(),
+        }
+    }
+
     fn reason(status: u16) -> &'static str {
         match status {
             200 => "OK",
+            201 => "Created",
             302 => "Found",
             303 => "See Other",
             307 => "Temporary Redirect",

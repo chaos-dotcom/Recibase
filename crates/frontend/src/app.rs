@@ -39,6 +39,7 @@ pub enum Route {
     Sitemap,
     Random,
     Contribute,
+    Admin,
     Static(String),
     Recipe(String),
 }
@@ -51,6 +52,7 @@ impl Route {
             "/sitemap.xml" => return Some(Route::Sitemap),
             "/random" => return Some(Route::Random),
             "/contribute" => return Some(Route::Contribute),
+            "/admin" => return Some(Route::Admin),
             _ => {}
         }
         if let Some(filename) = path.strip_prefix("/static/") {
@@ -154,7 +156,7 @@ impl App {
             &frontend_version,
             peers.clone(),
         )
-        .with_admin_url(&backend_url);
+        .with_backend_url(&backend_url);
         App {
             backend,
             backend_url,
@@ -198,6 +200,7 @@ impl App {
             Route::Sitemap => self.sitemap(request),
             Route::Random => self.random(request),
             Route::Contribute => self.contribute(request),
+            Route::Admin => self.render("admin.html", empty_context()),
             Route::Static(filename) => self.static_file(request, &filename),
             Route::Recipe(name) => self.recipe(request, &name),
         }

@@ -98,11 +98,18 @@ fn error_json(message: &str) -> Value {
 /// appended to the response its route produced. A request that matches no
 /// route at all is answered by `orNotFound` outside the middleware, so it
 /// carries no CORS header.
+///
+/// The admin JSON API is the exception: the browser calls it cross-origin with
+/// credentials, so those responses reflect the caller's origin and allow
+/// credentials instead of using the wildcard.
 pub fn route(request: &Request, context: &Context) -> Response {
+    let credentialed = request.path.starts_with("/admin/api/");
+    let origin = request.header("Origin").map(str::to_string);
     if request.method == "OPTIONS" {
-        let origin = request.header("Origin").is_some();
         let requested_method = request.header("Access-Control-Request-Method").is_some();
-        if origin && requested_method {
+        if let Some(origin) = &origin
+            && requested_method
+        {
             // http4s echoes the requested header list with each name trimmed
             // and re-joined with ", ".
             let requested = request
@@ -114,15 +121,30 @@ pub fn route(request: &Request, context: &Context) -> Response {
                 .filter(|name| !name.is_empty())
                 .collect::<Vec<_>>()
                 .join(", ");
+            if credentialed {
+                return Response::credentialed_preflight(origin, &echoed);
+            }
             return Response::preflight(&echoed);
         }
     }
-    let origin = request.header("Origin").is_some();
     let (mut response, matched) = dispatch(request, context);
-    if matched && origin {
-        response
-            .headers_after_length
-            .push(("Access-Control-Allow-Origin", "*"));
+    if matched && let Some(origin) = &origin {
+        if credentialed {
+            response
+                .headers_before_length
+                .push(("Access-Control-Allow-Origin", origin.clone()));
+            response.headers_before_length.push((
+                "Access-Control-Allow-Credentials",
+                "true".to_string(),
+            ));
+            response
+                .headers_before_length
+                .push(("Vary", "Origin".to_string()));
+        } else {
+            response
+                .headers_after_length
+                .push(("Access-Control-Allow-Origin", "*"));
+        }
     }
     response
 }
@@ -218,32 +240,53 @@ fn admin_get(request: &Request, context: &Context) -> Option<Response> {
             },
             None => disabled(),
         }),
+        // The JSON API the frontend's JavaScript calls; a missing session is a
+        // 401 the script renders a login prompt for, not a redirect.
+        "/admin/api/session" => Some(match &context.admin {
+            Some(admin) => admin.session_json(request),
+            None => disabled(),
+        }),
+        "/admin/api/entries" => Some(match &context.admin {
+            Some(admin) => match admin.session(request) {
+                Some((_session, user)) => admin.entries_json(request, &user),
+                None => error_response(401, "not signed in"),
+            },
+            None => disabled(),
+        }),
         _ => None,
     }
 }
 
 /// The tracker's `POST` routes, or `None` when the path is not one of them.
 fn admin_post(request: &Request, context: &Context) -> Option<Response> {
-    if request.path != "/auth/logout"
-        && request.path != "/admin/entries"
-        && request.path != "/admin/entries/delete"
-    {
+    let path = request.path.as_str();
+    let is_form = path == "/admin/entries" || path == "/admin/entries/delete";
+    let is_api = path == "/admin/api/entries" || path == "/admin/api/entries/delete";
+    if path != "/auth/logout" && !is_form && !is_api {
         return None;
     }
     let Some(admin) = &context.admin else {
         return Some(disabled());
     };
-    if request.path == "/auth/logout" {
+    if path == "/auth/logout" {
         return Some(admin.logout(request));
     }
-    match admin.session(request) {
-        Some((session, user)) => Some(if request.path == "/admin/entries" {
-            admin.add_entry(request, &session, &user)
+    let not_signed_in = || {
+        if is_api {
+            error_response(401, "not signed in")
         } else {
-            admin.delete_entry(request, &session, &user)
-        }),
-        None => Some(Response::redirect(303, "/auth/login")),
-    }
+            Response::redirect(303, "/auth/login")
+        }
+    };
+    Some(match admin.session(request) {
+        Some((session, user)) => match path {
+            "/admin/entries" => admin.add_entry(request, &session, &user),
+            "/admin/entries/delete" => admin.delete_entry(request, &session, &user),
+            "/admin/api/entries" => admin.add_entry_json(request, &session, &user),
+            _ => admin.delete_entry_json(request, &session, &user),
+        },
+        None => not_signed_in(),
+    })
 }
 
 /// The answer when the tracker routes are reached but not configured.

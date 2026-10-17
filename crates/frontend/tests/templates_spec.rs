@@ -57,7 +57,7 @@ fn render(name: &str, context: serde_json::Value) -> String {
 
 #[test]
 fn every_template_is_embedded_and_renders() {
-    assert_eq!(TEMPLATES.len(), 8, "the eight templates of templates/");
+    assert_eq!(TEMPLATES.len(), 9, "the templates of templates/");
 
     let home = render("home.html", json!({}));
     assert!(home.contains("Recibase"), "{home}");
@@ -67,6 +67,9 @@ fn every_template_is_embedded_and_renders() {
     );
     // The drawer lists the recipes the API returned.
     assert!(home.contains("href=\"test-recipe\""), "{home}");
+
+    let admin = render("admin.html", json!({}));
+    assert!(admin.contains("Meal tracker"), "{admin}");
 
     let not_found = render("notfound.html", json!({}));
     assert!(not_found.contains("404 - Page not Found"), "{not_found}");

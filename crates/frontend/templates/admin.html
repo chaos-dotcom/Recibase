@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% set pageName = 'Meal tracker' %}
+{% block content %}
+<h2>Meal tracker</h2>
+
+<div id="admin-app" data-api-url="{{ apiUrl }}">
+  <p id="admin-status">Checking your sign-in&hellip;</p>
+
+  <section id="admin-login" hidden>
+    <p>Sign in to log what you have eaten.</p>
+    <a id="admin-login-link" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" href="#">Sign in</a>
+  </section>
+
+  <section id="admin-tracker" hidden>
+    <form id="admin-add">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        <input class="mdl-textfield__input" name="meal_name" id="admin-meal" list="admin-meals" autocomplete="off" required>
+        <label class="mdl-textfield__label" for="admin-meal">Meal</label>
+      </div>
+      <datalist id="admin-meals"></datalist>
+
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        <input class="mdl-textfield__input" type="date" name="eaten_on" id="admin-date">
+        <label class="mdl-textfield__label" for="admin-date">Date</label>
+      </div>
+
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        <input class="mdl-textfield__input" name="note" id="admin-note">
+        <label class="mdl-textfield__label" for="admin-note">Note</label>
+      </div>
+
+      <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">
+        <input type="checkbox" name="featured" class="mdl-checkbox__input">
+        <span class="mdl-checkbox__label">Featured</span>
+      </label>
+
+      <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Add meal</button>
+      <p id="admin-error" class="admin-error" hidden></p>
+    </form>
+
+    <h3>History</h3>
+    <ul id="admin-entries" class="admin-entries"></ul>
+  </section>
+
+  <button id="admin-logout" class="mdl-button mdl-js-button" hidden>Sign out</button>
+</div>
+
+<script defer src="/static/admin.js?v={{ config.frontendVersion }}"></script>
+{% endblock %}

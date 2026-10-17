@@ -132,7 +132,7 @@ impl Admin {
             }
         };
 
-        let mut response = Response::redirect(303, "/admin");
+        let mut response = Response::redirect(303, &self.config.post_login_redirect);
         response.set_cookie(self.session_cookie(&session_id, SESSION_TTL_DAYS * 86_400));
         response
     }
