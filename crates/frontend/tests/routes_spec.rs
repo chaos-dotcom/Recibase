@@ -29,8 +29,8 @@ fn homepage() {
     assert!(body_of(&response).contains("Recibase"));
 }
 
-/// `/admin` is the meal tracker page, not a recipe: it renders and hands the
-/// API URL to its client script.
+/// `/admin` is the meal tracker page, not a recipe: it renders the chooser and
+/// the tracker, and hands the API URL to their client scripts.
 #[test]
 fn admin_page_renders_with_the_api_url() {
     let stub = StubApi::start();
@@ -39,9 +39,14 @@ fn admin_page_renders_with_the_api_url() {
     assert_eq!(response.status, 200);
     let body = body_of(&response);
     assert!(body.contains("Meal tracker"), "{body}");
+    // The ported chooser and the tracker, sharing one API URL.
+    assert!(body.contains("id=\"chooser\""), "{body}");
+    assert!(body.contains("id=\"tags-search\""), "{body}");
+    assert!(body.contains("id=\"meal-list\""), "{body}");
+    assert!(body.contains("/static/chooser.js"), "{body}");
     assert!(
         body.contains(stub.base_url()),
-        "the API URL is embedded for the script: {body}"
+        "the API URL is embedded for the scripts: {body}"
     );
 }
 

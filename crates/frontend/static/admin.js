@@ -8,6 +8,10 @@
     return;
   }
 
+  // The chooser reads this to know whether to offer its "Log" buttons, and to
+  // record a meal. Set synchronously so it exists before that script runs.
+  window.recibaseTracker = { authenticated: false };
+
   var apiBase = (root.getAttribute("data-api-url") || "/").replace(/\/+$/, "");
   function api(path) {
     return apiBase + "/" + path;
@@ -133,6 +137,20 @@
       });
   }
 
+  // The chooser's "Log" button: record a meal for today and refresh history.
+  function quickLog(mealName) {
+    return call("admin/api/entries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
+      body: JSON.stringify({ meal_name: mealName, eaten_on: today(), featured: false }),
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Could not log that meal (" + response.status + ")");
+      }
+      return loadEntries();
+    });
+  }
+
   function removeEntry(id) {
     call("admin/api/entries/delete", {
       method: "POST",
@@ -167,6 +185,7 @@
         loginLink.href = api("auth/login");
         login.hidden = false;
         upgrade();
+        document.dispatchEvent(new CustomEvent("recibase:session"));
         return;
       }
       csrf = session.csrf;
@@ -174,6 +193,8 @@
       logout.hidden = false;
       form.addEventListener("submit", addEntry);
       logout.addEventListener("click", signOut);
+      window.recibaseTracker = { authenticated: true, log: quickLog, refresh: loadEntries };
+      document.dispatchEvent(new CustomEvent("recibase:session"));
       loadMeals();
       loadEntries();
       upgrade();

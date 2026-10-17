@@ -45,5 +45,45 @@
   <button id="admin-logout" class="mdl-button mdl-js-button" hidden>Sign out</button>
 </div>
 
+<section id="chooser" data-api-url="{{ apiUrl }}">
+  <h2>What shall we cook?</h2>
+
+  <p>A portion of these meals are hosted on <a href="https://reciba.se/">Reciba.se</a>. Search by tag name and negate with <code>!Tag Name</code>. Search for implied tags with <code>&lt;Tag Name</code> e.g. <code>&lt;Vegetarian</code> includes all vegan meals. Use <code>&lt;2m</code> or <code>&gt;3m</code> to filter by date.</p>
+
+  <p id="tags-list-toggle"><span id="tags-list-icon">►</span> Tag list:</p>
+  <p id="tags-list-wrapper" hidden><em id="tags-list"></em></p>
+
+  <p id="weights-list-toggle"><span id="weights-list-icon">►</span> Weights:</p>
+  <div id="weights-list-wrapper" hidden><div id="weights-list"></div></div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label chooser-search">
+    <input class="mdl-textfield__input" type="text" id="tags-search" value="!Not a Meal, !Pudding, !Lunch, &lt;Pescatarian">
+    <label class="mdl-textfield__label" for="tags-search">Filter by Tags</label>
+  </div>
+
+  <div id="meta">
+    <div>
+      <div id="requires-box" hidden>
+        Requires: <em id="requires"></em>
+      </div>
+      <div id="excludes-box" hidden>
+        Excludes: <em id="excludes"></em>
+      </div>
+    </div>
+    <div class="right">
+      <div id="sort-box">Sort: <em id="sort-name">Best</em></div>
+      <div id="count-box">Count: <em id="count">0</em></div>
+    </div>
+  </div>
+
+  <p id="chooser-status" hidden></p>
+
+  <div id="meal-list">
+    <p>Loading meals...</p>
+    <p id="still-loading" hidden>Loading can take a few seconds.</p>
+  </div>
+</section>
+
 <script defer src="/static/admin.js?v={{ config.frontendVersion }}"></script>
+<script defer src="/static/chooser.js?v={{ config.frontendVersion }}"></script>
 {% endblock %}
