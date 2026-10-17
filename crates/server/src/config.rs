@@ -13,8 +13,11 @@ pub struct OidcConfig {
     pub client_secret: String,
     /// The absolute callback URL registered with the provider.
     pub redirect_url: String,
-    /// The one OIDC `sub` allowed to sign in; everyone else is rejected.
-    pub owner_subject: String,
+    /// The one OIDC `sub` allowed to sign in. Optional: when it is unset the
+    /// tracker adopts the first subject that signs in as the owner (stored in
+    /// the `settings` table), so a single-owner Pocket ID client needs no
+    /// lookup.
+    pub owner_subject: Option<String>,
 }
 
 /// The tracker configuration: OIDC plus cookie policy.
@@ -33,13 +36,15 @@ pub struct AdminConfig {
 impl AdminConfig {
     /// Reads the OIDC settings from the environment. Returns `None` (and the
     /// tracker routes answer 503) unless every required value is present.
+    /// `RECIBASE_OWNER_SUBJECT` is optional; unset means the first login adopts
+    /// ownership.
     pub fn from_env(env: &dyn Fn(&str) -> Option<String>) -> Option<AdminConfig> {
         let oidc = OidcConfig {
             issuer: env("OIDC_ISSUER_URL")?,
             client_id: env("OIDC_CLIENT_ID")?,
             client_secret: env("OIDC_CLIENT_SECRET")?,
             redirect_url: env("OIDC_REDIRECT_URL")?,
-            owner_subject: env("RECIBASE_OWNER_SUBJECT")?,
+            owner_subject: env("RECIBASE_OWNER_SUBJECT").filter(|value| !value.trim().is_empty()),
         };
         let cookie_secure = env("SESSION_COOKIE_SECURE")
             .map(|value| !value.eq_ignore_ascii_case("false"))

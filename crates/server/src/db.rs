@@ -58,12 +58,23 @@ pub mod schema {
         }
     }
 
+    diesel::table! {
+        settings (key) {
+            key -> Text,
+            value -> Text,
+            updated_at -> Timestamptz,
+        }
+    }
+
     diesel::joinable!(meal_entries -> users (user_id));
     diesel::joinable!(sessions -> users (user_id));
-    diesel::allow_tables_to_appear_in_same_query!(users, meal_entries, sessions, auth_flows);
+    diesel::allow_tables_to_appear_in_same_query!(users, meal_entries, sessions, auth_flows, settings);
 }
 
-use schema::{auth_flows, meal_entries, sessions, users};
+use schema::{auth_flows, meal_entries, sessions, settings, users};
+
+/// The `settings` key holding the adopted owner's OIDC subject.
+pub const OWNER_SUBJECT: &str = "owner_subject";
 
 #[derive(Debug, Clone, Queryable, Selectable)]
 #[diesel(table_name = users)]
@@ -282,6 +293,31 @@ impl Db {
             .get_result(&mut conn)
             .optional()?;
         Ok(flow)
+    }
+
+    /// A value from the `settings` table, if present.
+    pub fn setting(&self, key: &str) -> DbResult<Option<String>> {
+        let mut conn = self.conn()?;
+        Ok(settings::table
+            .find(key)
+            .select(settings::value)
+            .first(&mut conn)
+            .optional()?)
+    }
+
+    /// Inserts or replaces a `settings` value.
+    pub fn set_setting(&self, key: &str, value: &str) -> DbResult<()> {
+        let mut conn = self.conn()?;
+        diesel::insert_into(settings::table)
+            .values((settings::key.eq(key), settings::value.eq(value)))
+            .on_conflict(settings::key)
+            .do_update()
+            .set((
+                settings::value.eq(value),
+                settings::updated_at.eq(diesel::dsl::now),
+            ))
+            .execute(&mut conn)?;
+        Ok(())
     }
 
     pub fn entries_for_user(&self, user_id: i32) -> DbResult<Vec<MealEntryRow>> {

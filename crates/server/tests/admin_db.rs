@@ -71,6 +71,21 @@ fn entries_sessions_and_users_round_trip() {
 }
 
 #[test]
+fn settings_round_trip() {
+    let Some(url) = database_url() else {
+        eprintln!("skipping: DATABASE_URL is unset");
+        return;
+    };
+    let db = Db::connect(&url).expect("connect and migrate");
+    let key = format!("test-key-{}", std::process::id());
+    assert_eq!(db.setting(&key).expect("read"), None);
+    db.set_setting(&key, "first").expect("write");
+    assert_eq!(db.setting(&key).expect("read").as_deref(), Some("first"));
+    db.set_setting(&key, "second").expect("replace");
+    assert_eq!(db.setting(&key).expect("read").as_deref(), Some("second"));
+}
+
+#[test]
 fn the_database_drives_meals_usage() {
     let Some(url) = database_url() else {
         eprintln!("skipping: DATABASE_URL is unset");

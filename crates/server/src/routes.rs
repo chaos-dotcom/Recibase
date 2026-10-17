@@ -24,8 +24,6 @@ pub struct Context {
     /// The tracker routes, present only when the database and OIDC are
     /// configured.
     admin: Option<Admin>,
-    /// The OIDC subject whose entries drive usage; set with the tracker.
-    owner_subject: Option<String>,
 }
 
 impl Context {
@@ -42,18 +40,12 @@ impl Context {
         let admin = db.as_ref().and_then(|db| {
             crate::config::AdminConfig::from_env(&*env).map(|config| Admin::new(db.clone(), config))
         });
-        let owner_subject = env("RECIBASE_OWNER_SUBJECT").or_else(|| {
-            admin
-                .as_ref()
-                .map(|admin| admin.config.oidc.owner_subject.clone())
-        });
         Context {
             env,
             today,
             csv_entries,
             db,
             admin,
-            owner_subject,
         }
     }
 
@@ -68,15 +60,22 @@ impl Context {
     }
 
     fn current_entries(&self) -> Vec<MealLogEntry> {
-        match (&self.db, &self.owner_subject) {
-            (Some(db), Some(subject)) => match db.entries_for_subject(subject) {
-                Ok(rows) => rows.into_iter().map(entry_from_row).collect(),
-                Err(error) => {
-                    eprintln!("usage query failed ({error}); using the CSV log");
-                    self.csv_entries.clone()
-                }
-            },
-            _ => self.csv_entries.clone(),
+        // The owner whose entries count as usage: pinned by the environment, or
+        // adopted at first login. Until there is one, fall back to the CSV.
+        let subject = (self.env)("RECIBASE_OWNER_SUBJECT").or_else(|| {
+            self.admin
+                .as_ref()
+                .and_then(|admin| admin.owner_subject())
+        });
+        let (Some(db), Some(subject)) = (&self.db, subject) else {
+            return self.csv_entries.clone();
+        };
+        match db.entries_for_subject(&subject) {
+            Ok(rows) => rows.into_iter().map(entry_from_row).collect(),
+            Err(error) => {
+                eprintln!("usage query failed ({error}); using the CSV log");
+                self.csv_entries.clone()
+            }
         }
     }
 }

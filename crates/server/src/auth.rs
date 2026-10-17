@@ -105,8 +105,23 @@ impl Admin {
                 return text(502, "identity provider rejected the login");
             }
         };
-        if claims.sub != self.config.oidc.owner_subject {
-            return text(403, "this account is not authorised");
+        match self.claim_owner(&claims.sub) {
+            Ok(Claim::Owner) => {}
+            Ok(Claim::Adopted) => eprintln!(
+                "adopted subject {:?} as the tracker owner; set RECIBASE_OWNER_SUBJECT to pin it",
+                claims.sub
+            ),
+            Ok(Claim::Rejected) => {
+                eprintln!(
+                    "login rejected: subject {:?} is not the configured owner",
+                    claims.sub
+                );
+                return text(403, "this account is not authorised");
+            }
+            Err(error) => {
+                eprintln!("owner lookup failed: {error}");
+                return text(500, "login unavailable");
+            }
         }
 
         let user = match self
@@ -162,6 +177,43 @@ impl Admin {
         }
     }
 
+    /// The owner's OIDC subject: the pinned one, or the adopted one from the
+    /// store. `None` until the first login has happened.
+    pub fn owner_subject(&self) -> Option<String> {
+        self.config
+            .oidc
+            .owner_subject
+            .clone()
+            .or_else(|| self.db.setting(crate::db::OWNER_SUBJECT).ok().flatten())
+    }
+
+    /// Whether `subject` may sign in: the pinned owner, the adopted one, or -
+    /// when nothing is pinned and none is adopted yet - this first subject,
+    /// which is recorded as the owner.
+    fn claim_owner(&self, subject: &str) -> Result<Claim, String> {
+        if let Some(configured) = &self.config.oidc.owner_subject {
+            return Ok(if configured == subject {
+                Claim::Owner
+            } else {
+                Claim::Rejected
+            });
+        }
+        match self
+            .db
+            .setting(crate::db::OWNER_SUBJECT)
+            .map_err(|error| error.to_string())?
+        {
+            Some(owner) if owner == subject => Ok(Claim::Owner),
+            Some(_) => Ok(Claim::Rejected),
+            None => {
+                self.db
+                    .set_setting(crate::db::OWNER_SUBJECT, subject)
+                    .map_err(|error| error.to_string())?;
+                Ok(Claim::Adopted)
+            }
+        }
+    }
+
     fn session_cookie(&self, id: &str, max_age: i64) -> String {
         let secure = if self.config.cookie_secure { "; Secure" } else { "" };
         format!(
@@ -193,6 +245,16 @@ impl Admin {
             },
         }
     }
+}
+
+/// The result of checking a login subject against the tracker's owner.
+enum Claim {
+    /// The configured or previously adopted owner.
+    Owner,
+    /// No owner was recorded; this subject has just been adopted.
+    Adopted,
+    /// Someone other than the owner.
+    Rejected,
 }
 
 /// `scheme://authority` of a URL, dropping any path.
