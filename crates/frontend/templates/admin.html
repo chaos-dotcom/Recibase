@@ -12,6 +12,19 @@
   </section>
 
   <section id="admin-tracker" hidden>
+    <form id="admin-log" class="log-form admin-log">
+      <input id="admin-meal" name="meal_name" type="text" list="admin-meal-options"
+             placeholder="Enter a meal or recipe" autocomplete="off" required>
+      <datalist id="admin-meal-options"></datalist>
+      <button type="submit" class="chooser-log">Enter</button>
+      <span class="admin-log-more">
+        <input id="admin-meal-date" type="date" aria-label="Date">
+        <input id="admin-meal-note" type="text" placeholder="Note (optional)" aria-label="Note">
+        <label class="log-featured"><input id="admin-meal-featured" type="checkbox"> Featured</label>
+      </span>
+      <span id="admin-log-error" class="log-error"></span>
+    </form>
+
     <div class="tracker-head">
       <h3>History</h3>
       <button id="admin-logout" class="chooser-link" type="button">Sign out</button>
@@ -44,6 +57,11 @@
     <button type="button" class="chip" data-query="&gt;6m">Not had in ages</button>
     <button type="button" class="chip" data-query="Slow, High Effort">Weekend project</button>
   </div>
+
+  <label class="chooser-reci-verse">
+    <input type="checkbox" id="chooser-reci-verse">
+    Also show meals from other servers
+  </label>
 
   <div class="chooser-search">
     <input id="tags-search" class="chooser-input" type="search" autocomplete="off"

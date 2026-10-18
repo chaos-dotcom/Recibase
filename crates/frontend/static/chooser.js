@@ -28,6 +28,21 @@
   var listHost = document.getElementById("meal-list");
   var helpToggleEl = document.getElementById("chooser-help-toggle");
   var helpEl = document.getElementById("chooser-help");
+  var reciVerseBox = document.getElementById("chooser-reci-verse");
+  var drawerBox = document.getElementById("reciVerse");
+
+  // Meals from other servers (the reci-verse) are hidden by default; the
+  // preference is shared with the drawer's own toggle.
+  var RECI_VERSE_KEY = "recibase-reci-verse";
+  var reciVerse = false;
+  try {
+    reciVerse = window.localStorage.getItem(RECI_VERSE_KEY) === "true";
+  } catch (error) {
+    reciVerse = false;
+  }
+  if (reciVerseBox) {
+    reciVerseBox.checked = reciVerse;
+  }
 
   var DEFAULT_QUERY = "!Not a Meal, !Pudding, !Lunch, <Pescatarian";
   var defaultDate = new Date(0);
@@ -199,6 +214,11 @@
 
   function filteredMeals() {
     var f = parseFilters();
+    var pool = reciVerse
+      ? meals
+      : meals.filter(function (meal) {
+          return !meal.peer;
+        });
     var anyFilter =
       f.include.length > 0 ||
       f.includeInherited.length > 0 ||
@@ -207,9 +227,9 @@
       f.beforeDates.length > 0 ||
       f.afterDates.length > 0;
     if (!anyFilter) {
-      return meals.slice();
+      return pool.slice();
     }
-    return meals.filter(function (meal) {
+    return pool.filter(function (meal) {
       return tagsMatchQuery(meal, f) && lastEatenMatchesQuery(meal.last_eaten, f);
     });
   }
@@ -635,7 +655,9 @@
     var empty = document.createElement("div");
     empty.className = "chooser-empty";
     var message = document.createElement("p");
-    message.textContent = "No meals match these filters.";
+    message.textContent = reciVerse
+      ? "No meals match these filters."
+      : "No meals match these filters. Turn on \u201cother servers\u201d to include peer meals.";
     var clear = document.createElement("button");
     clear.type = "button";
     clear.className = "chooser-link";
@@ -778,6 +800,38 @@
     presetEls.forEach(function (button) {
       var preset = button.getAttribute("data-query").trim().toLowerCase();
       button.setAttribute("aria-pressed", current === preset ? "true" : "false");
+    });
+  }
+
+  function setReciVerse(on) {
+    reciVerse = on;
+    try {
+      window.localStorage.setItem(RECI_VERSE_KEY, on ? "true" : "false");
+    } catch (error) {
+      // storage unavailable; the choice just will not persist
+    }
+    if (reciVerseBox) {
+      reciVerseBox.checked = on;
+    }
+    if (drawerBox && drawerBox.checked !== on) {
+      drawerBox.checked = on;
+      drawerBox.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    render();
+  }
+
+  if (reciVerseBox) {
+    reciVerseBox.addEventListener("change", function () {
+      setReciVerse(reciVerseBox.checked);
+    });
+  }
+  if (drawerBox) {
+    drawerBox.addEventListener("change", function () {
+      reciVerse = drawerBox.checked;
+      if (reciVerseBox) {
+        reciVerseBox.checked = reciVerse;
+      }
+      render();
     });
   }
 

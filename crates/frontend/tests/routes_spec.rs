@@ -127,6 +127,8 @@ fn admin_page_renders_with_the_api_url() {
     assert!(body.contains("id=\"chooser\""), "{body}");
     assert!(body.contains("id=\"tags-search\""), "{body}");
     assert!(body.contains("id=\"meal-list\""), "{body}");
+    // Other servers' meals are off unless the reader opts in.
+    assert!(body.contains("id=\"chooser-reci-verse\""), "{body}");
     assert!(body.contains("/static/chooser.js"), "{body}");
     assert!(
         body.contains(stub.base_url()),

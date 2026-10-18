@@ -31,6 +31,13 @@
   var trackerEl = document.getElementById("admin-tracker");
   var logoutEl = document.getElementById("admin-logout");
   var historyEl = document.getElementById("admin-history");
+  var logFormEl = document.getElementById("admin-log");
+  var mealEl = document.getElementById("admin-meal");
+  var mealOptionsEl = document.getElementById("admin-meal-options");
+  var mealDateEl = document.getElementById("admin-meal-date");
+  var mealNoteEl = document.getElementById("admin-meal-note");
+  var mealFeaturedEl = document.getElementById("admin-meal-featured");
+  var logErrorEl = document.getElementById("admin-log-error");
 
   function today() {
     return new Date().toISOString().slice(0, 10);
@@ -284,6 +291,53 @@
     });
   }
 
+  // ---- logging a typed meal ----------------------------------------------
+
+  function loadMealNames() {
+    return fetch(api("meals/"))
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (meals) {
+        mealOptionsEl.innerHTML = "";
+        meals.forEach(function (meal) {
+          var option = document.createElement("option");
+          option.value = meal.name;
+          mealOptionsEl.appendChild(option);
+        });
+      })
+      .catch(function () {
+        // suggestions are a convenience; typing a name still works
+      });
+  }
+
+  function submitTypedMeal(event) {
+    event.preventDefault();
+    logErrorEl.textContent = "";
+    var name = mealEl.value.trim();
+    if (!name) {
+      return;
+    }
+    var submit = logFormEl.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    quickLog(name, {
+      eaten_on: mealDateEl.value || today(),
+      note: mealNoteEl.value,
+      featured: mealFeaturedEl.checked,
+    })
+      .then(function () {
+        mealEl.value = "";
+        mealNoteEl.value = "";
+        mealFeaturedEl.checked = false;
+        mealDateEl.value = today();
+        submit.disabled = false;
+      })
+      .catch(function (problem) {
+        logErrorEl.textContent = problem.message;
+        submit.disabled = false;
+      });
+  }
+
   // ---- start -------------------------------------------------------------
 
   call("admin/api/session")
@@ -301,6 +355,9 @@
       csrf = session.csrf;
       trackerEl.hidden = false;
       logoutEl.addEventListener("click", signOut);
+      mealDateEl.value = today();
+      logFormEl.addEventListener("submit", submitTypedMeal);
+      loadMealNames();
       window.recibaseTracker = { authenticated: true, log: quickLog, refresh: loadHistory };
       document.dispatchEvent(new CustomEvent("recibase:session"));
       loadHistory();

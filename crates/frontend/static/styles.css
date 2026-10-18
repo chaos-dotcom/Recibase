@@ -649,6 +649,16 @@ button.chip:hover {
   margin-top: 0.75rem;
 }
 
+.chooser-reci-verse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
 .chooser-meal {
   padding: 0.75rem 0.25rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -966,4 +976,16 @@ a.chooser-meal-name:hover {
 
 .history-empty {
   color: rgba(0, 0, 0, 0.6);
+}
+
+/* --- Manual "log a meal" form --- */
+.admin-log {
+  margin-bottom: 1.25rem;
+}
+
+.admin-log-more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
