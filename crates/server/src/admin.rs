@@ -44,6 +44,9 @@ impl Admin {
         let note = field("note").trim();
         let featured = matches!(field("featured"), "on" | "true" | "1");
 
+        if let Err(response) = self.reject_duplicate(user.id, meal_name, eaten_on, None) {
+            return response;
+        }
         let entry = NewMealEntry {
             user_id: user.id,
             meal_name,
@@ -142,6 +145,9 @@ impl Admin {
             .and_then(Value::as_bool)
             .unwrap_or(false);
 
+        if let Err(response) = self.reject_duplicate(user.id, meal_name, eaten_on, None) {
+            return response;
+        }
         let new = NewMealEntry {
             user_id: user.id,
             meal_name,
@@ -154,6 +160,74 @@ impl Admin {
             Err(error) => {
                 eprintln!("could not record a meal: {error}");
                 text(500, "could not record that meal")
+            }
+        }
+    }
+
+    /// `POST /admin/api/entries/update`: change an entry's date, note and
+    /// featured flag. A change that would collide with another entry of the same
+    /// meal on the same day is refused.
+    pub fn update_entry_json(&self, request: &Request, session: &Session, user: &User) -> Response {
+        if !self.origin_ok(request) || !self.csrf_header_ok(request, session) {
+            return text(403, "forbidden");
+        }
+        let Ok(body) = serde_json::from_slice::<Value>(&request.body) else {
+            return text(400, "invalid json");
+        };
+        let Some(id) = body.get("id").and_then(Value::as_i64).map(|id| id as i32) else {
+            return text(400, "missing entry id");
+        };
+        let eaten_on = body
+            .get("eaten_on")
+            .and_then(Value::as_str)
+            .and_then(|value| NaiveDate::parse_from_str(value, "%Y-%m-%d").ok())
+            .unwrap_or_else(|| Local::now().date_naive());
+        let note = body
+            .get("note")
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|value| !value.is_empty());
+        let featured = body
+            .get("featured")
+            .and_then(Value::as_bool)
+            .unwrap_or(false);
+
+        let existing = match self.db.entry(user.id, id) {
+            Ok(Some(entry)) => entry,
+            Ok(None) => return text(404, "no such entry"),
+            Err(error) => {
+                eprintln!("could not load an entry: {error}");
+                return text(500, "could not save that entry");
+            }
+        };
+        if let Err(response) =
+            self.reject_duplicate(user.id, &existing.meal_name, eaten_on, Some(id))
+        {
+            return response;
+        }
+        match self.db.update_entry(user.id, id, eaten_on, note, featured) {
+            Ok(_) => Response::json(&obj(vec![("ok", Value::Bool(true))])),
+            Err(error) => {
+                eprintln!("could not update an entry: {error}");
+                text(500, "could not save that entry")
+            }
+        }
+    }
+
+    /// Refuses an entry that would duplicate the same meal on the same day.
+    fn reject_duplicate(
+        &self,
+        user_id: i32,
+        meal_name: &str,
+        eaten_on: NaiveDate,
+        exclude_id: Option<i32>,
+    ) -> Result<(), Response> {
+        match self.db.entry_exists(user_id, meal_name, eaten_on, exclude_id) {
+            Ok(true) => Err(text(409, "That meal is already logged for that day")),
+            Ok(false) => Ok(()),
+            Err(error) => {
+                eprintln!("could not check for duplicates: {error}");
+                Err(text(500, "could not save that entry"))
             }
         }
     }

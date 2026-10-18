@@ -224,41 +224,48 @@
     return elapsed >= windowMonths ? 0 : 1 - elapsed / windowMonths;
   }
 
-  function bestScore(meal, now) {
+  function scoreParts(meal, now) {
     if (meal.tags.includes("Not a Meal")) {
-      return -Infinity;
+      return [{ label: "Not a meal", value: -Infinity }];
     }
-
-    var score = Math.log1p(meal.times_eaten) * weights.timesEaten;
-
+    var parts = [];
+    function add(label, value) {
+      if (value) {
+        parts.push({ label: label, value: value });
+      }
+    }
+    add("Times eaten", Math.log1p(meal.times_eaten) * weights.timesEaten);
     if (meal.featured !== null) {
-      score += weights.featured * linearDecay(monthsBetween(meal.featured, now), 6);
+      add("Featured recently", weights.featured * linearDecay(monthsBetween(meal.featured, now), 6));
     }
-
     if (meal.last_eaten !== null) {
       var monthsSince = monthsBetween(meal.last_eaten, now);
-      score -= weights.recentPenalty * linearDecay(monthsSince, 4);
+      add("Ate recently", -weights.recentPenalty * linearDecay(monthsSince, 4));
       if (monthsSince > 6) {
-        score += weights.stale * Math.min((monthsSince - 6) / 6, 1);
+        add("Not had in a while", weights.stale * Math.min((monthsSince - 6) / 6, 1));
       }
       if (meal.tags.includes("Popular") && monthsSince > 3) {
-        score += weights.popularRediscovery;
+        add("Popular rediscovery", weights.popularRediscovery);
       }
     } else {
-      score += weights.neverEaten;
+      add("Never tried", weights.neverEaten);
     }
-
     if (meal.tags.includes("New")) {
-      score += weights.newTag;
+      add("New", weights.newTag);
     }
     if (meal.tags.includes("Never Eaten")) {
-      score += weights.neverEatenTag;
+      add("Never Eaten", weights.neverEatenTag);
     }
     if (meal.tags.includes("Infrequent")) {
-      score += weights.infrequent;
+      add("Infrequent", weights.infrequent);
     }
+    return parts;
+  }
 
-    return score;
+  function bestScore(meal, now) {
+    return scoreParts(meal, now).reduce(function (sum, part) {
+      return sum + part.value;
+    }, 0);
   }
 
   function sortByBest(left, right) {
@@ -438,9 +445,112 @@
     parent.classList.add("notes-expanded");
   }
 
+  function todayIso() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function buildLogForm(host, meal) {
+    var form = document.createElement("form");
+    form.className = "log-form";
+
+    var date = document.createElement("input");
+    date.type = "date";
+    date.value = todayIso();
+    date.setAttribute("aria-label", "Date");
+
+    var note = document.createElement("input");
+    note.type = "text";
+    note.placeholder = "Note (optional)";
+    note.setAttribute("aria-label", "Note");
+
+    var featuredLabel = document.createElement("label");
+    featuredLabel.className = "log-featured";
+    var featured = document.createElement("input");
+    featured.type = "checkbox";
+    featuredLabel.appendChild(featured);
+    featuredLabel.appendChild(document.createTextNode(" Featured"));
+
+    var save = document.createElement("button");
+    save.type = "submit";
+    save.className = "chooser-log";
+    save.textContent = "Save";
+
+    var cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "chooser-link";
+    cancel.textContent = "Cancel";
+
+    form.appendChild(date);
+    form.appendChild(note);
+    form.appendChild(featuredLabel);
+    form.appendChild(save);
+    form.appendChild(cancel);
+
+    var error = document.createElement("span");
+    error.className = "log-error";
+
+    host.appendChild(form);
+    host.appendChild(error);
+
+    cancel.addEventListener("click", function () {
+      host.hidden = true;
+    });
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      save.disabled = true;
+      error.textContent = "";
+      window.recibaseTracker
+        .log(meal.name, { eaten_on: date.value, note: note.value, featured: featured.checked })
+        .then(function () {
+          host.hidden = true;
+          showStatus("Logged " + meal.name);
+        })
+        .catch(function (problem) {
+          save.disabled = false;
+          error.textContent = problem.message;
+        });
+    });
+  }
+
+  function scoreBreakdown(meal) {
+    var wrap = document.createElement("div");
+    wrap.className = "chooser-meal-score";
+
+    var score = document.createElement("span");
+    score.textContent = "Score " + bestScore(meal, bestSortReferenceDate).toFixed(1);
+
+    var why = document.createElement("button");
+    why.type = "button";
+    why.className = "chooser-why";
+    why.textContent = "why?";
+    why.setAttribute("aria-expanded", "false");
+
+    var parts = document.createElement("ul");
+    parts.className = "chooser-score-parts";
+    parts.hidden = true;
+    scoreParts(meal, bestSortReferenceDate).forEach(function (part) {
+      var item = document.createElement("li");
+      var sign = part.value < 0 ? "−" : "+";
+      item.textContent = part.label + " " + sign + Math.abs(part.value).toFixed(1);
+      parts.appendChild(item);
+    });
+    why.addEventListener("click", function () {
+      parts.hidden = !parts.hidden;
+      why.setAttribute("aria-expanded", String(!parts.hidden));
+    });
+
+    wrap.appendChild(score);
+    wrap.appendChild(why);
+    wrap.appendChild(parts);
+    return wrap;
+  }
+
   function mealRow(meal, showBestScore) {
     var row = document.createElement("li");
     row.className = "chooser-meal";
+
+    var head = document.createElement("div");
+    head.className = "chooser-meal-row";
 
     var main = document.createElement("div");
     main.className = "chooser-meal-main";
@@ -478,8 +588,9 @@
 
     var metaEl = document.createElement("span");
     metaEl.className = "chooser-meal-meta";
-    var meta = [];
-    meta.push(meal.last_eaten === null ? "Never eaten" : "Last eaten " + meal.last_eaten.toLocaleDateString());
+    var meta = [
+      meal.last_eaten === null ? "Never eaten" : "Last eaten " + meal.last_eaten.toLocaleDateString(),
+    ];
     if (meal.times_eaten > 0) {
       meta.push(meal.times_eaten + "×");
     }
@@ -487,35 +598,34 @@
     main.appendChild(metaEl);
 
     if (showBestScore) {
-      var scoreEl = document.createElement("span");
-      scoreEl.className = "chooser-meal-score";
-      scoreEl.textContent = "Score " + bestScore(meal, bestSortReferenceDate).toFixed(1);
-      main.appendChild(scoreEl);
+      main.appendChild(scoreBreakdown(meal));
     }
 
-    row.appendChild(main);
+    head.appendChild(main);
 
     if (window.recibaseTracker && window.recibaseTracker.authenticated) {
       var logEl = document.createElement("button");
       logEl.type = "button";
       logEl.className = "chooser-log";
       logEl.textContent = "Log";
-      logEl.setAttribute("aria-label", "Log " + meal.name + " for today");
+      logEl.setAttribute("aria-label", "Log " + meal.name);
+      head.appendChild(logEl);
+
+      var formHost = document.createElement("div");
+      formHost.className = "chooser-log-form";
+      formHost.hidden = true;
+      var built = false;
       logEl.addEventListener("click", function () {
-        logEl.disabled = true;
-        window.recibaseTracker
-          .log(meal.name)
-          .then(function () {
-            showStatus("Logged " + meal.name);
-          })
-          .catch(function (error) {
-            showStatus(error.message);
-          })
-          .finally(function () {
-            logEl.disabled = false;
-          });
+        if (!built) {
+          buildLogForm(formHost, meal);
+          built = true;
+        }
+        formHost.hidden = !formHost.hidden;
       });
-      row.appendChild(logEl);
+      row.appendChild(head);
+      row.appendChild(formHost);
+    } else {
+      row.appendChild(head);
     }
 
     return row;
@@ -557,6 +667,7 @@
     renderActiveChips();
     syncTagPalette(f);
     syncDateSelect();
+    syncPresets();
 
     listHost.innerHTML = "";
     if (loading) {
@@ -651,6 +762,24 @@
     helpEl.hidden = !helpEl.hidden;
     helpToggleEl.setAttribute("aria-expanded", String(!helpEl.hidden));
   });
+
+  var presetEls = Array.prototype.slice.call(
+    document.querySelectorAll("#chooser-presets [data-query]")
+  );
+  presetEls.forEach(function (button) {
+    button.addEventListener("click", function () {
+      var preset = button.getAttribute("data-query");
+      setQuery(query.trim().toLowerCase() === preset.trim().toLowerCase() ? "" : preset);
+    });
+  });
+
+  function syncPresets() {
+    var current = query.trim().toLowerCase();
+    presetEls.forEach(function (button) {
+      var preset = button.getAttribute("data-query").trim().toLowerCase();
+      button.setAttribute("aria-pressed", current === preset ? "true" : "false");
+    });
+  }
 
   function buildWeightsPanel() {
     weightConfig.forEach(function (entry) {

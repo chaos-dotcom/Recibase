@@ -30,6 +30,7 @@ fn tracker_routes_are_unavailable_without_configuration() {
         ("POST", "/admin/entries/delete"),
         ("POST", "/admin/api/entries"),
         ("POST", "/admin/api/entries/delete"),
+        ("POST", "/admin/api/entries/update"),
     ];
     for (method, path) in cases {
         let response = recibase_server::route(&request(method, path), &context());

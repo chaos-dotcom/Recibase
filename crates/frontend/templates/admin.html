@@ -7,42 +7,17 @@
   <p id="admin-status">Checking your sign-in&hellip;</p>
 
   <section id="admin-login" hidden>
-    <p>Sign in to log what you have eaten.</p>
+    <p>Sign in to log what you have eaten, and to see your history below.</p>
     <a id="admin-login-link" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" href="#">Sign in</a>
   </section>
 
   <section id="admin-tracker" hidden>
-    <form id="admin-add">
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-        <input class="mdl-textfield__input" name="meal_name" id="admin-meal" list="admin-meals" autocomplete="off" required>
-        <label class="mdl-textfield__label" for="admin-meal">Meal</label>
-      </div>
-      <datalist id="admin-meals"></datalist>
-
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-        <input class="mdl-textfield__input" type="date" name="eaten_on" id="admin-date">
-        <label class="mdl-textfield__label" for="admin-date">Date</label>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-        <input class="mdl-textfield__input" name="note" id="admin-note">
-        <label class="mdl-textfield__label" for="admin-note">Note</label>
-      </div>
-
-      <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">
-        <input type="checkbox" name="featured" class="mdl-checkbox__input">
-        <span class="mdl-checkbox__label">Featured</span>
-      </label>
-
-      <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Add meal</button>
-      <p id="admin-error" class="admin-error" hidden></p>
-    </form>
-
-    <h3>History</h3>
-    <ul id="admin-entries" class="admin-entries"></ul>
+    <div class="tracker-head">
+      <h3>History</h3>
+      <button id="admin-logout" class="chooser-link" type="button">Sign out</button>
+    </div>
+    <div id="admin-history" class="admin-history"></div>
   </section>
-
-  <button id="admin-logout" class="mdl-button mdl-js-button" hidden>Sign out</button>
 </div>
 
 <section id="chooser" data-api-url="{{ apiUrl }}">
@@ -61,6 +36,13 @@
         <li>Separate with commas, and mix with dates: <code>Vegan, &lt;2m</code>.</li>
       </ul>
     </div>
+  </div>
+
+  <div class="chooser-presets" id="chooser-presets" role="group" aria-label="Quick filters">
+    <button type="button" class="chip" data-query="Quick, Low Effort">Quick &amp; easy</button>
+    <button type="button" class="chip" data-query="Never Eaten">Never tried</button>
+    <button type="button" class="chip" data-query="&gt;6m">Not had in ages</button>
+    <button type="button" class="chip" data-query="Slow, High Effort">Weekend project</button>
   </div>
 
   <div class="chooser-search">

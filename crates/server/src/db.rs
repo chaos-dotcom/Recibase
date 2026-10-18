@@ -349,6 +349,64 @@ impl Db {
             .get_result(&mut conn)?)
     }
 
+    /// One entry the user owns.
+    pub fn entry(&self, user_id: i32, id: i32) -> DbResult<Option<MealEntryRow>> {
+        let mut conn = self.conn()?;
+        Ok(meal_entries::table
+            .find(id)
+            .filter(meal_entries::user_id.eq(user_id))
+            .select(MealEntryRow::as_select())
+            .first(&mut conn)
+            .optional()?)
+    }
+
+    /// Whether the user already has an entry for `meal_name` on `eaten_on`,
+    /// ignoring `exclude_id` (the entry being edited, if any).
+    pub fn entry_exists(
+        &self,
+        user_id: i32,
+        meal_name: &str,
+        eaten_on: NaiveDate,
+        exclude_id: Option<i32>,
+    ) -> DbResult<bool> {
+        let mut conn = self.conn()?;
+        let mut query = meal_entries::table
+            .filter(meal_entries::user_id.eq(user_id))
+            .filter(meal_entries::meal_name.eq(meal_name))
+            .filter(meal_entries::eaten_on.eq(eaten_on))
+            .into_boxed();
+        if let Some(id) = exclude_id {
+            query = query.filter(meal_entries::id.ne(id));
+        }
+        let count: i64 = query.count().get_result(&mut conn)?;
+        Ok(count > 0)
+    }
+
+    /// Updates the date, note and featured flag of an entry the user owns.
+    /// Returns whether a row matched.
+    pub fn update_entry(
+        &self,
+        user_id: i32,
+        id: i32,
+        eaten_on: NaiveDate,
+        note: Option<&str>,
+        featured: bool,
+    ) -> DbResult<bool> {
+        let mut conn = self.conn()?;
+        let updated = diesel::update(
+            meal_entries::table
+                .find(id)
+                .filter(meal_entries::user_id.eq(user_id)),
+        )
+        .set((
+            meal_entries::eaten_on.eq(eaten_on),
+            meal_entries::note.eq(note),
+            meal_entries::featured.eq(featured),
+        ))
+        .execute(&mut conn)?;
+        Ok(updated > 0)
+    }
+
     /// Deletes an entry the user owns. Returns whether a row was removed.
     pub fn delete_entry(&self, id: i32, user_id: i32) -> DbResult<bool> {
         let mut conn = self.conn()?;

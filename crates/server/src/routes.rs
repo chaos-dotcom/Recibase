@@ -266,7 +266,9 @@ fn admin_get(request: &Request, context: &Context) -> Option<Response> {
 fn admin_post(request: &Request, context: &Context) -> Option<Response> {
     let path = request.path.as_str();
     let is_form = path == "/admin/entries" || path == "/admin/entries/delete";
-    let is_api = path == "/admin/api/entries" || path == "/admin/api/entries/delete";
+    let is_api = path == "/admin/api/entries"
+        || path == "/admin/api/entries/delete"
+        || path == "/admin/api/entries/update";
     if path != "/auth/logout" && !is_form && !is_api {
         return None;
     }
@@ -288,6 +290,7 @@ fn admin_post(request: &Request, context: &Context) -> Option<Response> {
             "/admin/entries" => admin.add_entry(request, &session, &user),
             "/admin/entries/delete" => admin.delete_entry(request, &session, &user),
             "/admin/api/entries" => admin.add_entry_json(request, &session, &user),
+            "/admin/api/entries/update" => admin.update_entry_json(request, &session, &user),
             _ => admin.delete_entry_json(request, &session, &user),
         },
         None => not_signed_in(),

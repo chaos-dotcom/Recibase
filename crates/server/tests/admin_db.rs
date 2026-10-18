@@ -86,6 +86,56 @@ fn settings_round_trip() {
 }
 
 #[test]
+fn duplicates_are_detectable_and_entries_are_editable() {
+    let Some(url) = database_url() else {
+        eprintln!("skipping: DATABASE_URL is unset");
+        return;
+    };
+    let db = Db::connect(&url).expect("connect and migrate");
+    let subject = format!("dup-subject-{}", std::process::id());
+    let user = db.upsert_user(&subject, None).expect("upsert user");
+
+    let day = NaiveDate::from_ymd_opt(2024, 4, 1).unwrap();
+    let entry = db
+        .add_entry(&NewMealEntry {
+            user_id: user.id,
+            meal_name: "Carbonara",
+            eaten_on: day,
+            note: None,
+            featured: false,
+        })
+        .expect("add entry");
+
+    assert!(
+        db.entry_exists(user.id, "Carbonara", day, None)
+            .expect("exists"),
+        "the same meal on the same day is a duplicate"
+    );
+    assert!(
+        !db.entry_exists(user.id, "Carbonara", day, Some(entry.id))
+            .expect("exists"),
+        "excluding the entry makes it unique"
+    );
+    assert!(
+        !db.entry_exists(user.id, "Carbonara", NaiveDate::from_ymd_opt(2024, 4, 2).unwrap(), None)
+            .expect("exists"),
+        "a different day is not a duplicate"
+    );
+
+    let moved = NaiveDate::from_ymd_opt(2024, 4, 2).unwrap();
+    assert!(
+        db.update_entry(user.id, entry.id, moved, Some("moved"), true)
+            .expect("update")
+    );
+    let updated = db.entry(user.id, entry.id).expect("load").unwrap();
+    assert_eq!(updated.eaten_on, moved);
+    assert_eq!(updated.note.as_deref(), Some("moved"));
+    assert!(updated.featured);
+
+    db.delete_entry(entry.id, user.id).expect("delete");
+}
+
+#[test]
 fn the_database_drives_meals_usage() {
     let Some(url) = database_url() else {
         eprintln!("skipping: DATABASE_URL is unset");
