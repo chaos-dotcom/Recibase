@@ -1,370 +1,400 @@
 // The meal Chooser, ported into this frontend from
-// https://github.com/The-Silverwood-Institute/Chooser (MIT licensed).
-//
-// It reads the meal list from this deployment's API (`/meals/`), so the tags,
-// inherited tags, last-eaten dates and usage counts are live. The query syntax,
-// the weighted "Best" sort and the weight sliders are as in the original; the
-// one addition is a "Log" button on each meal, shown once the admin tracker is
-// signed in, which records today's dinner.
+// https://github.com/The-Silverwood-Institute/Chooser (MIT licensed) and given a
+// friendlier interface: tags are clickable chips, sorting and dates are menus,
+// and the active filters are shown as removable chips. The filtering, scoring
+// and sorting engine is unchanged.
 (function () {
   var root = document.getElementById("chooser");
   if (!root) {
     return;
   }
 
-  // The frontend aggregates our meals and the peers' into one list, with the
-  // usage scored from this deployment's own log.
   var mealsUrl = "/chooser/meals.json";
-  var tagsSearchEl = document.getElementById("tags-search");
-  var sortBoxEl = document.getElementById("sort-box");
-  var sortNameEl = document.getElementById("sort-name");
-  var statusEl = document.getElementById("chooser-status");
-  var tagListToggleEl = document.getElementById("tags-list-toggle");
-  var tagsListWrapperEl = document.getElementById("tags-list-wrapper");
-  var tagsListIconEl = document.getElementById("tags-list-icon");
-  var weightsListToggleEl = document.getElementById("weights-list-toggle");
-  var weightsListWrapperEl = document.getElementById("weights-list-wrapper");
-  var weightsListIconEl = document.getElementById("weights-list-icon");
+
+  var searchEl = document.getElementById("tags-search");
+  var sortEl = document.getElementById("chooser-sort");
+  var dateEl = document.getElementById("chooser-date");
+  var countEl = document.getElementById("chooser-count");
+  var clearEl = document.getElementById("chooser-clear");
+  var activeWrapEl = document.getElementById("chooser-active");
+  var activeChipsEl = document.getElementById("chooser-active-chips");
+  var tagsToggleEl = document.getElementById("tags-list-toggle");
+  var tagsWrapEl = document.getElementById("tags-list-wrapper");
+  var tagsListEl = document.getElementById("tags-list");
+  var weightsToggleEl = document.getElementById("weights-list-toggle");
+  var weightsWrapEl = document.getElementById("weights-list-wrapper");
   var weightsListEl = document.getElementById("weights-list");
-  var defaultSearchQuery = tagsSearchEl.value;
+  var statusEl = document.getElementById("chooser-status");
+  var listHost = document.getElementById("meal-list");
+  var helpToggleEl = document.getElementById("chooser-help-toggle");
+  var helpEl = document.getElementById("chooser-help");
+
+  var DEFAULT_QUERY = "!Not a Meal, !Pudding, !Lunch, <Pescatarian";
   var defaultDate = new Date(0);
   var BEST_SORT_INDEX = 6;
-  var defaultSortingMethodIndex = BEST_SORT_INDEX;
   var MS_PER_MONTH = 30.44 * 24 * 60 * 60 * 1000;
-  var bestScoreWeightConfig = [
-    { key: "timesEaten", label: "Times eaten", min: 0, max: 15, default: 5 },
-    { key: "recentPenalty", label: "Recent penalty", min: 0, max: 20, default: 8 },
-    { key: "featured", label: "Featured", min: 0, max: 15, default: 6 },
-    { key: "newTag", label: "New tag", min: 0, max: 10, default: 4 },
-    { key: "neverEaten", label: "Never tried", min: 0, max: 10, default: 3 },
-    { key: "neverEatenTag", label: "Never Eaten tag", min: 0, max: 10, default: 3 },
-    { key: "infrequent", label: "Infrequent tag", min: 0, max: 10, default: 2 },
-    { key: "stale", label: "Staleness bonus", min: 0, max: 15, default: 4 },
-    { key: "popularRediscovery", label: "Popular rediscovery", min: 0, max: 10, default: 2 },
+  var weightConfig = [
+    { key: "timesEaten", label: "Times eaten", min: 0, max: 15, value: 5 },
+    { key: "recentPenalty", label: "Recent penalty", min: 0, max: 20, value: 8 },
+    { key: "featured", label: "Featured", min: 0, max: 15, value: 6 },
+    { key: "newTag", label: "New tag", min: 0, max: 10, value: 4 },
+    { key: "neverEaten", label: "Never tried", min: 0, max: 10, value: 3 },
+    { key: "neverEatenTag", label: "Never Eaten tag", min: 0, max: 10, value: 3 },
+    { key: "infrequent", label: "Infrequent tag", min: 0, max: 10, value: 2 },
+    { key: "stale", label: "Staleness bonus", min: 0, max: 15, value: 4 },
+    { key: "popularRediscovery", label: "Popular rediscovery", min: 0, max: 10, value: 2 },
   ];
-  var bestScoreWeights = Object.fromEntries(
-    bestScoreWeightConfig.map(function (entry) {
-      return [entry.key, entry.default];
-    })
-  );
+  var weights = {};
+  weightConfig.forEach(function (entry) {
+    weights[entry.key] = entry.value;
+  });
   var hashStringRegex = /^(\d+)\-(.+)$/;
   var monthFilterRegex = /^([<>])([0-9]+)m$/;
-  var inactivityTimer;
-  var currentSortingMethodIndex = defaultSortingMethodIndex;
+
+  var query = DEFAULT_QUERY;
+  searchEl.value = query;
+  var meals = [];
+  var knownTags = [];
+  var normalisedTags = new Map();
+  var tagButtons = new Map();
+  var currentSortIndex = BEST_SORT_INDEX;
   var bestSortReferenceDate = new Date();
+  var hashTimer;
+  var statusTimer;
+  var loading = true;
 
   function showStatus(message) {
-    if (!statusEl) {
-      return;
-    }
     statusEl.textContent = message;
     statusEl.hidden = false;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(function () {
+      statusEl.hidden = true;
+    }, 4000);
   }
 
-  fetch(mealsUrl)
-    .then(function (resp) {
-      return resp.json();
-    })
-    .then(function (rawMeals) {
-      var meals = rawMeals.map(function (meal) {
-        meal.last_eaten = meal.last_eaten !== null ? new Date(meal.last_eaten) : null;
-        meal.featured = meal.featured !== null ? new Date(meal.featured) : null;
-        return meal;
-      });
-      var tags = new Set(meals.flatMap(function (meal) {
-        return meal.tags;
-      }));
-      var normalisedTags = new Map(
-        Array.from(tags).map(function (tag) {
-          return [tag.toLowerCase(), tag];
+  // ---- the query string is the single source of truth --------------------
+
+  function terms() {
+    return query
+      .split(",")
+      .map(function (term) {
+        return term.trim();
+      })
+      .filter(Boolean);
+  }
+
+  function setQuery(next) {
+    query = next;
+    searchEl.value = query;
+    render();
+    scheduleHash();
+  }
+
+  function hasTerm(term) {
+    var wanted = term.toLowerCase();
+    return terms().some(function (existing) {
+      return existing.toLowerCase() === wanted;
+    });
+  }
+
+  function removeTerm(term) {
+    var unwanted = term.toLowerCase();
+    setQuery(
+      terms()
+        .filter(function (existing) {
+          return existing.toLowerCase() !== unwanted;
         })
-      );
+        .join(", ")
+    );
+  }
 
-      document.getElementById("tags-list").textContent = Array.from(tags).join(", ");
+  function isExcludeTerm(term) {
+    return term.charAt(0) === "!" || term.charAt(0) === "-";
+  }
 
-      tagsSearchEl.addEventListener("input", function (ev) {
-        var searchQuery = ev.target.value;
-        var searchTerms = searchQuery
-          .toLowerCase()
-          .split(",")
-          .map(function (term) {
-            return term.trim();
-          })
-          .filter(function (term) {
-            return term;
-          });
-        var includeTags = searchTerms
-          .map(function (term) {
-            return normalisedTags.get(term);
-          })
-          .filter(function (res) {
-            return res != undefined;
-          });
-        var excludeTags = searchTerms
-          .filter(function (term) {
-            return term.startsWith("-") || term.startsWith("!");
-          })
-          .map(function (term) {
-            return term.slice(1);
-          })
-          .map(function (term) {
-            return normalisedTags.get(term);
-          })
-          .filter(function (res) {
-            return res != undefined;
-          });
-        var includeTagsWithInherited = searchTerms
-          .filter(function (term) {
-            return term.startsWith("<") && !term.startsWith("<!");
-          })
-          .map(function (term) {
-            return term.slice(1);
-          })
-          .map(function (term) {
-            return normalisedTags.get(term);
-          })
-          .filter(function (res) {
-            return res != undefined;
-          });
-        var monthFilters = searchTerms
-          .map(function (term) {
-            return monthFilterRegex.exec(term);
-          })
-          .filter(function (m) {
-            return m;
-          })
-          .map(function (match) {
-            var d = new Date();
-            d.setMonth(d.getMonth() - match[2]);
-            return [match[1], d];
-          });
-        var beforeDates = monthFilters
-          .filter(function (match) {
-            return match[0] === "<";
-          })
-          .map(function (m) {
-            return m[1];
-          });
-        var afterDates = monthFilters
-          .filter(function (match) {
-            return match[0] === ">";
-          })
-          .map(function (m) {
-            return m[1];
-          });
-        var excludeTagsWithInherited = searchTerms
-          .filter(function (term) {
-            return term.startsWith("<!");
-          })
-          .map(function (term) {
-            return term.slice(2);
-          })
-          .map(function (term) {
-            return normalisedTags.get(term);
-          })
-          .filter(function (res) {
-            return res != undefined;
-          });
+  function parseFilters() {
+    var lowered = terms().map(function (term) {
+      return term.toLowerCase();
+    });
+    var include = [];
+    var includeInherited = [];
+    var exclude = [];
+    var excludeInherited = [];
+    var beforeDates = [];
+    var afterDates = [];
 
-        renderFilteredMeals(
-          includeTags,
-          includeTagsWithInherited,
-          excludeTags,
-          excludeTagsWithInherited,
-          beforeDates,
-          afterDates
-        );
-        delayedSaveSearchQueryToHash(searchQuery);
-      });
-
-      var tagsMatchQuery = (
-        tags,
-        inheritedTags,
-        includeTags,
-        includeTagsWithInherited,
-        excludeTags,
-        excludeTagsWithInherited
-      ) =>
-        includeTags.every(function (tag) {
-          return tags.includes(tag);
-        }) &&
-        !tags.some(function (tag) {
-          return excludeTags.includes(tag);
-        }) &&
-        includeTagsWithInherited.every(function (tag) {
-          return tags.includes(tag) || inheritedTags.includes(tag);
-        }) &&
-        !(
-          tags.some(function (tag) {
-            return excludeTagsWithInherited.includes(tag);
-          }) ||
-          inheritedTags.some(function (tag) {
-            return excludeTagsWithInherited.includes(tag);
-          })
-        );
-
-      var lastEatenMatchesQuery = (lastEaten, beforeDates, afterDates) =>
-        lastEaten === null ||
-        (beforeDates.every(function (date) {
-          return lastEaten < date;
-        }) &&
-          afterDates.every(function (date) {
-            return lastEaten > date;
-          }));
-
-      var renderFilteredMeals = (
-        includeTags,
-        includeTagsWithInherited,
-        excludeTags,
-        excludeTagsWithInherited,
-        beforeDates,
-        afterDates
-      ) => {
-        var listEl = document.createElement("ul");
-        listEl.id = "meal-list";
-        listEl.classList.add("chooser-list");
-
-        var filterMeals = includeTags.length > 0 || excludeTags.length > 0;
-        document.getElementById("requires-box").hidden =
-          includeTags.length == 0 && includeTagsWithInherited.length == 0;
-        document.getElementById("requires").textContent = includeTags.concat(
-          includeTagsWithInherited.map(function (tag) {
-            return "<" + tag;
-          })
-        );
-        document.getElementById("excludes-box").hidden =
-          excludeTags.length == 0 && excludeTagsWithInherited.length == 0;
-        document.getElementById("excludes").textContent = excludeTags.concat(
-          excludeTagsWithInherited.map(function (tag) {
-            return "<!" + tag;
-          })
-        );
-
-        var visibleMeals = !filterMeals
-          ? meals
-          : meals.filter(function (meal) {
-              return (
-                tagsMatchQuery(
-                  meal.tags,
-                  meal.inherited_tags,
-                  includeTags,
-                  includeTagsWithInherited,
-                  excludeTags,
-                  excludeTagsWithInherited
-                ) && lastEatenMatchesQuery(meal.last_eaten, beforeDates, afterDates)
-              );
-            });
-
-        document.getElementById("count").textContent = visibleMeals.length;
-
-        bestSortReferenceDate = new Date();
-        var showBestScore = currentSortingMethodIndex === BEST_SORT_INDEX;
-
-        visibleMeals.sort(sortingMethods[currentSortingMethodIndex].sortFunction).forEach(function (meal) {
-          var titleEl = document.createElement("span");
-          titleEl.classList.add("chooser-meal-name");
-          titleEl.textContent = meal.name;
-
-          var tagsEl = document.createElement("span");
-          tagsEl.classList.add("chooser-meal-tags");
-          tagsEl.textContent = meal.tags.join(", ");
-
-          var wrapperEl = document.createElement("span");
-          wrapperEl.classList.add("chooser-meal-text");
-
-          var iconEls = getMealIcons(meal);
-          iconEls.forEach(function (iconEl) {
-            titleEl.appendChild(iconEl);
-          });
-
-          var mealSourceUrl = meal.source ? getMealUrl(meal.source) : null;
-
-          if (mealSourceUrl) {
-            var linkEl = document.createElement("a");
-            linkEl.href = mealSourceUrl;
-            if (meal.source.type == "online") {
-              linkEl.rel = "nofollow";
-            }
-            linkEl.appendChild(titleEl);
-            wrapperEl.appendChild(linkEl);
-          } else {
-            wrapperEl.appendChild(titleEl);
-          }
-
-          wrapperEl.appendChild(tagsEl);
-
-          if (meal.peer) {
-            var peerEl = document.createElement("span");
-            peerEl.classList.add("chooser-meal-source");
-            peerEl.textContent = "from " + meal.peer;
-            wrapperEl.appendChild(peerEl);
-          }
-
-          if (showBestScore) {
-            var scoreEl = document.createElement("span");
-            scoreEl.classList.add("chooser-meal-score");
-            scoreEl.textContent = "Score: " + bestScore(meal, bestSortReferenceDate).toFixed(1);
-            wrapperEl.appendChild(scoreEl);
-          }
-
-          if (meal.last_eaten !== null) {
-            var lastEatenEl = document.createElement("span");
-            lastEatenEl.classList.add("chooser-meal-score");
-            lastEatenEl.textContent = "Last eaten: " + meal.last_eaten.toLocaleDateString();
-            wrapperEl.appendChild(lastEatenEl);
-          }
-
-          if (window.recibaseTracker && window.recibaseTracker.authenticated) {
-            var logEl = document.createElement("button");
-            logEl.type = "button";
-            logEl.classList.add("chooser-log");
-            logEl.textContent = "Log";
-            logEl.addEventListener("click", function () {
-              window.recibaseTracker
-                .log(meal.name)
-                .then(function () {
-                  showStatus("Logged " + meal.name);
-                })
-                .catch(function (error) {
-                  showStatus(error.message);
-                });
-            });
-            wrapperEl.appendChild(logEl);
-          }
-
-          var listItemEl = document.createElement("li");
-          listItemEl.classList.add("chooser-meal");
-          listItemEl.appendChild(wrapperEl);
-          listEl.appendChild(listItemEl);
-        });
-
-        document.getElementById("meal-list").replaceWith(listEl);
-      };
-
-      if (location.hash.length > 0) {
-        loadSearchQueryFromHash();
+    lowered.forEach(function (term) {
+      var tag;
+      if (term.startsWith("<!")) {
+        tag = normalisedTags.get(term.slice(2));
+        if (tag) excludeInherited.push(tag);
+      } else if (term.startsWith("<")) {
+        tag = normalisedTags.get(term.slice(1));
+        if (tag) includeInherited.push(tag);
+      } else if (term.startsWith("!") || term.startsWith("-")) {
+        tag = normalisedTags.get(term.slice(1));
+        if (tag) exclude.push(tag);
+      } else {
+        var month = monthFilterRegex.exec(term);
+        if (month) {
+          var date = new Date();
+          date.setMonth(date.getMonth() - Number(month[2]));
+          (month[1] === "<" ? beforeDates : afterDates).push(date);
+        }
       }
-
-      reloadPage();
-      document.addEventListener("recibase:session", reloadPage);
     });
 
-  const getMealUrl = (source) => {
-    if (source.type == "recibase") {
-      return "https://reciba.se/" + source.permalink;
-    } else if (source.type == "google_drive") {
-      return "https://drive.google.com/file/d/" + source.id + "/view";
-    } else if (source.type == "online") {
-      return source.url;
-    } else {
-      console.warn('Unknown meal source type "' + source.type + '"');
-      return null;
+    lowered.forEach(function (term) {
+      var tag = normalisedTags.get(term);
+      if (tag) include.push(tag);
+    });
+
+    return {
+      include: include,
+      includeInherited: includeInherited,
+      exclude: exclude,
+      excludeInherited: excludeInherited,
+      beforeDates: beforeDates,
+      afterDates: afterDates,
+    };
+  }
+
+  // ---- filtering ---------------------------------------------------------
+
+  function tagsMatchQuery(meal, f) {
+    var mealTags = meal.tags || [];
+    var inherited = meal.inherited_tags || [];
+    return (
+      f.include.every(function (tag) {
+        return mealTags.includes(tag);
+      }) &&
+      !mealTags.some(function (tag) {
+        return f.exclude.includes(tag);
+      }) &&
+      f.includeInherited.every(function (tag) {
+        return mealTags.includes(tag) || inherited.includes(tag);
+      }) &&
+      !(
+        mealTags.some(function (tag) {
+          return f.excludeInherited.includes(tag);
+        }) ||
+        inherited.some(function (tag) {
+          return f.excludeInherited.includes(tag);
+        })
+      )
+    );
+  }
+
+  function lastEatenMatchesQuery(lastEaten, f) {
+    return (
+      lastEaten === null ||
+      (f.beforeDates.every(function (date) {
+        return lastEaten < date;
+      }) &&
+        f.afterDates.every(function (date) {
+          return lastEaten > date;
+        }))
+    );
+  }
+
+  function filteredMeals() {
+    var f = parseFilters();
+    var anyFilter =
+      f.include.length > 0 ||
+      f.includeInherited.length > 0 ||
+      f.exclude.length > 0 ||
+      f.excludeInherited.length > 0 ||
+      f.beforeDates.length > 0 ||
+      f.afterDates.length > 0;
+    if (!anyFilter) {
+      return meals.slice();
     }
-  };
+    return meals.filter(function (meal) {
+      return tagsMatchQuery(meal, f) && lastEatenMatchesQuery(meal.last_eaten, f);
+    });
+  }
 
-  const getMealIcons = (meal) => {
+  // ---- scoring and sorting (ported, unchanged) ---------------------------
+
+  function monthsBetween(from, to) {
+    return (to - from) / MS_PER_MONTH;
+  }
+
+  function linearDecay(elapsed, windowMonths) {
+    return elapsed >= windowMonths ? 0 : 1 - elapsed / windowMonths;
+  }
+
+  function bestScore(meal, now) {
+    if (meal.tags.includes("Not a Meal")) {
+      return -Infinity;
+    }
+
+    var score = Math.log1p(meal.times_eaten) * weights.timesEaten;
+
+    if (meal.featured !== null) {
+      score += weights.featured * linearDecay(monthsBetween(meal.featured, now), 6);
+    }
+
+    if (meal.last_eaten !== null) {
+      var monthsSince = monthsBetween(meal.last_eaten, now);
+      score -= weights.recentPenalty * linearDecay(monthsSince, 4);
+      if (monthsSince > 6) {
+        score += weights.stale * Math.min((monthsSince - 6) / 6, 1);
+      }
+      if (meal.tags.includes("Popular") && monthsSince > 3) {
+        score += weights.popularRediscovery;
+      }
+    } else {
+      score += weights.neverEaten;
+    }
+
+    if (meal.tags.includes("New")) {
+      score += weights.newTag;
+    }
+    if (meal.tags.includes("Never Eaten")) {
+      score += weights.neverEatenTag;
+    }
+    if (meal.tags.includes("Infrequent")) {
+      score += weights.infrequent;
+    }
+
+    return score;
+  }
+
+  function sortByBest(left, right) {
+    var diff = bestScore(right, bestSortReferenceDate) - bestScore(left, bestSortReferenceDate);
+    if (diff !== 0) {
+      return diff;
+    }
+    var leftDate = left.last_eaten !== null ? left.last_eaten : defaultDate;
+    var rightDate = right.last_eaten !== null ? right.last_eaten : defaultDate;
+    if (leftDate - rightDate !== 0) {
+      return leftDate - rightDate;
+    }
+    return left.name.localeCompare(right.name);
+  }
+
+  function sortByLastEaten(ascending) {
+    return function (left, right) {
+      var leftDate = left.last_eaten !== null ? left.last_eaten : defaultDate;
+      var rightDate = right.last_eaten !== null ? right.last_eaten : defaultDate;
+      return ascending ? leftDate - rightDate : rightDate - leftDate;
+    };
+  }
+
+  var sortingMethods = [
+    { name: "Last Eaten ▲", sort: sortByLastEaten(true) },
+    { name: "Last Eaten ▼", sort: sortByLastEaten(false) },
+    {
+      name: "Times Eaten ▲",
+      sort: function (left, right) {
+        return left.times_eaten - right.times_eaten;
+      },
+    },
+    {
+      name: "Times Eaten ▼",
+      sort: function (left, right) {
+        return right.times_eaten - left.times_eaten;
+      },
+    },
+    {
+      name: "Name ▼",
+      sort: function (left, right) {
+        return left.name.localeCompare(right.name);
+      },
+    },
+    {
+      name: "Name ▲",
+      sort: function (left, right) {
+        return right.name.localeCompare(left.name);
+      },
+    },
+    { name: "Best", sort: sortByBest },
+  ];
+
+  // ---- rendering ---------------------------------------------------------
+
+  function buildSortOptions() {
+    sortingMethods.forEach(function (method, index) {
+      var option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = "Sort: " + method.name;
+      sortEl.appendChild(option);
+    });
+  }
+
+  function renderActiveChips() {
+    var current = terms();
+    activeWrapEl.hidden = current.length === 0;
+    activeChipsEl.innerHTML = "";
+    current.forEach(function (term) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (isExcludeTerm(term) ? " chip-exclude" : "");
+      chip.setAttribute("aria-label", "Remove filter " + term);
+      chip.appendChild(document.createTextNode(term));
+
+      var close = document.createElement("span");
+      close.className = "material-icons";
+      close.textContent = "close";
+      chip.appendChild(close);
+
+      chip.addEventListener("click", function () {
+        removeTerm(term);
+      });
+      activeChipsEl.appendChild(chip);
+    });
+  }
+
+  function buildTagPalette() {
+    tagsListEl.innerHTML = "";
+    tagButtons.clear();
+    knownTags.forEach(function (tag) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.textContent = tag;
+      chip.addEventListener("click", function () {
+        if (hasTerm(tag)) {
+          removeTerm(tag);
+        } else {
+          var next = terms();
+          next.push(tag);
+          setQuery(next.join(", "));
+        }
+      });
+      tagButtons.set(tag, chip);
+      tagsListEl.appendChild(chip);
+    });
+  }
+
+  function syncTagPalette(f) {
+    tagButtons.forEach(function (chip, tag) {
+      chip.setAttribute("aria-pressed", f.include.includes(tag) ? "true" : "false");
+    });
+  }
+
+  function syncDateSelect() {
+    var monthTerm = terms().find(function (term) {
+      return monthFilterRegex.test(term.toLowerCase());
+    });
+    dateEl.value = monthTerm ? monthTerm.toLowerCase() : "";
+  }
+
+  function getMealUrl(source) {
+    if (source.type === "recibase") {
+      return "https://reciba.se/" + source.permalink;
+    } else if (source.type === "google_drive") {
+      return "https://drive.google.com/file/d/" + source.id + "/view";
+    } else if (source.type === "online") {
+      return source.url;
+    }
+    console.warn('Unknown meal source type "' + source.type + '"');
+    return null;
+  }
+
+  function getMealIcons(meal) {
     var icons = [];
-
     if (meal.source !== null) {
       if (meal.source.type === "recibase") {
         icons.push("fa-registered");
@@ -374,224 +404,331 @@
         icons.push("fa-google-drive");
       }
     }
-
-    if (meal.dated_notes.length > 0) {
+    if ((meal.dated_notes || []).length > 0) {
       icons.push("fa-comments");
     }
-
-    return icons.map((iconName) => {
-      var i = document.createElement("img");
-      i.src = "/static/" + iconName + ".svg";
-      i.classList.add("icon");
-      i.setAttribute("icon-name", iconName);
-      if (iconName == "fa-comments") {
-        i.addEventListener("click", (event) => displayMealComments(event, meal.dated_notes));
+    return icons.map(function (iconName) {
+      var img = document.createElement("img");
+      img.src = "/static/" + iconName + ".svg";
+      img.classList.add("icon");
+      img.setAttribute("icon-name", iconName);
+      img.alt = "";
+      if (iconName === "fa-comments") {
+        img.title = "Notes";
+        img.addEventListener("click", function (event) {
+          event.preventDefault();
+          toggleNotes(event.target, meal.dated_notes);
+        });
       }
-      return i;
+      return img;
     });
-  };
+  }
 
-  const displayMealComments = (event, datedNotes) => {
-    if (!event.target.classList.contains("icon")) {
+  function toggleNotes(icon, datedNotes) {
+    var parent = icon.closest(".chooser-meal-main");
+    if (parent.classList.contains("notes-expanded")) {
+      return;
+    }
+    datedNotes.forEach(function (datedNote) {
+      var noteEl = document.createElement("span");
+      noteEl.classList.add("chooser-meal-note");
+      noteEl.textContent = datedNote.date + ": " + datedNote.note;
+      parent.appendChild(noteEl);
+    });
+    parent.classList.add("notes-expanded");
+  }
+
+  function mealRow(meal, showBestScore) {
+    var row = document.createElement("li");
+    row.className = "chooser-meal";
+
+    var main = document.createElement("div");
+    main.className = "chooser-meal-main";
+
+    var nameEl;
+    var url = meal.source ? getMealUrl(meal.source) : null;
+    if (url) {
+      nameEl = document.createElement("a");
+      nameEl.className = "chooser-meal-name";
+      nameEl.href = url;
+      if (meal.source.type === "online") {
+        nameEl.rel = "nofollow";
+      }
+    } else {
+      nameEl = document.createElement("span");
+      nameEl.className = "chooser-meal-name";
+    }
+    nameEl.appendChild(document.createTextNode(meal.name));
+    getMealIcons(meal).forEach(function (icon) {
+      nameEl.appendChild(icon);
+    });
+    main.appendChild(nameEl);
+
+    if (meal.peer) {
+      var peerEl = document.createElement("span");
+      peerEl.className = "chooser-meal-source";
+      peerEl.textContent = "from " + meal.peer;
+      main.appendChild(peerEl);
+    }
+
+    var tagsEl = document.createElement("span");
+    tagsEl.className = "chooser-meal-tags";
+    tagsEl.textContent = meal.tags.join(", ");
+    main.appendChild(tagsEl);
+
+    var metaEl = document.createElement("span");
+    metaEl.className = "chooser-meal-meta";
+    var meta = [];
+    meta.push(meal.last_eaten === null ? "Never eaten" : "Last eaten " + meal.last_eaten.toLocaleDateString());
+    if (meal.times_eaten > 0) {
+      meta.push(meal.times_eaten + "×");
+    }
+    metaEl.textContent = meta.join(" · ");
+    main.appendChild(metaEl);
+
+    if (showBestScore) {
+      var scoreEl = document.createElement("span");
+      scoreEl.className = "chooser-meal-score";
+      scoreEl.textContent = "Score " + bestScore(meal, bestSortReferenceDate).toFixed(1);
+      main.appendChild(scoreEl);
+    }
+
+    row.appendChild(main);
+
+    if (window.recibaseTracker && window.recibaseTracker.authenticated) {
+      var logEl = document.createElement("button");
+      logEl.type = "button";
+      logEl.className = "chooser-log";
+      logEl.textContent = "Log";
+      logEl.setAttribute("aria-label", "Log " + meal.name + " for today");
+      logEl.addEventListener("click", function () {
+        logEl.disabled = true;
+        window.recibaseTracker
+          .log(meal.name)
+          .then(function () {
+            showStatus("Logged " + meal.name);
+          })
+          .catch(function (error) {
+            showStatus(error.message);
+          })
+          .finally(function () {
+            logEl.disabled = false;
+          });
+      });
+      row.appendChild(logEl);
+    }
+
+    return row;
+  }
+
+  function renderEmpty() {
+    var empty = document.createElement("div");
+    empty.className = "chooser-empty";
+    var message = document.createElement("p");
+    message.textContent = "No meals match these filters.";
+    var clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "chooser-link";
+    clear.textContent = "Clear filters";
+    clear.addEventListener("click", function () {
+      setQuery("");
+    });
+    empty.appendChild(message);
+    empty.appendChild(clear);
+    return empty;
+  }
+
+  function renderSkeleton() {
+    var skeleton = document.createElement("div");
+    skeleton.className = "chooser-skeleton";
+    for (var i = 0; i < 6; i++) {
+      skeleton.appendChild(document.createElement("span"));
+    }
+    return skeleton;
+  }
+
+  function render() {
+    var visible = filteredMeals();
+    countEl.textContent = loading
+      ? "Loading meals…"
+      : visible.length + (visible.length === 1 ? " meal" : " meals");
+
+    var f = parseFilters();
+    renderActiveChips();
+    syncTagPalette(f);
+    syncDateSelect();
+
+    listHost.innerHTML = "";
+    if (loading) {
+      listHost.appendChild(renderSkeleton());
+      return;
+    }
+    if (visible.length === 0) {
+      listHost.appendChild(renderEmpty());
       return;
     }
 
-    event.preventDefault();
-
-    var parentEl = event.target.closest(".chooser-meal-text");
-    if (!parentEl.classList.contains("comments-expanded")) {
-      datedNotes.forEach((datedNote) => {
-        var noteEl = document.createElement("span");
-        noteEl.classList.add("chooser-meal-note");
-        noteEl.textContent = datedNote.date + ": " + datedNote.note;
-        parentEl.appendChild(noteEl);
-      });
-      parentEl.classList.add("comments-expanded");
-    }
-  };
-
-  const displayNoticeIfStillLoading = () => {
-    var stillLoadingIndicatorEl = document.getElementById("still-loading");
-
-    if (stillLoadingIndicatorEl) {
-      stillLoadingIndicatorEl.hidden = false;
-    }
-  };
-
-  const delayedSaveSearchQueryToHash = (searchQuery) => {
-    clearTimeout(inactivityTimer);
-
-    inactivityTimer = setTimeout(() => saveSearchQueryToHash(searchQuery), 500);
-  };
-
-  const saveSearchQueryToHash = (searchQuery) => {
-    if (searchQuery != defaultSearchQuery || currentSortingMethodIndex != defaultSortingMethodIndex) {
-      var hashString = currentSortingMethodIndex + "-" + searchQuery;
-      location.hash = encodeURIComponent(hashString);
-    }
-  };
-
-  const loadSearchQueryFromHash = () => {
-    var hashString = decodeURIComponent(location.hash.slice(1));
-    var match = hashString.match(hashStringRegex);
-
-    if (match !== null) {
-      currentSortingMethodIndex = parseInt(match[1], 10);
-      tagsSearchEl.value = match[2];
-    } else {
-      tagsSearchEl.value = hashString;
-    }
-  };
-
-  const reloadPage = () => {
-    tagsSearchEl.dispatchEvent(
-      new Event("input", {
-        bubbles: true,
-        cancelable: true,
-      })
-    );
-    sortNameEl.textContent = sortingMethods[currentSortingMethodIndex].name;
-  };
-
-  const monthsBetween = (from, to) => (to - from) / MS_PER_MONTH;
-
-  const linearDecay = (elapsed, windowMonths) =>
-    elapsed >= windowMonths ? 0 : 1 - elapsed / windowMonths;
-
-  const bestScore = (meal, now = new Date()) => {
-    if (meal.tags.includes("Not a Meal")) {
-      return -Infinity;
-    }
-
-    var score = Math.log1p(meal.times_eaten) * bestScoreWeights.timesEaten;
-
-    if (meal.featured !== null) {
-      var monthsFeatured = monthsBetween(meal.featured, now);
-      score += bestScoreWeights.featured * linearDecay(monthsFeatured, 6);
-    }
-
-    if (meal.last_eaten !== null) {
-      var monthsSince = monthsBetween(meal.last_eaten, now);
-      score -= bestScoreWeights.recentPenalty * linearDecay(monthsSince, 4);
-      if (monthsSince > 6) {
-        score += bestScoreWeights.stale * Math.min((monthsSince - 6) / 6, 1);
-      }
-      if (meal.tags.includes("Popular") && monthsSince > 3) {
-        score += bestScoreWeights.popularRediscovery;
-      }
-    } else {
-      score += bestScoreWeights.neverEaten;
-    }
-
-    if (meal.tags.includes("New")) {
-      score += bestScoreWeights.newTag;
-    }
-    if (meal.tags.includes("Never Eaten")) {
-      score += bestScoreWeights.neverEatenTag;
-    }
-    if (meal.tags.includes("Infrequent")) {
-      score += bestScoreWeights.infrequent;
-    }
-
-    return score;
-  };
-
-  const sortByBest = (left, right) => {
-    var scoreDiff = bestScore(right, bestSortReferenceDate) - bestScore(left, bestSortReferenceDate);
-    if (scoreDiff !== 0) {
-      return scoreDiff;
-    }
-
-    var leftDate = left.last_eaten !== null ? left.last_eaten : defaultDate;
-    var rightDate = right.last_eaten !== null ? right.last_eaten : defaultDate;
-    var dateDiff = leftDate - rightDate;
-    if (dateDiff !== 0) {
-      return dateDiff;
-    }
-
-    return left.name.localeCompare(right.name);
-  };
-
-  const sortByLastEaten = (isAscending) => (left, right) => {
-    var leftDate = left.last_eaten !== null ? left.last_eaten : defaultDate;
-    var rightDate = right.last_eaten !== null ? right.last_eaten : defaultDate;
-
-    if (isAscending) {
-      return leftDate - rightDate;
-    } else {
-      return rightDate - leftDate;
-    }
-  };
-
-  const sortingMethods = [
-    { name: "Last Eaten ▲", sortFunction: sortByLastEaten(true) },
-    { name: "Last Eaten ▼", sortFunction: sortByLastEaten(false) },
-    {
-      name: "Times Eaten ▲",
-      sortFunction: (left, right) => left.times_eaten - right.times_eaten,
-    },
-    {
-      name: "Times Eaten ▼",
-      sortFunction: (left, right) => right.times_eaten - left.times_eaten,
-    },
-    { name: "Name ▼", sortFunction: (left, right) => left.name.localeCompare(right.name) },
-    { name: "Name ▲", sortFunction: (left, right) => right.name.localeCompare(left.name) },
-    { name: "Best", sortFunction: sortByBest },
-  ];
-
-  const changeSortingMethod = () => {
-    currentSortingMethodIndex = (currentSortingMethodIndex + 1) % sortingMethods.length;
-    reloadPage();
-    delayedSaveSearchQueryToHash(tagsSearchEl.value);
-  };
-
-  sortBoxEl.addEventListener("click", changeSortingMethod);
-
-  setTimeout(displayNoticeIfStillLoading, 2000);
-
-  tagListToggleEl.addEventListener("click", () => {
-    tagsListWrapperEl.hidden = !tagsListWrapperEl.hidden;
-    tagsListIconEl.textContent = tagsListWrapperEl.hidden ? "►" : "▼";
-  });
-
-  const initWeightsPanel = () => {
-    bestScoreWeightConfig.forEach((entry) => {
-      var rowEl = document.createElement("div");
-      rowEl.classList.add("weight-row");
-
-      var labelEl = document.createElement("label");
-      labelEl.htmlFor = "weight-" + entry.key;
-      labelEl.textContent = entry.label;
-
-      var sliderEl = document.createElement("input");
-      sliderEl.type = "range";
-      sliderEl.id = "weight-" + entry.key;
-      sliderEl.min = entry.min;
-      sliderEl.max = entry.max;
-      sliderEl.step = 1;
-      sliderEl.value = bestScoreWeights[entry.key];
-
-      var valueEl = document.createElement("span");
-      valueEl.classList.add("weight-value");
-      valueEl.textContent = bestScoreWeights[entry.key];
-
-      sliderEl.addEventListener("input", () => {
-        bestScoreWeights[entry.key] = parseInt(sliderEl.value, 10);
-        valueEl.textContent = bestScoreWeights[entry.key];
-        reloadPage();
-      });
-
-      rowEl.appendChild(labelEl);
-      rowEl.appendChild(sliderEl);
-      rowEl.appendChild(valueEl);
-      weightsListEl.appendChild(rowEl);
+    bestSortReferenceDate = new Date();
+    var showBestScore = currentSortIndex === BEST_SORT_INDEX;
+    var list = document.createElement("ul");
+    list.className = "chooser-results";
+    visible.sort(sortingMethods[currentSortIndex].sort).forEach(function (meal) {
+      list.appendChild(mealRow(meal, showBestScore));
     });
-  };
+    listHost.appendChild(list);
+  }
 
-  weightsListToggleEl.addEventListener("click", () => {
-    weightsListWrapperEl.hidden = !weightsListWrapperEl.hidden;
-    weightsListIconEl.textContent = weightsListWrapperEl.hidden ? "►" : "▼";
+  // ---- hash persistence --------------------------------------------------
+
+  function scheduleHash() {
+    clearTimeout(hashTimer);
+    hashTimer = setTimeout(saveHash, 500);
+  }
+
+  function saveHash() {
+    if (query !== DEFAULT_QUERY || currentSortIndex !== BEST_SORT_INDEX) {
+      location.hash = encodeURIComponent(currentSortIndex + "-" + query);
+    }
+  }
+
+  function loadHash() {
+    var hash = decodeURIComponent(location.hash.slice(1));
+    if (!hash) {
+      return;
+    }
+    var match = hash.match(hashStringRegex);
+    if (match !== null) {
+      currentSortIndex = parseInt(match[1], 10);
+      query = match[2];
+    } else {
+      query = hash;
+    }
+    if (!sortingMethods[currentSortIndex]) {
+      currentSortIndex = BEST_SORT_INDEX;
+    }
+    searchEl.value = query;
+  }
+
+  // ---- controls ----------------------------------------------------------
+
+  searchEl.addEventListener("input", function (event) {
+    query = event.target.value;
+    render();
+    scheduleHash();
   });
 
-  initWeightsPanel();
+  sortEl.addEventListener("change", function () {
+    currentSortIndex = parseInt(sortEl.value, 10);
+    render();
+    scheduleHash();
+  });
+
+  dateEl.addEventListener("change", function () {
+    var kept = terms().filter(function (term) {
+      return !monthFilterRegex.test(term.toLowerCase());
+    });
+    if (dateEl.value) {
+      kept.push(dateEl.value);
+    }
+    setQuery(kept.join(", "));
+  });
+
+  clearEl.addEventListener("click", function () {
+    setQuery("");
+  });
+
+  tagsToggleEl.addEventListener("click", function () {
+    tagsWrapEl.hidden = !tagsWrapEl.hidden;
+    tagsToggleEl.setAttribute("aria-expanded", String(!tagsWrapEl.hidden));
+  });
+
+  weightsToggleEl.addEventListener("click", function () {
+    weightsWrapEl.hidden = !weightsWrapEl.hidden;
+    weightsToggleEl.setAttribute("aria-expanded", String(!weightsWrapEl.hidden));
+  });
+
+  helpToggleEl.addEventListener("click", function () {
+    helpEl.hidden = !helpEl.hidden;
+    helpToggleEl.setAttribute("aria-expanded", String(!helpEl.hidden));
+  });
+
+  function buildWeightsPanel() {
+    weightConfig.forEach(function (entry) {
+      var row = document.createElement("div");
+      row.className = "weight-row";
+
+      var label = document.createElement("label");
+      label.htmlFor = "weight-" + entry.key;
+      label.textContent = entry.label;
+
+      var slider = document.createElement("input");
+      slider.type = "range";
+      slider.id = "weight-" + entry.key;
+      slider.min = entry.min;
+      slider.max = entry.max;
+      slider.step = 1;
+      slider.value = weights[entry.key];
+
+      var value = document.createElement("span");
+      value.className = "weight-value";
+      value.textContent = weights[entry.key];
+
+      slider.addEventListener("input", function () {
+        weights[entry.key] = parseInt(slider.value, 10);
+        value.textContent = weights[entry.key];
+        render();
+      });
+
+      row.appendChild(label);
+      row.appendChild(slider);
+      row.appendChild(value);
+      weightsListEl.appendChild(row);
+    });
+  }
+
+  // ---- start -------------------------------------------------------------
+
+  buildSortOptions();
+  buildWeightsPanel();
+  sortEl.value = String(currentSortIndex);
+  loadHash();
+  render();
+
+  fetch(mealsUrl)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (rawMeals) {
+      meals = rawMeals.map(function (meal) {
+        meal.last_eaten = meal.last_eaten !== null ? new Date(meal.last_eaten) : null;
+        meal.featured = meal.featured !== null ? new Date(meal.featured) : null;
+        return meal;
+      });
+      knownTags = Array.from(
+        new Set(
+          meals.flatMap(function (meal) {
+            return meal.tags;
+          })
+        )
+      ).sort(function (a, b) {
+        return a.localeCompare(b);
+      });
+      knownTags.forEach(function (tag) {
+        normalisedTags.set(tag.toLowerCase(), tag);
+      });
+      buildTagPalette();
+      loading = false;
+      render();
+    })
+    .catch(function () {
+      loading = false;
+      countEl.textContent = "";
+      listHost.innerHTML = "";
+      var failed = document.createElement("div");
+      failed.className = "chooser-empty";
+      failed.textContent = "Could not load the meals. Try again in a moment.";
+      listHost.appendChild(failed);
+    });
+
+  document.addEventListener("recibase:session", render);
 })();

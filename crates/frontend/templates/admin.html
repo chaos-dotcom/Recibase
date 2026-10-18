@@ -46,42 +46,65 @@
 </div>
 
 <section id="chooser" data-api-url="{{ apiUrl }}">
-  <h2>What shall we cook?</h2>
-
-  <p>A portion of these meals are hosted on <a href="https://reciba.se/">Reciba.se</a>. Search by tag name and negate with <code>!Tag Name</code>. Search for implied tags with <code>&lt;Tag Name</code> e.g. <code>&lt;Vegetarian</code> includes all vegan meals. Use <code>&lt;2m</code> or <code>&gt;3m</code> to filter by date.</p>
-
-  <p id="tags-list-toggle"><span id="tags-list-icon">►</span> Tag list:</p>
-  <p id="tags-list-wrapper" hidden><em id="tags-list"></em></p>
-
-  <p id="weights-list-toggle"><span id="weights-list-icon">►</span> Weights:</p>
-  <div id="weights-list-wrapper" hidden><div id="weights-list"></div></div>
-
-  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label chooser-search">
-    <input class="mdl-textfield__input" type="text" id="tags-search" value="!Not a Meal, !Pudding, !Lunch, &lt;Pescatarian">
-    <label class="mdl-textfield__label" for="tags-search">Filter by Tags</label>
-  </div>
-
-  <div id="meta">
-    <div>
-      <div id="requires-box" hidden>
-        Requires: <em id="requires"></em>
-      </div>
-      <div id="excludes-box" hidden>
-        Excludes: <em id="excludes"></em>
-      </div>
-    </div>
-    <div class="right">
-      <div id="sort-box">Sort: <em id="sort-name">Best</em></div>
-      <div id="count-box">Count: <em id="count">0</em></div>
+  <div class="chooser-head">
+    <h2>What shall we cook?</h2>
+    <p class="chooser-lead">
+      Pick meals by tag, then log what you eat.
+      <button type="button" id="chooser-help-toggle" class="chooser-link" aria-expanded="false" aria-controls="chooser-help">How filtering works</button>
+    </p>
+    <div id="chooser-help" class="chooser-help" hidden>
+      <ul>
+        <li><code>Vegan</code> &mdash; must have this tag.</li>
+        <li><code>!Pudding</code> (or <code>-Pudding</code>) &mdash; must not have it.</li>
+        <li><code>&lt;Vegetarian</code> &mdash; or anything that implies it, e.g. vegan.</li>
+        <li><code>&lt;!Meat</code> &mdash; nor anything that implies it.</li>
+        <li>Separate with commas, and mix with dates: <code>Vegan, &lt;2m</code>.</li>
+      </ul>
     </div>
   </div>
 
-  <p id="chooser-status" hidden></p>
-
-  <div id="meal-list">
-    <p>Loading meals...</p>
-    <p id="still-loading" hidden>Loading can take a few seconds.</p>
+  <div class="chooser-search">
+    <input id="tags-search" class="chooser-input" type="search" autocomplete="off"
+           placeholder="Filter by tag &mdash; e.g. Vegan, !Spicy, &lt;Vegetarian"
+           aria-label="Filter meals by tag">
+    <select id="chooser-sort" class="chooser-select" aria-label="Sort meals"></select>
+    <select id="chooser-date" class="chooser-select" aria-label="Filter by when last eaten">
+      <option value="">Last eaten: any time</option>
+      <option value="&lt;1m">Eaten in the last month</option>
+      <option value="&lt;2m">Eaten in the last 2 months</option>
+      <option value="&lt;3m">Eaten in the last 3 months</option>
+      <option value="&lt;6m">Eaten in the last 6 months</option>
+      <option value="&gt;3m">Not eaten in 3 months</option>
+      <option value="&gt;6m">Not eaten in 6 months</option>
+    </select>
   </div>
+
+  <div id="chooser-active" class="chooser-active" hidden>
+    <span class="chooser-active-label">Filters</span>
+    <span id="chooser-active-chips" class="chooser-chips"></span>
+    <button type="button" id="chooser-clear" class="chooser-link">Clear</button>
+  </div>
+
+  <div class="chooser-meta">
+    <span id="chooser-count" class="chooser-count" aria-live="polite"></span>
+    <span class="chooser-meta-actions">
+      <button type="button" id="tags-list-toggle" class="chooser-link" aria-expanded="false">Tags</button>
+      <button type="button" id="weights-list-toggle" class="chooser-link" aria-expanded="false">Scoring</button>
+    </span>
+  </div>
+
+  <div id="tags-list-wrapper" class="chooser-panel" hidden>
+    <p class="chooser-panel-hint">Click a tag to include it; click it again to remove it.</p>
+    <div id="tags-list" class="chooser-chips"></div>
+  </div>
+  <div id="weights-list-wrapper" class="chooser-panel" hidden>
+    <p class="chooser-panel-hint">Tune what &ldquo;Best&rdquo; rewards.</p>
+    <div id="weights-list"></div>
+  </div>
+
+  <p id="chooser-status" class="chooser-status" role="status" hidden></p>
+
+  <div id="meal-list" class="chooser-results"></div>
 </section>
 
 <script defer src="/static/admin.js?v={{ config.frontendVersion }}"></script>
