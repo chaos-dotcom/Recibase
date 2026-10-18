@@ -37,6 +37,10 @@ pub struct Peer {
     pub site_url: String,
     /// The peer's `/recipes/` list, cached on the same 15-minute TTL as ours.
     pub recipes: Arc<CachedBackendCall<Value>>,
+    /// The peer's `/meals/` list, for the meals we do not hold: their tags and
+    /// source, so the chooser can list them. We still score them from *our*
+    /// usage, never theirs.
+    pub meals: Arc<CachedBackendCall<Value>>,
     /// The peer's API, for fetching one of their recipes to render here.
     backend: Arc<BackendClient>,
 }
@@ -49,10 +53,15 @@ impl Peer {
             let backend = Arc::clone(&backend);
             move || backend.get_json("recipes/?withRevision=true&withTags=true")
         }));
+        let meals = Arc::new(CachedBackendCall::new({
+            let backend = Arc::clone(&backend);
+            move || backend.get_json("meals/")
+        }));
         Peer {
             label,
             site_url: site_url.trim_end_matches('/').to_string(),
             recipes,
+            meals,
             backend,
         }
     }

@@ -203,6 +203,12 @@ fn dispatch(request: &Request, context: &Context) -> (Response, bool) {
         if path == "/meals/raw" {
             return (Response::plain(&controllers::meal_names()), true);
         }
+        if path == "/meals/usage" {
+            return (
+                Response::json(&controllers::meals_usage(&context.usage())),
+                true,
+            );
+        }
         if let Some(response) = admin_get(request, context) {
             return (response, true);
         }

@@ -29,6 +29,90 @@ fn homepage() {
     assert!(body_of(&response).contains("Recibase"));
 }
 
+/// The chooser's meal list mixes in the peers' meals, but scores every one from
+/// our own log, not the peer's, and never duplicates a meal we hold.
+#[test]
+fn chooser_meals_include_peers_scored_locally() {
+    let stub = StubApi::start();
+    stub.on(
+        "GET",
+        "/meals/",
+        Answer::json(
+            r#"[{"name":"Our Stew","tags":["Vegan"],"inherited_tags":[],"source":null,"dated_notes":[],"last_eaten":"2024-01-01","times_eaten":3,"featured":null}]"#,
+        ),
+    );
+    stub.on(
+        "GET",
+        "/meals/usage",
+        Answer::json(r#"{"Their Pie":{"times_eaten":2,"last_eaten":"2024-02-02","featured":null}}"#),
+    );
+    let peer = StubApi::start();
+    peer.on(
+        "GET",
+        "/meals/",
+        Answer::json(
+            r#"[{"name":"Their Pie","tags":["Pescatarian"],"inherited_tags":["Vegetarian"],"source":{"type":"recibase","permalink":"their-pie"},"dated_notes":[{"date":"2019-01-01","note":"theirs"}],"last_eaten":"2020-01-01","times_eaten":99,"featured":null},
+                {"name":"Our Stew","tags":["Vegan"],"inherited_tags":[],"source":null,"dated_notes":[],"last_eaten":null,"times_eaten":0,"featured":null}]"#,
+        ),
+    );
+    let app = App::with_peers(
+        stub.base_url().to_string(),
+        "latest".to_string(),
+        8080,
+        vec![Peer::new(
+            "Kit & Alex".to_string(),
+            peer.base_url().to_string(),
+            "https://reciba.se".to_string(),
+        )],
+    );
+
+    let response = app.handle(&get("/chooser/meals.json"));
+    assert_eq!(response.status, 200);
+    assert_eq!(header_or(&response, "Content-Type"), "application/json");
+    let parsed: serde_json::Value =
+        serde_json::from_str(&body_of(&response)).expect("the chooser meals are JSON");
+    let meals = parsed.as_array().expect("a JSON array");
+
+    let names: Vec<&str> = meals
+        .iter()
+        .filter_map(|meal| meal.get("name").and_then(|name| name.as_str()))
+        .collect();
+    assert!(names.contains(&"Our Stew"));
+    assert!(names.contains(&"Their Pie"));
+    assert_eq!(
+        names.iter().filter(|name| **name == "Our Stew").count(),
+        1,
+        "our stew is not duplicated by the peer"
+    );
+
+    let their_pie = meals
+        .iter()
+        .find(|meal| meal.get("name").and_then(|name| name.as_str()) == Some("Their Pie"))
+        .expect("their pie is present");
+    // Scored from our log, not the peer's 99/2020.
+    assert_eq!(
+        their_pie.get("times_eaten").and_then(serde_json::Value::as_i64),
+        Some(2)
+    );
+    assert_eq!(
+        their_pie.get("last_eaten").and_then(serde_json::Value::as_str),
+        Some("2024-02-02")
+    );
+    // Their notes are dropped; their tags and source are kept.
+    assert_eq!(
+        their_pie.get("dated_notes").and_then(serde_json::Value::as_array).map(Vec::len),
+        Some(0)
+    );
+    assert_eq!(
+        their_pie.get("inherited_tags").and_then(|v| v.as_array()).map(Vec::len),
+        Some(1)
+    );
+    assert_eq!(
+        their_pie.get("peer").and_then(serde_json::Value::as_str),
+        Some("reciba.se")
+    );
+}
+
 /// `/admin` is the meal tracker page, not a recipe: it renders the chooser and
 /// the tracker, and hands the API URL to their client scripts.
 #[test]

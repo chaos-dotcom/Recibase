@@ -36,8 +36,8 @@ impl Admin {
         };
 
         let meal_name = field("meal_name").trim();
-        if meal_name.is_empty() || !is_known_meal(meal_name) {
-            return text(400, "choose a meal from the list");
+        if !valid_meal_name(meal_name) {
+            return text(400, "choose a meal");
         }
         let eaten_on = NaiveDate::parse_from_str(field("eaten_on"), "%Y-%m-%d")
             .unwrap_or_else(|_| Local::now().date_naive());
@@ -124,8 +124,8 @@ impl Admin {
             .and_then(Value::as_str)
             .unwrap_or("")
             .trim();
-        if meal_name.is_empty() || !is_known_meal(meal_name) {
-            return text(400, "choose a meal from the list");
+        if !valid_meal_name(meal_name) {
+            return text(400, "choose a meal");
         }
         let eaten_on = body
             .get("eaten_on")
@@ -206,9 +206,14 @@ fn opt_value(value: Option<String>) -> Value {
     value.map(Value::String).unwrap_or(Value::Null)
 }
 
-/// Whether a name is one of the meals the corpus knows about.
-fn is_known_meal(name: &str) -> bool {
-    meal_stubs().iter().any(|meal| meal.name == name)
+/// Whether a name may be recorded.
+///
+/// The corpus constrains the form's suggestions, but a meal a peer's server
+/// serves is not in our corpus, so any reasonable non-empty name is accepted;
+/// a personal tracker should be able to count it too.
+fn valid_meal_name(name: &str) -> bool {
+    let name = name.trim();
+    !name.is_empty() && name.chars().count() <= 120
 }
 
 /// Every meal name, sorted, for the entry form's `datalist`.
@@ -337,7 +342,7 @@ fn escape(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{escape, is_known_meal};
+    use super::{escape, valid_meal_name};
 
     #[test]
     fn html_special_characters_are_escaped() {
@@ -345,8 +350,11 @@ mod tests {
     }
 
     #[test]
-    fn only_corpus_meals_are_known() {
-        assert!(is_known_meal("Carbonara"));
-        assert!(!is_known_meal("Definitely Not A Meal"));
+    fn any_reasonable_name_is_accepted() {
+        assert!(valid_meal_name("Carbonara"));
+        // A meal a peer's server serves is not in our corpus but is allowed.
+        assert!(valid_meal_name("Kit's Reci-Verse Curry"));
+        assert!(!valid_meal_name("   "));
+        assert!(!valid_meal_name(&"x".repeat(121)));
     }
 }

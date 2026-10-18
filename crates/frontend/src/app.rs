@@ -40,6 +40,7 @@ pub enum Route {
     Random,
     Contribute,
     Admin,
+    ChooserMeals,
     Static(String),
     Recipe(String),
 }
@@ -53,6 +54,7 @@ impl Route {
             "/random" => return Some(Route::Random),
             "/contribute" => return Some(Route::Contribute),
             "/admin" => return Some(Route::Admin),
+            "/chooser/meals.json" => return Some(Route::ChooserMeals),
             _ => {}
         }
         if let Some(filename) = path.strip_prefix("/static/") {
@@ -201,6 +203,7 @@ impl App {
             Route::Random => self.random(request),
             Route::Contribute => self.contribute(request),
             Route::Admin => self.render("admin.html", empty_context()),
+            Route::ChooserMeals => self.chooser_meals(),
             Route::Static(filename) => self.static_file(request, &filename),
             Route::Recipe(name) => self.recipe(request, &name),
         }
@@ -251,6 +254,84 @@ impl App {
             .header("Content-Type", "text/json")
             .header("Content-Length", body.len().to_string())
             .body(body.into_bytes())
+    }
+
+    /// `GET /chooser/meals.json`: the chooser's meal list. Our own `/meals/`,
+    /// plus every peer meal we do not hold, whose usage is taken from *our*
+    /// log so that a peer's recipe is scored personally rather than from the
+    /// peer's history.
+    fn chooser_meals(&self) -> Result<Response, RouteError> {
+        let own = self
+            .backend
+            .get_json("meals/")
+            .map_err(|_| RouteError::BackendUnavailable)?;
+        let usage = self
+            .backend
+            .get_json("meals/usage")
+            .map_err(|_| RouteError::BackendUnavailable)?;
+        let mut meals = own.as_array().cloned().unwrap_or_default();
+
+        let mut known: std::collections::HashSet<String> = meals
+            .iter()
+            .filter_map(|meal| meal.get("name").and_then(Value::as_str).map(str::to_string))
+            .collect();
+
+        for peer in &self.peers {
+            let Ok(list) = peer.meals.fetch_data() else {
+                continue;
+            };
+            let Some(entries) = list.as_array() else {
+                continue;
+            };
+            for entry in entries {
+                let Some(name) = entry.get("name").and_then(Value::as_str) else {
+                    continue;
+                };
+                if !known.insert(name.to_string()) {
+                    continue;
+                }
+                let mut copy = entry.clone();
+                if let Value::Object(map) = &mut copy {
+                    // The peer's tags and source stay; the usage is ours, so the
+                    // score is personal. Their notes go with it.
+                    let scored = usage.get(name);
+                    map.insert(
+                        "times_eaten".to_string(),
+                        scored
+                            .and_then(|u| u.get("times_eaten"))
+                            .cloned()
+                            .unwrap_or(Value::from(0)),
+                    );
+                    map.insert(
+                        "last_eaten".to_string(),
+                        scored
+                            .and_then(|u| u.get("last_eaten"))
+                            .cloned()
+                            .unwrap_or(Value::Null),
+                    );
+                    map.insert(
+                        "featured".to_string(),
+                        scored
+                            .and_then(|u| u.get("featured"))
+                            .cloned()
+                            .unwrap_or(Value::Null),
+                    );
+                    map.insert("dated_notes".to_string(), Value::Array(Vec::new()));
+                    map.insert(
+                        "peer".to_string(),
+                        Value::String(peer.display_name().to_string()),
+                    );
+                }
+                meals.push(copy);
+            }
+        }
+
+        let body =
+            serde_json::to_vec(&Value::Array(meals)).expect("JSON serialisation cannot fail");
+        Ok(Response::new(200)
+            .header("Content-Type", "application/json")
+            .header("Content-Length", body.len().to_string())
+            .body(body))
     }
 
     fn sitemap(&self, request: &Request) -> Result<Response, RouteError> {

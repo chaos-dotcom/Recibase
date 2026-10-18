@@ -12,8 +12,9 @@
     return;
   }
 
-  var apiBase = (root.getAttribute("data-api-url") || "/").replace(/\/+$/, "");
-  var mealsUrl = apiBase + "/meals/";
+  // The frontend aggregates our meals and the peers' into one list, with the
+  // usage scored from this deployment's own log.
+  var mealsUrl = "/chooser/meals.json";
   var tagsSearchEl = document.getElementById("tags-search");
   var sortBoxEl = document.getElementById("sort-box");
   var sortNameEl = document.getElementById("sort-name");
@@ -291,6 +292,13 @@
           }
 
           wrapperEl.appendChild(tagsEl);
+
+          if (meal.peer) {
+            var peerEl = document.createElement("span");
+            peerEl.classList.add("chooser-meal-source");
+            peerEl.textContent = "from " + meal.peer;
+            wrapperEl.appendChild(peerEl);
+          }
 
           if (showBestScore) {
             var scoreEl = document.createElement("span");

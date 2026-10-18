@@ -433,3 +433,11 @@ fn meals_raw_is_sorted_and_filtered_to_dinners() {
     assert!(names.contains(&"Baked Rigatoni with Aubergine"));
     let _ = to_string;
 }
+
+/// `/meals/usage` is the personal usage by name; empty without a log.
+#[test]
+fn meals_usage_is_empty_without_a_log() {
+    let response = route(&request("GET", "/meals/usage"), &context());
+    assert_eq!(response.status, 200);
+    assert_eq!(body(&response), "{}");
+}

@@ -513,7 +513,8 @@ p.recipe-also {
 
 #chooser .chooser-meal-tags,
 #chooser .chooser-meal-score,
-#chooser .chooser-meal-note {
+#chooser .chooser-meal-note,
+#chooser .chooser-meal-source {
   display: block;
   color: rgba(0, 0, 0, 0.54);
   font-size: 0.875rem;

@@ -1,13 +1,14 @@
 //! `RecipeController`, `MealsController` and `MetaController`.
 
 use chrono::{Duration, Local, Months, NaiveDate};
+use recibase_core::json::{obj, opt_date};
 use recibase_core::meal::{MealStub, MealStubWithUsageData};
 use recibase_core::misc::{Manifest, MenuEntry, docs_json};
 use recibase_core::recipe::RecipeDef;
 use recibase_core::scala_hash;
 use recibase_core::tag::Tag;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 pub struct Usage {
     pub entries: Vec<recibase_core::usage::MealLogEntry>,
@@ -144,6 +145,38 @@ pub fn meals_json(usage: &Usage) -> Value {
     let meals = meals_with_usage(usage);
     let order = scala_hash::set_order(&meals);
     Value::Array(order.iter().map(|&i| meals[i].to_json()).collect())
+}
+
+/// `GET /meals/usage`: the owner's personal usage for every meal they have
+/// logged, keyed by name.
+///
+/// This includes names the corpus does not hold - a meal a peer's server
+/// serves - so the frontend's chooser can score those from this deployment's
+/// own history rather than the peer's.
+pub fn meals_usage(usage: &Usage) -> Value {
+    let totals = usage.totals();
+    let last_eaten = usage.last_eaten();
+    let featured = usage.featured();
+    let names: BTreeSet<&String> = totals
+        .keys()
+        .chain(last_eaten.keys())
+        .chain(featured.keys())
+        .collect();
+    let mut map = serde_json::Map::new();
+    for name in names {
+        map.insert(
+            name.clone(),
+            obj(vec![
+                (
+                    "times_eaten",
+                    Value::from(totals.get(name).copied().unwrap_or(0)),
+                ),
+                ("last_eaten", opt_date(&last_eaten.get(name).copied())),
+                ("featured", opt_date(&featured.get(name).copied())),
+            ]),
+        );
+    }
+    Value::Object(map)
 }
 
 /// `MealsController.mealNames`.
