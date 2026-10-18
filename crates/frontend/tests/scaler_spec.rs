@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 
 use recibase_frontend::scaler::{
     Quantity, get_scale_factor, ingredients_copy_text, parse_quantity, scale_ingredient,
+    scale_method_step,
 };
 use serde_json::{Value, json};
 
@@ -398,6 +399,47 @@ mod test_scale_ingredient {
         }
 
         assert_scaled_to("1 per person", 2.0, "2 per persons");
+    }
+}
+
+mod test_scale_method_step {
+    use super::*;
+
+    #[test]
+    fn strips_braces_when_unscaled() {
+        let step = "Add {250ml} cold water and {2 tsp} sugar.";
+
+        assert_eq!(
+            scale_method_step(step, None),
+            "Add 250ml cold water and 2 tsp sugar."
+        );
+    }
+
+    #[test]
+    fn scales_and_highlights_quantities() {
+        let step = "Add {250ml} cold water and {2 tsp} sugar.";
+
+        assert_eq!(
+            scale_method_step(step, Some(2.0)),
+            "Add <span class=\"scaled\">500ml</span> cold water and \
+             <span class=\"scaled\">4 tsp</span> sugar."
+        );
+    }
+
+    #[test]
+    fn strips_unparseable_quantities_without_highlight() {
+        assert_eq!(
+            scale_method_step("Add {a pinch} of salt.", Some(2.0)),
+            "Add a pinch of salt."
+        );
+    }
+
+    #[test]
+    fn leaves_unmarked_text_unchanged() {
+        let step = "Cook for 4-5 minutes.";
+
+        assert_eq!(scale_method_step(step, Some(2.0)), step);
+        assert_eq!(scale_method_step(step, None), step);
     }
 }
 

@@ -439,6 +439,53 @@ fn recipe_scaling() {
     assert!(body.contains("Onion: 4"), "{body}");
 }
 
+/// `test_recipe_strips_method_quantity_syntax`.
+#[test]
+fn recipe_strips_method_quantity_syntax() {
+    let stub = StubApi::start();
+    let mut recipe = sample_recipe();
+    recipe.as_object_mut().expect("an object").insert(
+        "method".to_string(),
+        json!(["Add {250ml} cold water and {2 tsp} sugar."]),
+    );
+    stub.on("GET", "/recipes/test-recipe", Answer::json(recipe.to_string()));
+    let app = app_on(&stub);
+
+    let body = body_of(&app.handle(&get("/test-recipe")));
+
+    assert!(
+        body.contains("Add 250ml cold water and 2 tsp sugar."),
+        "{body}"
+    );
+    assert!(!body.contains("{250ml}"), "{body}");
+    assert!(!body.contains("class=\"scaled\""), "{body}");
+}
+
+/// `test_recipe_scales_method_quantities`.
+#[test]
+fn recipe_scales_method_quantities() {
+    let stub = StubApi::start();
+    let mut recipe = sample_recipe();
+    recipe.as_object_mut().expect("an object").insert(
+        "method".to_string(),
+        json!(["Add {250ml} cold water and {2 tsp} sugar."]),
+    );
+    stub.on("GET", "/recipes/test-recipe", Answer::json(recipe.to_string()));
+    let app = app_on(&stub);
+
+    let body = body_of(&app.handle(&get("/test-recipe?scale=2")));
+
+    assert!(
+        body.contains("<span class=\"scaled\">500ml</span>"),
+        "{body}"
+    );
+    assert!(
+        body.contains("<span class=\"scaled\">4 tsp</span>"),
+        "{body}"
+    );
+    assert!(!body.contains("{250ml}"), "{body}");
+}
+
 /// `test_homepage_backend_unavailable`. The Python patches
 /// `app.fetchRecipeList` to raise; here the API is not reachable at all.
 #[test]

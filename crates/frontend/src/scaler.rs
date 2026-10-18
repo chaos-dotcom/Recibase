@@ -1262,6 +1262,56 @@ pub fn parse_quantity(raw_quantity: &str) -> Option<Quantity> {
 // Scaling, merging and the copy text
 // ---------------------------------------------------------------------------
 
+/// `scaler.scale_method_step`: expands `{...}`-marked quantities in a method
+/// step. A set factor scales the quantity and wraps it in
+/// `<span class="scaled">`; without one, the braces are simply stripped. A
+/// marked value that does not parse as a quantity is stripped and left plain.
+pub fn scale_method_step(step: &str, factor: Option<f64>) -> String {
+    // `if not factor` is false only for a real, non-zero factor.
+    let factor = factor.filter(|value| *value != 0.0);
+
+    let mut out = String::with_capacity(step.len());
+    let mut rest = step;
+    while let Some(open) = rest.find('{') {
+        out.push_str(&rest[..open]);
+        let after = &rest[open + 1..];
+        match after.find('}') {
+            Some(close) => {
+                let inner = &after[..close];
+                // `\{([^{}]+)\}`: at least one character, no braces inside.
+                if inner.is_empty() || inner.contains('{') {
+                    out.push('{');
+                    rest = after;
+                } else {
+                    out.push_str(&scale_method_quantity(inner.trim(), factor));
+                    rest = &after[close + 1..];
+                }
+            }
+            None => {
+                out.push_str(&rest[open..]);
+                return out;
+            }
+        }
+    }
+    out.push_str(rest);
+    out
+}
+
+/// The replacement for one `{...}` marker: the scaled, highlighted quantity,
+/// or the raw text when unscaled or unparseable.
+fn scale_method_quantity(raw: &str, factor: Option<f64>) -> String {
+    let Some(factor) = factor else {
+        return raw.to_string();
+    };
+    match parse_quantity(raw) {
+        Some(quantity) => format!(
+            "<span class=\"scaled\">{}</span>",
+            quantity.scale(factor).to_text()
+        ),
+        None => raw.to_string(),
+    }
+}
+
 /// `scaler.scale_ingredient`: mutates one ingredient object, setting
 /// `quantity` to the scaled string and `scaled` to `true` when the quantity
 /// parsed.

@@ -458,7 +458,12 @@ impl App {
             return self.not_found();
         };
 
-        let scale_factor = match scaler::get_scale_factor(request.query_param("scale").as_deref()) {
+        // `app.py`: the method's brace-marked quantities are always expanded -
+        // scaled and highlighted when a factor is set, braces stripped when not.
+        let raw_scale = scaler::get_scale_factor(request.query_param("scale").as_deref());
+        scale_method(&mut recipe, raw_scale);
+
+        let scale_factor = match raw_scale {
             Some(factor) => {
                 scale_blocks(&mut recipe, factor);
                 factor
@@ -669,11 +674,23 @@ fn parse_recipe(text: &str) -> Result<Value, RouteError> {
     serde_json::from_str(text).map_err(|_| RouteError::BackendUnavailable)
 }
 
+/// `app.py`'s method-step scaling: each step's `{...}`-marked quantities are
+/// expanded in place.
+fn scale_method(recipe: &mut Value, factor: Option<f64>) {
+    let Some(method) = recipe.get_mut("method").and_then(Value::as_array_mut) else {
+        return;
+    };
+    for step in method.iter_mut() {
+        if let Some(text) = step.as_str() {
+            *step = Value::String(scaler::scale_method_step(text, factor));
+        }
+    }
+}
+
 /// `list(map(lambda b: dict(name=b['name'], ingredients=list(map(...))), ...))`:
 /// every block is replaced by an object with exactly those two keys, and
 /// each ingredient is scaled in place.
-fn scale_blocks(recipe: &mut serde_json::Value, factor: f64) {
-    let Some(blocks) = recipe
+fn scale_blocks(recipe: &mut serde_json::Value, factor: f64) {    let Some(blocks) = recipe
         .get_mut("ingredients_blocks")
         .and_then(Value::as_array_mut)
     else {
