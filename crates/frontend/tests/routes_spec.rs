@@ -406,6 +406,32 @@ fn recipe_page() {
     assert!(body.contains("Chop onion"), "{body}");
 }
 
+/// The recipe page carries the "Log meal" control, but it starts hidden: the
+/// script reveals it only after the API confirms the visitor's session.
+#[test]
+fn recipe_page_offers_a_log_meal_button_to_a_signed_in_visitor() {
+    let stub = StubApi::start();
+    let app = app_on(&stub);
+    let response = app.handle(&get("/test-recipe"));
+    assert_eq!(response.status, 200);
+    let body = body_of(&response);
+
+    let start = body
+        .find("id=\"recipe-log\"")
+        .expect("the recipe-log control is on the page");
+    let tag = &body[start..start + body[start..].find('>').expect("the tag ends")];
+    assert!(tag.contains("hidden"), "{tag}");
+    assert!(tag.contains("data-meal-name=\"Test Recipe\""), "{tag}");
+    assert!(
+        tag.contains(stub.base_url()),
+        "the API URL is embedded: {tag}"
+    );
+
+    assert!(body.contains("id=\"recipe-log-button\""), "{body}");
+    assert!(body.contains("Log meal"), "{body}");
+    assert!(body.contains("/static/recipe-log.js"), "{body}");
+}
+
 /// `test_recipe_lowercase_redirect`.
 #[test]
 fn recipe_lowercase_redirect() {

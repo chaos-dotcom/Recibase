@@ -23,6 +23,10 @@
     {% for link in also %}<a href="{{ link['url'] }}" rel="nofollow">{{ link['label'] }}</a>{% if not loop.last %}, {% endif %}{% endfor %} too.
   </p>
 {% endif %}
+<div id="recipe-log" class="recipe-log" data-api-url="{{ apiUrl }}" data-meal-name="{{ recipe['name'] }}" hidden>
+  <button id="recipe-log-button" class="chooser-log" type="button">Log meal</button>
+  <span id="recipe-log-status" class="recipe-log-status" role="status" aria-live="polite"></span>
+</div>
 {% if recipe['tags']|length > 0 %}
   <ul class="chips" aria-label="Recipe tags">
     {% for tag in recipe['tags'] %}
@@ -91,4 +95,5 @@
 {% elif recipe['source'] %}
   <em>Recipe Source: {{ recipe['source'] }}</em>
 {% endif %}
+<script defer src="/static/recipe-log.js?v={{ config.frontendVersion }}"></script>
 {% endblock %}

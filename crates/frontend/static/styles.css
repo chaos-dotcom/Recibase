@@ -773,6 +773,27 @@ a.chooser-meal-name:hover {
   font-size: 0.8125rem;
 }
 
+/* The recipe page's "Log meal" control, revealed once the API confirms the
+   visitor's session. */
+.recipe-log {
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.recipe-log:not([hidden]) {
+  display: flex;
+}
+
+.recipe-log-status {
+  color: #303f9f;
+  font-size: 0.8125rem;
+}
+
+.recipe-log-status.is-error {
+  color: #b3261e;
+}
+
 .chooser-log {
   flex: 0 0 auto;
   border: 0;
