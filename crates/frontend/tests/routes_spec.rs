@@ -826,6 +826,74 @@ fn recipe_copy_ingredients_are_premerged() {
     assert!(body.contains("2 Onion"), "{body}");
 }
 
+/// The API serves recipe prose as Markdown, and the page renders it - including
+/// when a scale factor makes the scaler mark up the method's quantities, whose
+/// `<span class="scaled">` has to survive the render rather than be escaped into
+/// visible text.
+#[test]
+fn recipe_prose_is_rendered_from_markdown() {
+    let stub = StubApi::start();
+    let mut recipe = sample_recipe();
+    recipe["method"] = json!([
+        "Simmer **gently** for {10} mins.",
+        "See [the notes](https://example.test/notes).",
+    ]);
+    recipe["notes"] = json!(["Best on the day, *not* the next."]);
+    stub.on(
+        "GET",
+        "/recipes/test-recipe",
+        Answer::json(recipe.to_string()),
+    );
+    let app = app_on(&stub);
+
+    // Unscaled: the braces are stripped and the Markdown is rendered.
+    let body = body_of(&app.handle(&get("/test-recipe")));
+    assert!(
+        body.contains("Simmer <strong>gently</strong> for 10 mins."),
+        "{body}"
+    );
+    assert!(
+        body.contains("<a href=\"https://example.test/notes\">the notes</a>"),
+        "{body}"
+    );
+    assert!(
+        body.contains("Best on the day, <em>not</em> the next."),
+        "{body}"
+    );
+    // The Markdown source is gone: no stray asterisks or brackets reach the page.
+    assert!(!body.contains("**gently**"), "{body}");
+    assert!(!body.contains("](https://example.test/notes)"), "{body}");
+
+    // Scaled: the scaler's span is rendered as markup, not escaped as text.
+    let body = body_of(&app.handle(&get("/test-recipe?scale=2")));
+    assert!(
+        body.contains("Simmer <strong>gently</strong> for <span class=\"scaled\">20</span> mins."),
+        "{body}"
+    );
+    assert!(!body.contains("&lt;span"), "{body}");
+}
+
+/// Ingredients stay structured objects, so the scaler keeps scaling them even
+/// though the method is Markdown.
+#[test]
+fn scaled_ingredients_still_scale_with_markdown_method() {
+    let stub = StubApi::start();
+    let mut recipe = sample_recipe();
+    recipe["method"] = json!(["Add the **butter**."]);
+    stub.on(
+        "GET",
+        "/recipes/test-recipe",
+        Answer::json(recipe.to_string()),
+    );
+    let app = app_on(&stub);
+
+    let body = body_of(&app.handle(&get("/test-recipe?scale=2")));
+    // 2 Onion -> 4, 50g Butter -> 100g.
+    assert!(body.contains("4"), "{body}");
+    assert!(body.contains("100g"), "{body}");
+    assert!(body.contains("Add the <strong>butter</strong>."), "{body}");
+}
+
 // -- the method and static-file cases the brief asks for -------------
 
 /// `HEAD /` carries the `Content-Length` of the `GET` and sends no body.

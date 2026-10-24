@@ -1,180 +1,176 @@
 ---
 name: add-recibase-recipe
-description: Add or edit Recibase recipes in the Rust port. Use when the user asks to add a recipe, convert recipe text into code, type up a MealStub, or work in crates/core/src/recipes/.
+description: Add or edit Recibase recipes. Use when the user asks to add a recipe, convert recipe text into markdown, type up a MealStub, or work in crates/core/recipes/.
 ---
 
 # Add a Recibase Recipe
 
 ## Overview
 
-Recipes are Rust modules in `crates/core/src/recipes/`, one file per Scala
-`case object ... extends Recipe`, each exposing `pub fn recipe() -> RecipeDef`.
+Every recipe is one markdown file in `crates/core/recipes/`. Nothing else is
+needed to add one: `crates/core/build.rs` finds the files at compile time and
+compiles them in, so there is no Rust to write and no registry to regenerate.
 
-This repo is a byte-for-byte port of the Scala Recibase: every ported recipe's
-JSON must equal the Scala capture (`crates/core/tests/recipe_corpus.rs`).
-Recipes that are *ours* (pulled from our own folder, not ported from the
-upstream Scala) carry a **chaos tag** so they can be told apart from that parity
-corpus — see below.
+`crates/core/src/md.rs` defines the format and parses it. The recipe's JSON is
+compared against the Scala capture by `crates/core/tests/recipe_corpus.rs`, so a
+recipe ported from the upstream Scala must encode byte for byte as it did.
 
 ## Workflow
 
-1. Read 1–2 nearby recipes for style (e.g. `beef_stroganoff.rs`,
-   `birthday_cake2.rs`).
-2. Create `snake_case.rs` matching the `object_name` (e.g. `BeefStroganoff` →
-   `beef_stroganoff.rs`).
-3. Fill in `pub fn recipe() -> RecipeDef` (template below).
-4. Set `created_at` with `NaiveDate::from_ymd_opt(year, month, day).unwrap()`;
-   when converting a `MealStub`, use `(2020, 4, 24)`.
-5. Pick tags from `Tag` in `crates/core/src/tag.rs`.
-6. Verify: `cargo build -p recibase-core` and `cargo test --workspace`.
+1. Read 1–2 nearby files for style (e.g. `dahl.md`,
+   `mexican_polenta_pie.md`).
+2. Copy one and edit it, or write a new `snake_case.md`.
+3. Verify: `cargo test -p recibase-core` and `cargo test --workspace`.
 
-## Chaos tag
+The filename must be `snake_case(object_name)` (`BeefStroganoff` →
+`beef_stroganoff.md`): it names the generated constant holding the file.
 
-A recipe that is ours (from our own folder, not ported from Kit's or Alex's
-upstream Scala) is marked with a chaos tag: a line in the module doc comment.
+## The file
 
-```rust
-//! `se.reciba.api.recipes.ExampleRecipe`.
-//! chaos-tag: casa-chaos
+```markdown
+---
+object_name: ExampleRecipe
+created_at: 2020-04-24
+permalink: example-recipe
+source: Gousto
+description: One sentence for the page.
+tagline: A short aside.
+image: https://i.reciba.se/example.jpg
+tags: Vegetarian, Low Effort
+chaos: true
+---
+
+# Example Recipe
+
+## Ingredients
+
+| Ingredient | Quantity | Prep | Notes |
+| --- | --- | --- | --- |
+| Onion | 1 | chopped | Optional |
+| Salt |
+
+### Topping
+
+| Ingredient | Quantity | Prep | Notes |
+| --- | --- | --- | --- |
+| Cheese | 100g | grated |
+
+## Method
+
+1. Chop the onion.
+2. Sprinkle the cheese over the top.
+
+## Notes
+
+- A tip.
 ```
 
-The marker is the literal `chaos-tag:` (`recibase_core::recipe::CHAOS_TAG`). It is
-a **comment**, so it is never serialised and the byte-for-byte comparison ignores
-it; `crates/core/tests/recipe_corpus.rs` additionally *skips* a tagged recipe, so
-ours do not need a Scala capture.
+### Blank template
 
-The filename must equal `snake_case(object_name)` (e.g. `ExampleRecipe` →
-`example_recipe.rs`) so the tag can be found. Do not tag a recipe that has to stay
-byte-identical to the upstream Scala.
+Copy this for a new recipe. Only `object_name` and `created_at` are required;
+delete the optional keys and the `### Section` / `## Notes` parts you do not
+need.
+
+```markdown
+---
+object_name: ExampleRecipe
+created_at: 2020-04-24
+tags:
+---
+
+# Example Recipe
+
+## Ingredients
+
+| Ingredient | Quantity | Prep | Notes |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
+## Method
+
+1. First step.
+```
+
+### Frontmatter
+
+| Key | Required | Notes |
+|-----|----------|-------|
+| `object_name` | yes | The Scala case object name; also the `edit` link's filename |
+| `created_at` | yes | `YYYY-MM-DD` |
+| `tags` | no | Comma-separated; must be exact `entry_name`s from `crates/core/src/tag.rs` (e.g. `Cold Weather`, not `ColdWeather`) |
+| `permalink` | no | Only when the slug from the name is wrong; otherwise omit |
+| `source`, `description`, `tagline` | no | Plain text; a URL in `source` is rendered as a link |
+| `image` | no | URL; 1080×1080 unless `image_width`/`image_height` say otherwise |
+| `chaos` | no | `true` marks a recipe as ours - see below |
+
+Omit a key rather than writing an empty value: absent means JSON `null`.
+
+The `# Title` is the recipe's `name`; it is not repeated in the frontmatter.
+
+### Ingredients
+
+One table per section; a `### Name` heading makes a named section (`Base`,
+`Topping`, `Dressing`). A recipe with no named sections has a single table
+directly under `## Ingredients`. A recipe can also mix the two: a table before
+any heading is the unnamed section (`fish_finger_katsu.md`).
+
+The four columns are the four fields of an ingredient, which is what keeps them
+separable - the scaler parses `Quantity`, `hasIngredient` matches `Ingredient`,
+and the clipboard merges on `Ingredient` + `Quantity`:
+
+- **Ingredient** - the name; required.
+- **Quantity** - `200g`, `1 tbsp`, `1 x 400g tin`, `A decent slosh`.
+- **Prep** - `chopped`, `finely diced`.
+- **Notes** - `Optional`, `Quantity is approximate`.
+
+Trailing empty cells can be left off: `| Salt |` is a name-only ingredient.
+Do not invent a quantity you do not have.
+
+### Method and notes
+
+The method is a numbered list, one step per item. Notes are a bullet list.
+Both are **Markdown**, rendered by the frontend (`crates/frontend/src/markdown.rs`)
+with the `markdown` crate.
+
+- A step is rendered inside an `<li>` and a note inside a `<p>`, so keep each one
+  as prose: a line starting `- `, `# ` or `1. ` is block syntax and nests a list
+  or heading inside the wrapper.
+- Links are `[text](url)`. Raw HTML still renders (it is trusted, and it is what
+  the scaler injects), but Markdown is the convention.
+- A continuation line must be indented by at least one space (three under a
+  method step and two under a note line up with the text). An unindented
+  continuation line is a build error.
+- For oven temperatures, write the instruction out (`200°C (390°F, gas mark 6)`)
+  - the previous Rust `celsius(200)` helper is gone.
+
+### Characters that need care
+
+- `|` inside a cell is written `\|`.
+- A leading or trailing space is written `&#32;`, because a table parser trims
+  them. The corpus contains a few real trailing spaces which the API returns, so
+  do not "fix" them.
+
+## The chaos marker
+
+A recipe that is ours (from our own folder, not ported from Kit's or Alex's
+upstream Scala) sets `chaos: true` in its frontmatter.
+
+It is not part of the recipe's JSON, so it never reaches the API; the
+byte-for-byte comparison *skips* a marked recipe, because ours have no Scala
+capture. Do not mark a recipe that has to stay byte-identical to the upstream
+Scala.
 
 ## Converting a MealStub
 
 When typing up a stub from `crates/core/src/meal_definitions.rs`:
 
 - Keep the stub's `name` and `tags` unless the user changes them.
-- Set `created_at` to `NaiveDate::from_ymd_opt(2020, 4, 24).unwrap()`.
+- Set `created_at` to `2020-04-24`.
 - **Delete the stub** from `declared_stubs()` and decrement `DECLARED_STUB_COUNT`
   (both in `meal_definitions.rs`), then update the `assert_eq!(DECLARED_STUB_COUNT, 90)`
   in `crates/core/tests/meal_definitions.rs`. Meals are `recipes()` ++ the
   declared stubs; leaving the stub in duplicates the meal
   (`no_two_meals_share_a_lowercase_name` fails).
-
-## Template
-
-```rust
-//! `se.reciba.api.recipes.ExampleRecipe`.
-
-use crate::recipe::RecipeDef;
-use crate::tag::Tag;
-use chrono::NaiveDate;
-
-pub fn recipe() -> RecipeDef {
-    RecipeDef {
-        object_name: "ExampleRecipe".to_string(),
-        name: "Example Recipe".to_string(),
-        created_at: NaiveDate::from_ymd_opt(2026, 7, 8).unwrap(),
-        permalink_override: None,
-        source: None,
-        description: None,
-        tagline: None,
-        notes: Vec::new(),
-        tags: vec![Tag::Scales, Tag::LowEffort],
-        image: None,
-        ingredients_blocks: crate::recipe::IngredientsBlock::simple(vec![
-            crate::recipe::Ingredient::q("Onion", "1"),
-            crate::recipe::Ingredient::q("Salt", "Pinch"),
-        ]),
-        method: vec![
-            format!("Preheat the oven to {}.", crate::utils::int_utils::celsius(180)),
-            "Serve immediately.".to_string(),
-        ],
-    }
-}
-```
-
-## Required fields (`RecipeDef`)
-
-| Field | Notes |
-|-------|-------|
-| `object_name` | Scala case object name; the `edit` link filename |
-| `name` | Display name; the permalink is derived from it automatically unless overridden |
-| `created_at` | `NaiveDate::from_ymd_opt(y, m, d).unwrap()` |
-| `tags` | `vec![Tag::…]` — insertion order is kept; the wire order is applied by `scala_hash` |
-| `ingredients_blocks` | `Vec<IngredientsBlock>` |
-| `method` | `Vec<String>`, one step per string |
-
-## Optional fields
-
-- `source` — attribution string (`Some("Gousto".to_string())`), not a URL; URLs
-  belong on MealStubs as `Source::Online(...)`.
-- `description`, `tagline` — `Option<String>`.
-- `notes` — `Vec<String>` of extra tips (HTML links allowed).
-- `image` — `Some(crate::recipe::Image::new("https://i.reciba.se/…"))`.
-- `permalink_override` — `Some("custom-slug".to_string())` only when the Scala
-  overrides `permalink` (or the auto slug is wrong); otherwise `None`, which
-  makes `RecipeDef::permalink()` use `from_raw_string(name)`.
-
-Ice cream recipes reuse the shared mixin in `crates/core/src/ice_cream.rs`
-(`generic_ingredients`, `generic_notes`, `generic_method_start`,
-`generic_method_end`) — there is no `IceCream` trait.
-
-## Ingredients
-
-### Single section
-
-```rust
-ingredients_blocks: crate::recipe::IngredientsBlock::simple(vec![
-    crate::recipe::Ingredient::q("Onion", "1"),
-    crate::recipe::Ingredient::q("Plain Flour", "200g"),
-]),
-```
-
-### Multiple sections
-
-Order sections as the user requests (e.g. cake before topping):
-
-```rust
-ingredients_blocks: vec![
-    crate::recipe::IngredientsBlock::new(Some("Cake"), vec![
-        crate::recipe::Ingredient::q("Plain Flour", "375g"),
-    ]),
-    crate::recipe::IngredientsBlock::new(Some("Topping"), vec![
-        crate::recipe::Ingredient::q("Walnuts", "60g"),
-    ]),
-],
-```
-
-### Ingredient constructors
-
-`Ingredient` fields are `name: String` and `quantity` / `prep` / `notes` as
-`Option<String>`. Use the helpers where they fit; fall back to `opt` for any
-other combination:
-
-```rust
-Ingredient::q("Onion", "1")                                // name + quantity
-Ingredient::qp("Cream Cheese", "250g", "soft")             // + prep
-Ingredient::qpn("Beetroot", "5", "peeled", "approximate")  // + notes
-Ingredient::opt("Honey", Some("1 tbsp"), None, Some("Optional"))
-Ingredient::new("Salt")                                    // name only
-```
-
-**Common mistake:** `q`/`qp`/`qpn` take `&str`, not `Option`, and there is no
-named-argument form. For an ingredient with a missing field use `opt`:
-`Ingredient::opt("Stock Cube", None, None, Some("Or 1 tbsp Bovril"))`. Do not
-invent a quantity you do not have.
-
-## Method steps
-
-- One step per `vec!` element.
-- Use British spelling (`centre`, `flavour`) to match existing recipes.
-- Write fractions as `1/2`, `1/4` — not `½`.
-- Prefix steps by section when helpful: `"Topping: …"`, `"Cake: …"`.
-- For oven temperatures use `crate::utils::int_utils`:
-
-```rust
-use crate::utils::int_utils::{celsius, simple_fan_instruction};
-format!("Preheat the oven to {}.", celsius(180)) // "180°C (355°F, gas mark 4)"
-```
 
 ## Tags
 
@@ -182,40 +178,55 @@ Pick from existing tags only (`crates/core/src/tag.rs`). The whole vocabulary:
 
 | Category | Tags |
 |----------|------|
-| Meal type | `Pudding`, `Lunch`, `Baking`, `Soup`, `Christmas`, `NonMeal` |
-| Dietary | `Vegan`, `VeganIsh`, `Vegetarian`, `VegetarianIsh`, `Pescatarian`, `GlutenFree` |
-| Vibe | `Stodge`, `Spicy`, `ColdWeather`, `HotWeather` |
-| Effort | `Slow`, `Quick`, `Scales`, `HighEffort`, `LowEffort` |
-| Storage | `Freezes`, `BetterNextDay` |
-| Marker | `AI` — renders the "carefully review this, AI was used" warning on the page |
+| Meal type | `Pudding`, `Lunch`, `Baking`, `Soup`, `Christmas`, `Not a Meal` |
+| Dietary | `Vegan`, `Vegan-ish`, `Vegetarian`, `Vegetarian-ish`, `Pescatarian`, `Gluten-Free` |
+| Dietary, Stephani's | `StephaniUnhealthy`, `Stephani-ish`, `Stephani` |
+| Vibe | `Stodge`, `Spicy`, `Cold Weather`, `Hot Weather` |
+| Effort | `Slow`, `Quick`, `Scales`, `High Effort`, `Low Effort` |
+| Storage | `Freezes`, `Better Next Day` |
+| Marker | `AI` - renders the "carefully review this, AI was used" warning on the page |
 
-Do **not** add `NeverEaten`, `Popular`, `Infrequent`, or `New` — those are
+`It's Made of Meat` also exists, but no recipe sets it today.
+
+Do **not** add `Never Eaten`, `Popular`, `Infrequent`, or `New` - those are
 applied automatically from usage data.
 
 Dietary tags are a chain and the parents are inherited: set only the most
-specific one. `Tag::Vegan` alone yields `VeganIsh`, `Vegetarian`,
-`VegetarianIsh` and `Pescatarian` in `inherited_tags` automatically
-(`Tag::all_parent_tags`); never list a parent explicitly. The chain is
-`Vegan` → `VeganIsh` → `Vegetarian` → `VegetarianIsh` → `Pescatarian`, and
-`GlutenFree` and `Pescatarian` are standalone (no parent).
+specific one. `Vegan` alone yields `Vegan-ish`, `Vegetarian`, `Vegetarian-ish`
+and `Pescatarian` in `inherited_tags` automatically. Never list a parent
+explicitly. The chain is `Vegan` → `Vegan-ish` → `Vegetarian` → `Vegetarian-ish`
+→ `Pescatarian`, and `Gluten-Free` and `Pescatarian` are standalone.
 
-Meat dishes use `VegetarianIsh` (as the upstream corpus does), not
-`Vegetarian`.
+Meat dishes use `Vegetarian-ish` (as the upstream corpus does), not
+`Vegetarian`. Baking/puddings use `Pudding` + `Baking` + `Vegetarian` when
+egg/dairy only.
 
-Baking/puddings use `Pudding` + `Baking` + `Vegetarian` when egg/dairy only.
+## Changing a ported recipe
+
+`crates/core/tests/recipe_corpus.rs` requires every ported recipe to encode byte
+for byte as the Scala capture did. Editing a ported recipe's prose or amounts
+breaks that on purpose, so record the difference in
+`crates/core/tests/fixtures/intentional_differences.txt`:
+
+```
+RoastBeetrootDahl notes  # markdown link
+```
+
+Name the object and the JSON field(s) that may differ. Everything else in that
+recipe is still compared byte for byte, and the test fails both when a difference
+is not listed and when a listed difference is no longer needed.
 
 ## Conventions
 
 - Match naming and tone of neighbouring recipes; don't over-comment.
-- Put ingredient alternatives or cut guidance in the ingredient `notes`, not in
-  `method`.
-- Keep the diff to one new file unless editing an existing recipe or converting
-  a MealStub.
-- `object_name` = Scala case object = filename stem of the `edit` link.
+- Put ingredient alternatives or cut guidance in the ingredient Notes column,
+  not in the method.
+- Keep the diff to one file unless editing an existing recipe or converting a
+  MealStub.
 
 ## Examples in this repo
 
-- Simple savoury: `beef_stroganoff.rs`, `chilli_con_carne.rs`
-- Multi-section baking: `crunch_chocolate_chip_coffee_cake.rs`, `birthday_cake2.rs`
-- With source/notes/image: `brownies.rs`
-- Ice cream: `pistachio_ice_cream.rs` (+ the shared `ice_cream.rs` mixin)
+- Simple savoury: `dahl.md`, `easy_pancakes.md`
+- Multi-section: `mexican_polenta_pie.md`, `creamy_leek_croustade.md`
+- With source/description/image: `blue_cheese_gnocchi.md`, `beetroot_risotto.md`
+- Our own (marked `chaos: true`): `miso_tofu_aubergine.md`, `kimchi_noodles.md`

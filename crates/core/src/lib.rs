@@ -1,8 +1,8 @@
 //! A port of the Recibase recipe API, byte-for-byte compatible with the Scala
 //! implementation in `Se/Recibase`.
 
-pub mod ice_cream;
 pub mod json;
+pub mod md;
 pub mod meal;
 pub mod meal_definitions;
 pub mod misc;

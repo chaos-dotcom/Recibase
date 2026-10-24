@@ -18,6 +18,7 @@ pub mod cached_backend;
 pub mod contribute;
 pub mod form;
 pub mod http;
+pub mod markdown;
 pub mod markupsafe;
 pub mod pages;
 pub mod peer;

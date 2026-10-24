@@ -1,11 +1,12 @@
-//! Generates the recipe module list and registry for `src/recipes/mod.rs`.
+//! Generates the recipe registry from `recipes/*.md`, for `src/recipes/mod.rs`.
 //!
-//! Rust has no reflection, so the corpus needs a hand-maintained module list and
-//! a registry that calls each recipe's `recipe()`. Rather than commit those two
-//! generated files and keep them in sync with the directory by hand (the old
-//! `tools/gen_recipes.py` did), this build script derives both from
-//! `src/recipes/*.rs` at compile time: adding, removing or renaming a recipe file
-//! is enough, and there is nothing to regenerate or commit.
+//! Rust has no reflection, so the corpus needs a hand-maintained list. Rather
+//! than commit a generated file and keep it in sync with `recipes/` by hand,
+//! this build script derives the list from `recipes/*.md` at compile time:
+//! adding, removing or renaming a recipe file is enough.
+//!
+//! Each file is `include_str!`d, so the recipes are compiled into the binary and
+//! still parsed without reading the filesystem at runtime.
 //!
 //! `mod.rs` `include!`s the emitted file, so `recipes::recipes()` and
 //! `recipes::chaos_recipes()` keep their paths.
@@ -19,109 +20,133 @@ use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-/// The `chaos-tag:` marker (see `recibase_core::recipe::CHAOS_TAG`): a recipe
-/// that is ours rather than part of Kit's and Alex's upstream corpus. It has no
-/// Scala capture, so the byte-for-byte test skips it and the API marks its list
-/// entry.
-const CHAOS_MARKER: &str = "chaos-tag:";
-
-/// One recipe module: the file, its module name (the filename stem) and, for a
-/// chaos-tagged recipe, its `object_name`.
-struct Module {
-    name: String,
-    object_name: Option<String>,
+/// A recipe file: its identifier (the filename stem) and its absolute path.
+struct RecipeFile {
+    ident: String,
     file: PathBuf,
 }
 
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
-    let recipes_dir = manifest_dir.join("src").join("recipes");
+    let recipes_dir = manifest_dir.join("recipes");
     // A directory is fingerprinted recursively, so adding or removing a recipe
     // reruns this script just as editing one does.
     println!("cargo:rerun-if-changed={}", recipes_dir.display());
 
-    let modules = recipe_modules(&recipes_dir);
+    let files = recipe_files(&recipes_dir);
     assert!(
-        !modules.is_empty(),
-        "{} contains no recipe modules",
+        !files.is_empty(),
+        "{} contains no recipe files",
         recipes_dir.display()
     );
 
-    // `chaos_recipes()` is checked against the sources by
-    // `tests/recipe_corpus.rs`; sort it so the generated file is deterministic.
-    let mut chaos: Vec<&str> = modules
-        .iter()
-        .filter_map(|module| module.object_name.as_deref())
-        .collect();
-    chaos.sort_unstable();
+    // The chaos marker is read here, at build time, so the generated list cannot
+    // drift from the files.
+    let chaos = chaos_object_names(&files);
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR"));
     let out = out_dir.join("recipes_generated.rs");
-    fs::write(&out, generate(&modules, &chaos))
+    fs::write(&out, generate(&files, &chaos))
         .unwrap_or_else(|e| panic!("write {}: {e}", out.display()));
 }
 
-/// Every `*.rs` in `dir` except `mod.rs`, sorted by filename.
-fn recipe_modules(dir: &Path) -> Vec<Module> {
-    let mut files: Vec<PathBuf> = fs::read_dir(dir)
-        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
-        .map(|entry| entry.expect("directory entry").path())
-        .filter(|path| {
-            path.extension().is_some_and(|ext| ext == "rs")
-                && path.file_name().and_then(|name| name.to_str()) != Some("mod.rs")
+/// The `object_name`s of the files marked `chaos: true`, sorted.
+fn chaos_object_names(files: &[RecipeFile]) -> Vec<String> {
+    let mut names: Vec<String> = files
+        .iter()
+        .filter_map(|file| {
+            let source = fs::read_to_string(&file.file)
+                .unwrap_or_else(|e| panic!("read {}: {e}", file.file.display()));
+            // A build script cannot depend on the crate it builds, so the marker
+            // is read here rather than through `recibase_core::md`.
+            has_chaos_marker(&source).then(|| frontmatter_value(&source, "object_name"))
         })
         .collect();
-    files.sort();
+    names.sort();
+    names
+}
 
-    files
+/// Whether the document's frontmatter marks it as ours.
+fn has_chaos_marker(source: &str) -> bool {
+    let Some(front) = frontmatter(source) else {
+        return false;
+    };
+    front.lines().any(|line| {
+        let Some((key, value)) = line.split_once(':') else {
+            return false;
+        };
+        key.trim() == "chaos" && !matches!(value.trim(), "" | "false" | "no")
+    })
+}
+
+/// The frontmatter block, without its `---` fences.
+fn frontmatter(source: &str) -> Option<&str> {
+    let rest = source.strip_prefix("---")?;
+    let rest = rest
+        .strip_prefix('\n')
+        .or_else(|| rest.strip_prefix("\r\n"))?;
+    let mut offset = 0;
+    for line in rest.split_inclusive('\n') {
+        let end = offset + line.len();
+        if line.trim_end() == "---" {
+            return Some(&rest[..offset]);
+        }
+        offset = end;
+    }
+    None
+}
+
+fn frontmatter_value(source: &str, key: &str) -> String {
+    frontmatter(source)
+        .and_then(|front| {
+            front.lines().find_map(|line| {
+                let (k, v) = line.split_once(':')?;
+                (k.trim() == key).then(|| v.trim().to_string())
+            })
+        })
+        .unwrap_or_else(|| panic!("a chaos recipe has no `{key}`"))
+}
+
+/// Every `*.md` in `dir`, sorted by filename.
+///
+/// The identifier is the stem, which is a valid Rust identifier only because the
+/// filenames are `snake_case`; it names the `const` holding the file's text.
+fn recipe_files(dir: &Path) -> Vec<RecipeFile> {
+    let mut paths: Vec<PathBuf> = fs::read_dir(dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| entry.expect("directory entry").path())
+        .filter(|path| path.extension().is_some_and(|ext| ext == "md"))
+        .collect();
+    paths.sort();
+
+    paths
         .into_iter()
         .map(|file| {
-            let source = fs::read_to_string(&file)
-                .unwrap_or_else(|e| panic!("read {}: {e}", file.display()));
-            let name = file
+            let stem = file
                 .file_stem()
                 .expect("recipe file has a stem")
                 .to_string_lossy()
                 .into_owned();
-            let object_name = source
-                .contains(CHAOS_MARKER)
-                .then(|| extract_object_name(&source, &file));
-            Module {
-                name,
-                object_name,
-                file,
-            }
+            assert!(
+                is_ident(&stem),
+                "{}: the filename must be a snake_case Rust identifier",
+                file.display()
+            );
+            RecipeFile { ident: stem, file }
         })
         .collect()
 }
 
-/// `object_name: "BeefStroganoff"` -> `BeefStroganoff`. A chaos-tagged file
-/// without one is a mistake (it would silently vanish from `chaos_recipes()`),
-/// so this panics rather than guessing.
-fn extract_object_name(source: &str, file: &Path) -> String {
-    const KEY: &str = "object_name:";
-    let after = source
-        .split_once(KEY)
-        .unwrap_or_else(|| {
-            panic!(
-                "{}: carries `{CHAOS_MARKER}` but has no `{KEY}`",
-                file.display()
-            )
-        })
-        .1
-        .trim_start();
-    let value = after
-        .strip_prefix('"')
-        .unwrap_or_else(|| panic!("{}: `{KEY}` is not a string literal", file.display()));
-    value
-        .split_once('"')
-        .unwrap_or_else(|| panic!("{}: unterminated `{KEY}` string", file.display()))
-        .0
-        .to_string()
+/// ASCII identifier: the filenames are ours, so this is a guard rather than a
+/// full Unicode check.
+fn is_ident(name: &str) -> bool {
+    let mut chars = name.chars();
+    matches!(chars.next(), Some(c) if c.is_ascii_alphabetic() || c == '_')
+        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
-/// The generated `include!`d by `src/recipes/mod.rs`.
-fn generate(modules: &[Module], chaos: &[&str]) -> String {
+/// The generated file, `include!`d by `src/recipes/mod.rs`.
+fn generate(files: &[RecipeFile], chaos: &[String]) -> String {
     let mut out = String::new();
 
     // A plain comment, not `//!`: this text is `include!`d into `mod.rs`, which
@@ -129,41 +154,41 @@ fn generate(modules: &[Module], chaos: &[&str]) -> String {
     // rejected (`E0753`).
     out.push_str(
         "// GENERATED by crates/core/build.rs - do not edit by hand.\n\n\
-         use crate::recipe::RecipeDef;\nuse std::sync::LazyLock;\n\n",
+         use crate::recipe::RecipeDef;\nuse std::sync::LazyLock;\n\n\
+         /// The markdown source of every recipe, in filename order.\n\
+         const SOURCES: &[(&str, &str)] = &[\n",
     );
-
-    // The module declarations. This text is `include!`d from `OUT_DIR`, which is
-    // the directory rustc resolves a bare `pub mod foo;` against, so `#[path]`
-    // pins each module to its file in `src/recipes`.
-    for module in modules {
+    for file in files {
         writeln!(
             out,
-            "#[path = {:?}]\npub mod {};",
-            module.file.display().to_string(),
-            module.name
+            "    ({:?}, include_str!({:?})),",
+            file.ident,
+            file.file.display().to_string()
         )
         .unwrap();
     }
-    out.push('\n');
+    out.push_str("];\n\n");
 
     out.push_str(
-        "pub fn recipes() -> &'static [RecipeDef] {\n\
+        "/// The corpus, parsed once on first use.\n\
+         pub fn recipes() -> &'static [RecipeDef] {\n\
          \x20   static RECIPES: LazyLock<Vec<RecipeDef>> = LazyLock::new(|| {\n\
-         \x20       vec![\n",
+         \x20       SOURCES\n\
+         \x20           .iter()\n\
+         \x20           .map(|(file, source)| crate::md::parse(source, file))\n\
+         \x20           .collect()\n\
+         \x20   });\n\
+         \x20   &RECIPES\n}\n\n",
     );
-    for module in modules {
-        writeln!(out, "            self::{}::recipe(),", module.name).unwrap();
-    }
-    out.push_str("        ]\n    });\n    &RECIPES\n}\n");
 
     out.push_str(
-        "\n/// The `object_name`s of recipes that are ours (the files carrying\n\
-         /// `chaos-tag:`). `recipe_corpus` skips them, and the API marks their\n\
+        "/// The `object_name`s of recipes that are ours rather than part of the\n\
+         /// upstream corpus. `recipe_corpus` skips them, and the API marks their\n\
          /// list entries so the frontend can tell them from the upstream corpus.\n\
          pub fn chaos_recipes() -> &'static [&'static str] {\n    &[\n",
     );
-    for name in chaos {
-        writeln!(out, "        \"{name}\",").unwrap();
+    for object_name in chaos {
+        writeln!(out, "        {object_name:?},").unwrap();
     }
     out.push_str("    ]\n}\n");
 

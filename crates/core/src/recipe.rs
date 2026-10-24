@@ -8,10 +8,10 @@ use chrono::NaiveDate;
 use serde_json::Value;
 
 pub const RECIPE_DIR: &str =
-    "https://github.com/chaos-dotcom/Recibase/tree/main/crates/core/src/recipes";
+    "https://github.com/chaos-dotcom/Recibase/tree/main/crates/core/recipes";
 
-/// `BeefStroganoff` -> `beef_stroganoff`, the recipe module filename in
-/// `src/recipes` (and so the `edit` link's filename).
+/// `BeefStroganoff` -> `beef_stroganoff`, the recipe document's filename in
+/// `recipes/` (and so the `edit` link's filename).
 pub fn snake_case(name: &str) -> String {
     let mut out = String::new();
     for (i, c) in name.chars().enumerate() {
@@ -23,12 +23,12 @@ pub fn snake_case(name: &str) -> String {
     out
 }
 
-/// Marker for recipes that are ours (Casa Chaos) rather than part of the
-/// upstream parity corpus of Kit's and Alex's recipes. It lives in a recipe
-/// file's module doc comment, e.g. `//! chaos-tag: casa-chaos`, so it is never
-/// serialised: the byte-for-byte comparison ignores the tag, and skips the
-/// tagged recipe (which has no Scala capture).
-pub const CHAOS_TAG: &str = "chaos-tag:";
+/// The frontmatter key that marks a recipe as ours (Casa Chaos) rather than part
+/// of the upstream parity corpus of Kit's and Alex's recipes. It is not part of
+/// `RecipeDef` and so is never serialised; `crates/core/build.rs` reads it to
+/// fill in `chaos_recipes()`, which the byte-for-byte comparison skips because
+/// those recipes have no Scala capture.
+pub const CHAOS_TAG: &str = "chaos";
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Ingredient {
@@ -208,7 +208,7 @@ impl RecipeDef {
     }
 
     pub fn edit(&self) -> String {
-        format!("{}/{}.rs", RECIPE_DIR, snake_case(&self.object_name))
+        format!("{}/{}.md", RECIPE_DIR, snake_case(&self.object_name))
     }
 
     /// A short, stable digest of the recipe's content, for telling "the same

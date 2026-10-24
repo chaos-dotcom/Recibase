@@ -490,6 +490,12 @@ impl App {
             }
         }
 
+        // The API serves recipe prose as Markdown. Rendering happens here, after
+        // the scaler has marked the method's quantities with
+        // `<span class="scaled">`, so those spans survive as trusted HTML.
+        render_method_markdown(&mut recipe);
+        let combined_notes = render_notes_markdown(combined_notes);
+
         let empty = serde_json::Value::Array(Vec::new());
         let blocks = recipe.get("ingredients_blocks").unwrap_or(&empty);
         let copy_ingredients = scaler::ingredients_copy_text(blocks);
@@ -685,6 +691,35 @@ fn scale_method(recipe: &mut Value, factor: Option<f64>) {
             *step = Value::String(scaler::scale_method_step(text, factor));
         }
     }
+}
+
+/// Renders each method step from Markdown into the HTML an `<li>` holds.
+///
+/// Runs after [`scale_method`]: the scaler's `<span class="scaled">` markers are
+/// trusted HTML that the renderer passes through.
+fn render_method_markdown(recipe: &mut Value) {
+    let Some(method) = recipe.get_mut("method").and_then(Value::as_array_mut) else {
+        return;
+    };
+    for step in method.iter_mut() {
+        if let Some(text) = step.as_str() {
+            *step = Value::String(crate::markdown::to_inline_html(text));
+        }
+    }
+}
+
+/// Renders each note from Markdown into the HTML the notes list holds.
+///
+/// A note is a fragment: a single paragraph loses its `<p>` wrapper because the
+/// template already supplies one, while a note with more structure keeps it.
+fn render_notes_markdown(notes: Vec<Value>) -> Vec<Value> {
+    notes
+        .into_iter()
+        .map(|note| match note.as_str() {
+            Some(text) => Value::String(crate::markdown::to_inline_html(text)),
+            None => note,
+        })
+        .collect()
 }
 
 /// `list(map(lambda b: dict(name=b['name'], ingredients=list(map(...))), ...))`:

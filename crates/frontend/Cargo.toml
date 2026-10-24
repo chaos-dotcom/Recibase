@@ -8,6 +8,9 @@ workspace = true
 
 [dependencies]
 chrono.workspace = true
+# Recipe prose (method steps, notes) is markdown in the API, rendered here
+# rather than in the server: the wire format is text, the presentation is ours.
+markdown.workspace = true
 minijinja.workspace = true
 serde_json.workspace = true
 # The API is reached over https in production, so unlike `recibase-submit` this

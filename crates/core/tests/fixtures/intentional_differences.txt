@@ -1,0 +1,20 @@
+# Recipes whose JSON deliberately differs from the Scala capture.
+#
+# The port's contract is that a hosted upstream recipe encodes exactly as the
+# Scala did. Two things legitimately break that byte-identity, and both are
+# recorded here so the difference is auditable rather than invisible:
+#
+#   * the prose (method steps, notes) is Markdown, not HTML or plain text, so a
+#     recipe carrying inline HTML has its markup rewritten;
+#   * a recipe has been corrected locally after the capture was taken.
+#
+# Every field of every recipe that is *not* listed here still has to match the
+# capture byte for byte, and the test fails if an entry stops being needed, so
+# the list cannot quietly rot.
+#
+# Format: <ObjectName> <field>[,<field>...]  # why
+# Fields are the top-level JSON keys of the recipe response.
+
+BeetrootRisotto notes  # markdown link; plus a local chaos note the capture predates
+MeltyMushroomWellingtons ingredients_blocks,method  # spinach amount and bake time corrected locally
+RoastBeetrootDahl notes  # markdown link
