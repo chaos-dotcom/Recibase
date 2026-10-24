@@ -26,7 +26,7 @@ pub fn recipe() -> RecipeDef {
         image: None,
         ingredients_blocks: crate::recipe::IngredientsBlock::simple(vec![
             crate::recipe::Ingredient::opt("Chestnut mushrooms", Some("250g"), Some("half sliced, half diced"), None),
-            crate::recipe::Ingredient::opt("Spinach", None, Some("torn up"), None),
+            crate::recipe::Ingredient::opt("Spinach", None, Some("400g"), None),
             crate::recipe::Ingredient::qp("Stilton", "220g", "finely chopped"),
             crate::recipe::Ingredient::opt("Garlic", None, Some("finely chopped"), None),
             crate::recipe::Ingredient::q("Butter", "knob"),
