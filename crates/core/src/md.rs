@@ -92,10 +92,10 @@ pub fn parse(source: &str, file: &str) -> RecipeDef {
                     }),
                 )
             }
-            "permalink" => recipe.permalink_override = Some(value),
-            "source" => recipe.source = Some(value),
-            "description" => recipe.description = Some(value),
-            "tagline" => recipe.tagline = Some(value),
+            "permalink" => recipe.permalink_override = some_if_set(value),
+            "source" => recipe.source = some_if_set(value),
+            "description" => recipe.description = some_if_set(value),
+            "tagline" => recipe.tagline = some_if_set(value),
             "image" => {
                 recipe.image = Some(match (image_width(front), image_height(front)) {
                     (Some(width), Some(height)) => Image::sized(&value, width, height),
@@ -301,10 +301,13 @@ fn split_frontmatter(source: &str) -> Option<(&str, &str)> {
 
 /// Decodes a cell or frontmatter value: the escapes a value cannot carry
 /// literally are undone here.
+///
+/// `\|` and `&#32;` are the two a table cell needs; `&amp;` keeps a literal `&`
+/// from being read as the start of an escape.
 fn decode(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     let mut rest = value;
-    while let Some(index) = rest.find('&') {
+    while let Some(index) = rest.find(['&', '\\']) {
         out.push_str(&rest[..index]);
         rest = &rest[index..];
         if let Some(decoded) = rest.strip_prefix("&#32;") {
@@ -313,13 +316,24 @@ fn decode(value: &str) -> String {
         } else if let Some(decoded) = rest.strip_prefix("&amp;") {
             out.push('&');
             rest = decoded;
+        } else if let Some(decoded) = rest.strip_prefix("\\|") {
+            out.push('|');
+            rest = decoded;
         } else {
-            out.push('&');
-            rest = &rest[1..];
+            // A lone `&` or `\` is itself.
+            let ch = rest.chars().next().expect("a character");
+            out.push(ch);
+            rest = &rest[ch.len_utf8()..];
         }
     }
     out.push_str(rest);
     out
+}
+
+/// A frontmatter value, or `None` when it is empty: `description:` with nothing
+/// after it means absent, the same as omitting the key.
+fn some_if_set(value: String) -> Option<String> {
+    (!value.is_empty()).then_some(value)
 }
 
 /// `| a | b |` -> ["a", "b"]. A trailing row of empty cells is allowed, so a row
@@ -487,6 +501,30 @@ chaos: true
         let recipe = parse(&source, "sample.md");
         assert_eq!(recipe.method[0], "Chop the onion.\nThen the garlic.");
         assert_eq!(recipe.notes[0], "A note.\nContinued.");
+    }
+
+    #[test]
+    fn a_pipe_survives_a_frontmatter_value_too() {
+        // The same `\|` escape the table uses, in the frontmatter.
+        let source = SAMPLE.replace("description: A description.", "description: One \\| two.");
+        let recipe = parse(&source, "sample.md");
+        assert_eq!(recipe.description.as_deref(), Some("One | two."));
+    }
+
+    #[test]
+    fn an_empty_frontmatter_value_means_absent() {
+        // `description:` with nothing after it is the same as omitting the key,
+        // which is what the API sends as JSON null.
+        let source = SAMPLE.replace("description: A description.", "description:");
+        let recipe = parse(&source, "sample.md");
+        assert_eq!(recipe.description, None);
+    }
+
+    #[test]
+    fn a_literal_backslash_and_ampersand_survive() {
+        let source = SAMPLE.replace("description: A description.", "description: a\\b &amp; c");
+        let recipe = parse(&source, "sample.md");
+        assert_eq!(recipe.description.as_deref(), Some("a\\b & c"));
     }
 
     #[test]

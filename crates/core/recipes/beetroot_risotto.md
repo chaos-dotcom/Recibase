@@ -34,5 +34,4 @@ tags: Vegetarian, Slow, Hot Weather
 ## Notes
 
 - [An arborio rice/water ratio calculator](https://t.sci1.uk/risotto-calculator/)
-- Chaos Note 👀: I've found this is very simular to the recipie found in I think the green roasting tin. - But the additonal kit step of roasting the betroot first is amazing 😍 
-
+- Chaos Note 👀: I've found this is very simular to the recipie found in I think the green roasting tin. - But the additonal kit step of roasting the beetroot first is amazing 😍

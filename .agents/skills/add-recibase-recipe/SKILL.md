@@ -145,10 +145,14 @@ with the `markdown` crate.
 
 ### Characters that need care
 
-- `|` inside a cell is written `\|`.
-- A leading or trailing space is written `&#32;`, because a table parser trims
-  them. The corpus contains a few real trailing spaces which the API returns, so
-  do not "fix" them.
+- `|` inside a cell is written `\|`, in a table cell **and** in a frontmatter
+  value.
+- A leading or trailing space is written `&#32;`, for the same reason (a table
+  parser trims them). The corpus contains a few real trailing spaces which the
+  API returns, so do not "fix" them.
+- `&amp;` writes a literal `&`; a bare `&` is fine, but use the escape if the
+  text could otherwise look like an escape.
+- An empty frontmatter value (`description:`) means the key is absent.
 
 ## The chaos marker
 
