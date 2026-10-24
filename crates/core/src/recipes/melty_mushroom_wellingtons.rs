@@ -43,7 +43,7 @@ pub fn recipe() -> RecipeDef {
             "Place a large spoonful of the mushroom mixture on one side of the scored pastries.".to_string(),
             "Fold over the other half of the pasty and seal with a fork.".to_string(),
             "Cut a slit in the top to allow steam to escape.".to_string(),
-            "Place the pies on a baking tray in the oven for 20 minutes or until golden brown.".to_string(),
+            "Place the pies on a baking tray in the oven for 10 minutes or until golden brown.".to_string(),
         ],
     }
 }
