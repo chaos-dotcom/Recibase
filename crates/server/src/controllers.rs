@@ -202,6 +202,46 @@ pub fn docs() -> Value {
     docs_json()
 }
 
+/// `TagCatalog.all`: every tag with its display name, entry name, description,
+/// category, immediate superset and the looser tags it implies.
+pub fn tags_json() -> Value {
+    let tags: Vec<Value> = recibase_core::tag::TAGS
+        .iter()
+        .map(|tag| {
+            obj(vec![
+                ("name", Value::String(tag.entry_name().to_string())),
+                ("entry_name", Value::String(tag.entry_name().to_string())),
+                (
+                    "description",
+                    tag.description()
+                        .map(|d| Value::String(d.to_string()))
+                        .unwrap_or(Value::Null),
+                ),
+                (
+                    "category",
+                    Value::String(tag.category().entry_name().to_string()),
+                ),
+                (
+                    "superset",
+                    tag.superset()
+                        .map(|s| Value::String(s.entry_name().to_string()))
+                        .unwrap_or(Value::Null),
+                ),
+                (
+                    "implied_tags",
+                    Value::Array(
+                        tag.implied_tags()
+                            .iter()
+                            .map(|t| Value::String(t.entry_name().to_string()))
+                            .collect(),
+                    ),
+                ),
+            ])
+        })
+        .collect();
+    obj(vec![("tags", Value::Array(tags))])
+}
+
 /// The `New` tag depends on the day the server runs, so the comparison harness
 /// can pin it. Defaults to the local date, exactly like the Scala.
 pub fn today(env: &dyn Fn(&str) -> Option<String>) -> NaiveDate {

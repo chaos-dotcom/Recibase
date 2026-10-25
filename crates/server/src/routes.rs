@@ -165,6 +165,9 @@ fn dispatch(request: &Request, context: &Context) -> (Response, bool) {
                 true,
             );
         }
+        if path == "/tags" {
+            return (Response::json(&controllers::tags_json()), true);
+        }
         if path == "/recipes/" {
             let ingredient = request.query_param("hasIngredient");
             let with_revision = request.query_param("withRevision").as_deref() == Some("true");

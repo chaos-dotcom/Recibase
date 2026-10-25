@@ -88,9 +88,10 @@ impl MealStub {
         }
     }
 
+    /// `includeinMealPlanner`: an explicit include wins, otherwise the meal is
+    /// included unless it carries an exclude tag.
     pub fn is_dinner(&self) -> bool {
-        let non_dinner = Tag::non_dinner_tags();
-        !self.tags.iter().any(|t| non_dinner.contains(t))
+        Tag::include_in_meal_planner(&self.tags)
     }
 }
 
@@ -106,8 +107,8 @@ pub struct MealStubWithUsageData {
 }
 
 impl MealStubWithUsageData {
-    pub fn inherited_tags(&self) -> Vec<Tag> {
-        crate::scala_hash::scala_set_flat_map(&self.tags, |t| t.all_parent_tags())
+    pub fn implied_tags(&self) -> Vec<Tag> {
+        crate::scala_hash::scala_set_flat_map(&self.tags, |t| t.implied_tags())
     }
 
     pub fn tags_in_set_order(&self) -> Vec<Tag> {
@@ -126,9 +127,9 @@ impl MealStubWithUsageData {
                     .collect()),
             ),
             (
-                "inherited_tags",
+                "implied_tags",
                 arr(self
-                    .inherited_tags()
+                    .implied_tags()
                     .iter()
                     .map(|t| Value::String(t.entry_name().to_string()))
                     .collect()),

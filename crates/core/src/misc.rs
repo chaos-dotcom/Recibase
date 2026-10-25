@@ -137,6 +137,7 @@ impl MenuEntry {
 pub fn docs_entries() -> Vec<(&'static str, &'static str)> {
     vec![
         ("docs", "/"),
+        ("tags", "/tags"),
         ("recipes_list", "/recipes/?hasIngredient={ingredient_name}"),
         ("recipe", "/recipes/{recipe_permalink}"),
         ("meals_list", "/meals/"),

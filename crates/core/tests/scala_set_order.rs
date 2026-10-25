@@ -115,7 +115,8 @@ const TAG_HASHES: &[(&str, i32)] = &[
     ("Pudding", 1430896733),
     ("Lunch", 73782026),
     ("Baking", 1982397558),
-    ("NonMeal", -507339760),
+    ("IncludeInMealPlanner", -2005174654),
+    ("ExcludeFromMealPlanner", 561515883),
     ("Soup", 2583063),
     ("Vegan", 82533797),
     ("VeganIsh", 2043126937),
@@ -349,39 +350,18 @@ fn scala_recipes() -> BTreeMap<String, Vec<Tag>> {
         let tags = scala_tags_of(&src).expect("val tags");
         out.insert(name, tags);
     }
-    assert_eq!(out.len(), 95, "expected 95 recipe sources");
+    assert_eq!(out.len(), 97, "expected 97 recipe sources");
     out
 }
 
-/// `Recipe.inheritedTags` = `tags.flatMap(_.allParentTags)`.
+/// `Recipe.impliedTags` = `tags.flatMap(_.impliedTags)`.
 ///
-/// Scala's `allParentTags` is `parent.allParentTags + parent`, so its `Set`
-/// iterates the ancestors with the **outermost first**; `Tag::all_parent_tags`
-/// (tag.rs, owned by W1 and frozen) walks the chain upwards and today returns
-/// them innermost first, which is the reverse. The helper below detects the
-/// order tag.rs gives and restores the Scala `Set` order, so this test keeps
-/// passing once tag.rs returns the Scala order (see the note in
-/// `scala_hash::scala_set_flat_map`; the fix is one `.reverse()` in tag.rs).
-///
-/// Evidence for the Scala order: `/recipes/baked-rigatoni-aubergine` has tags
-/// {Vegetarian, Slow, Scales} (a Set3, insertion order) and the capture's
-/// `inherited_tags` is `["Pescatarian","Vegetarian-ish"]`, i.e. the outermost
-/// ancestor first. It is *not* sorted or hash order: in a recipe whose tags set
-/// is a HashSet (5+ tags) the Scala `flatMap` builds a HashSet and the result
-/// is in trie order instead, e.g. `/recipes/broccoli-stilton-soup`
-/// `inherited_tags` is `["Vegetarian-ish","Pescatarian"]`.
-fn inherited_tags(tags: &[Tag]) -> Vec<Tag> {
-    scala_set_flat_map(tags, |tag| {
-        let mut outermost = *tag;
-        while let Some(parent) = outermost.parent() {
-            outermost = parent;
-        }
-        let mut parents = tag.all_parent_tags();
-        if parents.first() != Some(&outermost) {
-            parents.reverse();
-        }
-        parents
-    })
+/// Upstream master walks the `superset` chain from the tag outwards, so the
+/// nearest looser tag comes first: for `Vegan` that is
+/// `Vegan-ish, Vegetarian, Vegetarian-ish, Pescatarian`. `Tag::implied_tags`
+/// (tag.rs) returns exactly that order, so no reversal is needed here.
+fn implied_tags(tags: &[Tag]) -> Vec<Tag> {
+    scala_set_flat_map(tags, |tag| tag.implied_tags())
 }
 
 // --------------------------------------------------------------------------
@@ -479,19 +459,19 @@ fn recipes_match_both_capture_dirs() {
                 "{file}: tags in Scala Set order"
             );
 
-            let expected_inherited: Vec<&str> = inherited_tags(tags)
+            let expected_implied: Vec<&str> = implied_tags(tags)
                 .iter()
                 .map(|t| t.entry_name())
                 .collect();
             assert_eq!(
-                expected_inherited,
-                field_array(&value, "inherited_tags"),
-                "{file}: inherited_tags in Scala Set order"
+                expected_implied,
+                field_array(&value, "implied_tags"),
+                "{file}: implied_tags in Scala Set order"
             );
             checked += 1;
         }
     }
-    assert_eq!(checked, 190, "95 recipes in each of the two capture dirs");
+    assert_eq!(checked, 190, "95 hosted recipes in each of the two capture dirs");
 }
 
 #[test]

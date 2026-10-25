@@ -240,15 +240,15 @@ impl RecipeDef {
         }
     }
 
-    /// `isDinner`: no tag intersects `Tag.nonDinnerTags`.
+    /// `includeinMealPlanner`: an explicit include wins, otherwise the meal is
+    /// included unless it carries an exclude tag.
     pub fn is_dinner(&self) -> bool {
-        let non_dinner = Tag::non_dinner_tags();
-        !self.tags.iter().any(|t| non_dinner.contains(t))
+        Tag::include_in_meal_planner(&self.tags)
     }
 
-    /// `tags.flatMap(_.allParentTags)` as a Scala `Set`, in iteration order.
-    pub fn inherited_tags(&self) -> Vec<Tag> {
-        crate::scala_hash::scala_set_flat_map(&self.tags, |t| t.all_parent_tags())
+    /// `tags.flatMap(_.impliedTags)` as a Scala `Set`, in iteration order.
+    pub fn implied_tags(&self) -> Vec<Tag> {
+        crate::scala_hash::scala_set_flat_map(&self.tags, |t| t.implied_tags())
     }
 
     /// `tags` as a Scala `Set`, in iteration order.
@@ -285,9 +285,9 @@ impl RecipeDef {
                     .collect()),
             ),
             (
-                "inherited_tags",
+                "implied_tags",
                 arr(self
-                    .inherited_tags()
+                    .implied_tags()
                     .iter()
                     .map(|t| Value::String(t.entry_name().to_string()))
                     .collect()),
