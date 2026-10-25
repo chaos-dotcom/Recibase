@@ -28,7 +28,7 @@ tags: Vegetarian, Scales, Low Effort, Quick
 
 ## Method
 
-1. Chop the shiitake or porchini mushrooms into large pieces
+1. Chop the shiitake or porchini mushrooms into large pieces.
 2. Boil the kettle then use as little water as possible to disolve the cube in a jug.
 3. Melt butter in a large frying pan then soften the onion with the garlic.
 4. Turn up the heat and add the brown mushrooms. Cook for a minute or so.
