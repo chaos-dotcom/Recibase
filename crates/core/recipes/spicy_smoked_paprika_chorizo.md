@@ -42,7 +42,7 @@ tags: Spicy, Scales, Better Next Day, Slow
 6. Add the pasata, tinned tomatoes, cloves, chilli flakes, red wine, oregano, cinamon stick, and honey. If the pan is looking full then wait until the mixure has reduced before adding the rest of the tinned tomatoes/wine.
 7. Wait until bubbling then turn down the heat and simmer for at least 20 minutes.
 8. Stir in spinach, mascarpone and cannellini beans.
-9. Serve with pasta
+9. Serve with pasta.
 
 ## Notes
 

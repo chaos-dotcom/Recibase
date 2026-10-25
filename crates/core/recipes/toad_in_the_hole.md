@@ -30,13 +30,13 @@ tags: Vegetarian, Low Effort
 3. Add the salt, eggs, water and milk.
 4. Whisk the ingredients for a few minutes.
 5. Brush a 20cm by 26cm by 4cm baking tray with oil.
-6. Warm the baking tray in the oven for 4 minutes
+6. Warm the baking tray in the oven for 4 minutes.
 7. Evenly pour half the batter into the baking tray.
 8. Place the sausages in the batter.
 9. Pour the remainder of the batter over the sausages.
 10. Bake in the oven for 25-30 minutes. You MUST NOT open the oven while it is cooking.
 11. Meanwhile add the gravy granules and a splash of red wine to a measuring jug.
-12. Top up the jug with boiling water to 400ml.
+12. Top up the jug with boiling water to {400ml}.
 13. Stir in the marmite. Add more water if the gravy is too thick.
 14. Serve the toad in the hole with lashings of gravy.
 

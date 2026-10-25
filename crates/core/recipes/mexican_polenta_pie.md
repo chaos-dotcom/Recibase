@@ -41,7 +41,7 @@ tags: Vegetarian, Slow, Scales
 ## Method
 
 1. Heat the oven to 200°C (390°F, gas mark 6). Heat the oil in a saucepan over a high heat. Stir in the celery, garlic, onions and green pepper, bring them to a sizzle, then cover, reduce the heat to low and cook for 10 minutes, or until they have softened. Stir in the cayenne pepper and cook for a further 1-2 minutes.
-2. Stir in the kidney beans, olives, jalapeño peppers, sweetcorn, canned tomatoes, tomato purée and add salt and pepper to taste. Bring the mixture to the boil and simmer for 5 minutes. Then spoon the mixture into a 3 litre ovenproof serving dish.
-3. Topping: Mix together the cornmeal or polenta, flour, 1/2 teaspoon of salt and the baking powder, then beat in the egg and milk. The mixture should look like a thick batter; if not, add 1-2 tablespoons of milk.
+2. Stir in the kidney beans, olives, jalapeño peppers, sweetcorn, canned tomatoes, tomato purée and add salt and pepper to taste. Bring the mixture to the boil and simmer for 5 minutes. Then spoon the mixture into a {3 litre} ovenproof serving dish.
+3. Topping: Mix together the cornmeal or polenta, flour, {1/2 teaspoon} of salt and the baking powder, then beat in the egg and milk. The mixture should look like a thick batter; if not, add {1-2 tablespoons} of milk.
 4. Spoon the topping over the vegetables, sprinkle with the cheese and bake for 40 minutes, or until the topping is risen and golden brown. Leave the pie to stand for 5 minutes before serving.
 
